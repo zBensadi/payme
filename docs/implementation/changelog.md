@@ -1,6 +1,21 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [Unreleased] - Phase 2
+### Added
+- PBKDF2-HMAC-SHA256 password hashing via the `cryptography` package.
+- `AuthService` handling password setup, login, and recovery keys.
+- Complete authentication UI suite: Setup, Login, Forgot Password, Recovery Key Display, and Fatal Error screens.
+- `ReauthGuard` widget to protect future destructive actions.
+- GoRouter redirection guards based on authentication state.
+- Fatal error state to prevent silent admin account takeover if existing business data is detected but credentials are missing.
+
+### Changed
+- `PayMeApp` now consumes `appRouterProvider` via Riverpod.
+- Placeholder home screen includes a top-bar "Lock" button.
+
+### Security
+- Password and recovery key hashes are stored safely alongside the local SQLite database.
+- Recovery key is only displayed once during generation.
 
 ## Version 0.0.1
 

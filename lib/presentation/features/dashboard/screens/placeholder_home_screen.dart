@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../auth/controllers/auth_controller.dart';
 
 class PlaceholderHomeScreen extends ConsumerWidget {
   const PlaceholderHomeScreen({super.key});
@@ -12,7 +13,16 @@ class PlaceholderHomeScreen extends ConsumerWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PayMe'),
+        title: const Text('PayMe Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.lock),
+            tooltip: 'Lock',
+            onPressed: () {
+              ref.read(authControllerProvider.notifier).logout();
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(

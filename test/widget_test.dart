@@ -5,8 +5,8 @@ import 'package:payme/app.dart';
 import 'package:payme/presentation/features/dashboard/screens/placeholder_home_screen.dart';
 import 'package:payme/core/database/database_provider.dart';
 import 'package:payme/core/database/database_service.dart';
+import 'package:payme/presentation/features/auth/controllers/auth_controller.dart';
 
-// A simple fake DatabaseService for testing UI rendering without a real DB.
 class FakeDatabaseService extends DatabaseService {
   FakeDatabaseService() : super(_FakeDatabase());
 }
@@ -19,6 +19,17 @@ class _FakeDatabase implements Database {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class FakeAuthController extends Notifier<AuthState> implements AuthController {
+  @override
+  AuthState build() => AuthState.authenticated;
+  
+  @override
+  void markAsAuthenticated() {}
+  
+  @override
+  void logout() {}
+}
+
 void main() {
   testWidgets('App builds and shows placeholder screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -26,6 +37,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(FakeDatabaseService()),
+          authControllerProvider.overrideWith(() => FakeAuthController()),
         ],
         child: const PayMeApp(),
       ),
