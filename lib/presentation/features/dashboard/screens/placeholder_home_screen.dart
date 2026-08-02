@@ -40,6 +40,14 @@ class PlaceholderHomeScreen extends ConsumerWidget {
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
+              leading: const Icon(Icons.people),
+              title: const Text('Clients'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/clients');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.calendar_month),
               title: const Text('Accounting Years'),
               onTap: () {

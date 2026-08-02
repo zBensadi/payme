@@ -11,7 +11,16 @@
 ### Security
 - Year deletion requires passing the `ReauthGuard` (if the year is not active). Active year deletion is completely blocked.
 
-## [Unreleased] - Phase 2
+## [Unreleased]
+### Added
+- **Phase 4**: Client Module implementation (`Client` entity, model, local data source, repository).
+- Shared UI Widgets (`EmptyStateView`, `ErrorView`, `LoadingView`, `ConfirmDialog`).
+- Client state controllers using `NotifierProvider` for robust UI decoupling.
+- Screens for Client Form, Client List, and Deleted Clients with soft-delete logic.
+- Duplicate client check warning during form save.
+- `UI_UX_Guidelines.md` for consistent UI patterns across modules.
+
+## [1.0.0-phase3] - 2026-08-01
 ### Added
 - PBKDF2-HMAC-SHA256 password hashing via the `cryptography` package.
 - `AuthService` handling password setup, login, and recovery keys.

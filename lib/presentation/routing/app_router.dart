@@ -9,6 +9,10 @@ import '../features/auth/screens/recovery_key_display_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
 import '../features/accounting_years/screens/accounting_years_screen.dart';
+import '../features/clients/screens/client_list_screen.dart';
+import '../features/clients/screens/client_form_screen.dart';
+import '../features/clients/screens/deleted_clients_screen.dart';
+import '../../domain/entities/client.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
@@ -89,6 +93,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/accounting-years',
         builder: (context, state) => const AccountingYearsScreen(),
+      ),
+      GoRoute(
+        path: '/clients',
+        builder: (context, state) => const ClientListScreen(),
+      ),
+      GoRoute(
+        path: '/clients/new',
+        builder: (context, state) => const ClientFormScreen(),
+      ),
+      GoRoute(
+        path: '/clients/edit',
+        builder: (context, state) {
+          final client = state.extra as Client;
+          return ClientFormScreen(client: client);
+        },
+      ),
+      GoRoute(
+        path: '/clients/deleted',
+        builder: (context, state) => const DeletedClientsScreen(),
       ),
     ],
   );

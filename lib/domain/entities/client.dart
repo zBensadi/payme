@@ -1,0 +1,82 @@
+class Client {
+  final String id;
+  final String name;
+  final String? phone;
+  final String? email;
+  final String? address;
+  final String? notes;
+  final bool isDeleted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? remoteId;
+  final DateTime? syncedAt;
+  final bool isDirty;
+
+  const Client({
+    required this.id,
+    required this.name,
+    this.phone,
+    this.email,
+    this.address,
+    this.notes,
+    this.isDeleted = false,
+    required this.createdAt,
+    required this.updatedAt,
+    this.remoteId,
+    this.syncedAt,
+    this.isDirty = false,
+  });
+
+  Client copyWith({
+    String? id,
+    String? name,
+    String? phone,
+    String? email,
+    String? address,
+    String? notes,
+    bool? isDeleted,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? remoteId,
+    DateTime? syncedAt,
+    bool? isDirty,
+  }) {
+    return Client(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      address: address ?? this.address,
+      notes: notes ?? this.notes,
+      isDeleted: isDeleted ?? this.isDeleted,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      remoteId: remoteId ?? this.remoteId,
+      syncedAt: syncedAt ?? this.syncedAt,
+      isDirty: isDirty ?? this.isDirty,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Client &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          phone == other.phone &&
+          email == other.email &&
+          address == other.address &&
+          notes == other.notes &&
+          isDeleted == other.isDeleted;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      phone.hashCode ^
+      email.hashCode ^
+      address.hashCode ^
+      notes.hashCode ^
+      isDeleted.hashCode;
+}
