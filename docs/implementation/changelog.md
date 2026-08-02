@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## Version 0.0.1
 
+### Phase 1
+**Added**
+- `sqflite`, `sqflite_common_ffi`, `path_provider`, `logger`, `path` dependencies.
+- `DatabaseService` and `MigrationRunner` to initialize and maintain SQLite databases.
+- Initial schema `v1_initial.sql` per Architecture constraints.
+- Logging output initialized before app startup.
+- `Result` and `AppFailure` classes for standardized error handling.
+- `AppPaths` for deterministic local directory resolutions.
+- `AppConstants` centralized configuration.
+
 ### Phase 0
 **Added**
 - `flutter_riverpod` and `go_router` dependencies.
