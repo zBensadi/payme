@@ -8,6 +8,7 @@ import '../features/auth/screens/setup_password_screen.dart';
 import '../features/auth/screens/recovery_key_display_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
+import '../features/accounting_years/screens/accounting_years_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
@@ -84,6 +85,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const PlaceholderHomeScreen(),
+      ),
+      GoRoute(
+        path: '/accounting-years',
+        builder: (context, state) => const AccountingYearsScreen(),
       ),
     ],
   );

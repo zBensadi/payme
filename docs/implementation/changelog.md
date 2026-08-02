@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] - Phase 3
+### Added
+- `AccountingYear` domain entity and repository.
+- Full CRUD for Accounting Years in SQLite, enforcing unique names and single active year state via transaction.
+- UI to create, rename, set active, and delete years.
+- Global `activeYearProvider` injected into the Dashboard.
+- `IdGenerator` for lightweight UUID generation without dependencies.
+
+### Security
+- Year deletion requires passing the `ReauthGuard` (if the year is not active). Active year deletion is completely blocked.
+
 ## [Unreleased] - Phase 2
 ### Added
 - PBKDF2-HMAC-SHA256 password hashing via the `cryptography` package.
