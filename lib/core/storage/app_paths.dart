@@ -36,6 +36,24 @@ class AppPaths {
     return dir.path;
   }
 
+  static Future<String> getLogosPath() async {
+    final baseDir = await getAppSupportDirectory();
+    final dir = Directory(p.join(baseDir.path, 'logos'));
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir.path;
+  }
+
+  static Future<String> getTempPath() async {
+    final tempDir = await getTemporaryDirectory();
+    final dir = Directory(p.join(tempDir.path, AppConstants.appName));
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir.path;
+  }
+
   static Future<String> getLogsPath() async {
     final baseDir = await getAppSupportDirectory();
     final dir = Directory(p.join(baseDir.path, AppConstants.logsDirName));

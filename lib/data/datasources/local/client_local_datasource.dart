@@ -90,8 +90,9 @@ class ClientLocalDataSource {
     );
   }
 
-  Future<void> softDelete(String id) async {
-    await _db.update(
+  Future<void> softDelete(String id, {Transaction? txn}) async {
+    final executor = txn ?? _db;
+    await executor.update(
       'clients',
       {
         'is_deleted': 1,

@@ -1,4 +1,3 @@
-import 'package:sqflite/sqflite.dart';
 import '../../core/error/failures.dart';
 import '../../core/error/result.dart';
 import '../../domain/entities/client.dart';
@@ -80,9 +79,9 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
-  Future<Result<void>> softDelete(String id) async {
+  Future<Result<void>> softDelete(String id, {Object? txn}) async {
     try {
-      await _dataSource.softDelete(id);
+      await _dataSource.softDelete(id, txn: txn as dynamic);
       return const Success(null);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to delete client: $e'));

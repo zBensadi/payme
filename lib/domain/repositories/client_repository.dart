@@ -8,6 +8,6 @@ abstract class ClientRepository {
   Future<Result<bool>> checkDuplicate(String name, String? phone, {String? excludeId});
   Future<Result<Client>> create(Client client);
   Future<Result<Client>> update(Client client);
-  Future<Result<void>> softDelete(String id);
+  Future<Result<void>> softDelete(String id, {Object? txn});
   Future<Result<void>> restore(String id);
 }

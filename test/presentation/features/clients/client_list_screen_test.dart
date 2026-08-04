@@ -53,7 +53,7 @@ class FakeClientRepository implements ClientRepository {
   }
 
   @override
-  Future<Result<void>> softDelete(String id) async {
+  Future<Result<void>> softDelete(String id, {Object? txn}) async {
     final index = clients.indexWhere((c) => c.id == id);
     if (index >= 0) clients[index] = clients[index].copyWith(isDeleted: true);
     return const Success(null);

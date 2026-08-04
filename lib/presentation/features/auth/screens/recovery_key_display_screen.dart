@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/auth_controller.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class RecoveryKeyDisplayScreen extends ConsumerWidget {
   final String recoveryKey;
@@ -12,7 +13,7 @@ class RecoveryKeyDisplayScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recovery Key'),
+        title: Text(AppLocalizations.of(context)!.recoveryKey),
         automaticallyImplyLeading: false, // Prevent going back to setup
       ),
       body: Center(
@@ -26,26 +27,24 @@ class RecoveryKeyDisplayScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.warning_amber_rounded, size: 64, color: Colors.orange),
                 const SizedBox(height: 24),
-                const Text(
-                  'IMPORTANT',
+                Text(
+                  AppLocalizations.of(context)!.important,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'This is your ONLY Recovery Key. It will never be shown again.\n\n'
-                  'If you forget your password and lose this key, you will permanently lose access to your business data. '
-                  'Please copy it and store it in a safe place immediately.',
+                Text(
+                  AppLocalizations.of(context)!.recoveryKeyWarning,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 32),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   ),
                   child: SelectableText(
                     recoveryKey,
@@ -62,11 +61,11 @@ class RecoveryKeyDisplayScreen extends ConsumerWidget {
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: recoveryKey));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Copied to clipboard')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.copiedToClipboard)),
                     );
                   },
                   icon: const Icon(Icons.copy),
-                  label: const Text('Copy to Clipboard'),
+                  label: Text(AppLocalizations.of(context)!.copyToClipboard),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -77,7 +76,7 @@ class RecoveryKeyDisplayScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('I have saved my Recovery Key'),
+                  child: Text(AppLocalizations.of(context)!.savedRecoveryKey),
                 ),
               ],
             ),

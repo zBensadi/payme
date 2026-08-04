@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/accounting_year.dart';
 import '../../../../core/security/reauth_guard.dart';
 import '../controllers/accounting_year_controller.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class YearListTile extends ConsumerWidget {
   final AccountingYear year;
@@ -18,7 +19,7 @@ class YearListTile extends ConsumerWidget {
       await ref.read(accountingYearControllerProvider.notifier).delete(year.id);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Accounting year deleted successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.accountingYearDeleted)),
         );
       }
     } catch (e) {
@@ -35,24 +36,24 @@ class YearListTile extends ConsumerWidget {
     final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rename Accounting Year'),
+        title: Text(AppLocalizations.of(context)!.renameAccountingYear),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Year Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.yearName,
+            border: const OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -87,7 +88,7 @@ class YearListTile extends ConsumerWidget {
           ),
         ),
         subtitle: year.isActive 
-            ? const Text('Active Year', style: TextStyle(color: Colors.green)) 
+            ? Text(AppLocalizations.of(context)!.activeYear, style: const TextStyle(color: Colors.green)) 
             : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -105,7 +106,7 @@ class YearListTile extends ConsumerWidget {
                     }
                   }
                 },
-                child: const Text('Set Active'),
+                child: Text(AppLocalizations.of(context)!.setActive),
               ),
             PopupMenuButton<String>(
               onSelected: (value) {
@@ -116,14 +117,14 @@ class YearListTile extends ConsumerWidget {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'rename',
-                  child: Text('Rename'),
+                  child: Text(AppLocalizations.of(context)!.rename),
                 ),
                 if (!year.isActive)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
-                    child: Text('Delete', style: TextStyle(color: Colors.red)),
+                    child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
                   ),
               ],
             ),

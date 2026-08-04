@@ -1,17 +1,18 @@
 # Current Status
 
-**Current Phase:** Phase 5 (Products/Services)
+**Current Phase:** Phase 6 (Payments)
 **Current Milestone:** Core Business Entities (Module 2)
-**Overall Progress:** 40% (Phase 0, 1, 2, 3, 4 completed)
+**Overall Progress:** 50% (Phase 0, 1, 2, 3, 4, 5 completed)
 **Completed Phases:** 
 - Phase 0: Project Foundation & Architecture
 - Phase 1: Database Foundation
 - Phase 2: Authentication & Security Foundation
 - Phase 3: Accounting Years
 - Phase 4: Clients
+- Phase 5: Invoices
 **Current Git Branch:** main
 **Last Completed Commit:** cd20745 (feat: implement Phase 3 Accounting Years)
-**Next Planned Task:** Implement Product/Service entity and related UI.
+**Next Planned Task:** Implement Phase 6 (Payments).
 **Current Dependencies:** 
 - `flutter_riverpod`
 - `go_router`

@@ -7,6 +7,12 @@ import '../../../widgets/loading_view.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../controllers/client_list_controller.dart';
 import '../widgets/client_list_tile.dart';
+import '../widgets/delete_client_dialog.dart';
+import '../../../../services/client_deletion_service.dart';
+import '../../../../domain/entities/client.dart';
+import '../../../../core/error/result.dart';
+import '../../../providers/repository_providers.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class ClientListScreen extends ConsumerStatefulWidget {
   const ClientListScreen({super.key});
@@ -28,21 +34,71 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
     ref.read(clientSearchQueryProvider.notifier).updateQuery(query);
   }
 
-  Future<void> _handleDelete(String id, String name) async {
-    final proceed = await ConfirmDialog.show(
-      context,
-      title: 'Delete Client',
-      content: 'Are you sure you want to delete $name?',
-      confirmLabel: 'Delete',
-      isDestructive: true,
+  Future<void> _handleDelete(Client client) async {
+    final invoiceRepo = ref.read(invoiceRepositoryProvider);
+    final countResult = await invoiceRepo.countAllForClient(client.id);
+    final count = countResult is Success ? (countResult as Success<int>).value : 0;
+
+    if (count == 0) {
+      // Normal soft delete
+      final proceed = await ConfirmDialog.show(
+        context,
+        title: AppLocalizations.of(context)!.deleteClientDialogTitle,
+        content: AppLocalizations.of(context)!.deleteClientConfirm(client.name),
+        confirmLabel: AppLocalizations.of(context)!.delete,
+        isDestructive: true,
+      );
+      if (proceed && mounted) {
+        try {
+          await ref.read(clientListControllerProvider.notifier).softDelete(client.id);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.clientDeleted), backgroundColor: Colors.green),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+            );
+          }
+        }
+      }
+      return;
+    }
+
+    // Has invoices
+    if (!mounted) return;
+    
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) => DeleteClientDialog(
+        client: client,
+        invoiceCount: count,
+      ),
     );
 
-    if (proceed && mounted) {
+    if (result != null && mounted) {
       try {
-        await ref.read(clientListControllerProvider.notifier).softDelete(id);
+        final action = result['action'] as DeleteClientAction;
+        final targetClientId = result['targetClientId'] as String?;
+
+        final service = ref.read(clientDeletionServiceProvider);
+        final deleteResult = await service.deleteClientWithInvoices(
+          client.id,
+          transferToClientId: action == DeleteClientAction.transfer ? targetClientId : null,
+        );
+        
+        if (deleteResult is Failure) {
+          throw Exception((deleteResult as Failure<void>).failure.message);
+        }
+
+        // Refresh list
+        ref.invalidate(clientListControllerProvider);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Client deleted'), backgroundColor: Colors.green),
+            SnackBar(content: Text(AppLocalizations.of(context)!.clientDeleted), backgroundColor: Colors.green),
           );
         }
       } catch (e) {
@@ -61,11 +117,11 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Clients'),
+        title: Text(AppLocalizations.of(context)!.clients),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Deleted Clients',
+            tooltip: AppLocalizations.of(context)!.deletedClients,
             onPressed: () => context.push('/clients/deleted'),
           ),
         ],
@@ -77,7 +133,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search by name or phone...',
+                hintText: AppLocalizations.of(context)!.searchClientHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
@@ -96,10 +152,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
           ),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: state.when(
+      body: state.when(
             data: (clients) {
               if (clients.isEmpty) {
                 final isSearching = ref.read(clientSearchQueryProvider).isNotEmpty;
@@ -126,8 +179,9 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
                     final client = clients[index];
                     return ClientListTile(
                       client: client,
+                      onTap: () => context.push('/clients/${client.id}'),
                       onEdit: () => context.push('/clients/edit', extra: client),
-                      onDelete: () => _handleDelete(client.id, client.name),
+                      onDelete: () => _handleDelete(client),
                     );
                   },
                 ),
@@ -138,9 +192,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
               message: error.toString().replaceAll('Exception: ', ''),
               onRetry: () => ref.read(clientListControllerProvider.notifier).refresh(),
             ),
-          ),
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/clients/new'),
         child: const Icon(Icons.add),

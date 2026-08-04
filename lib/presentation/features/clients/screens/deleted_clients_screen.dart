@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../widgets/empty_state_view.dart';
 import '../../../widgets/error_view.dart';
@@ -6,6 +6,7 @@ import '../../../widgets/loading_view.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../controllers/deleted_clients_controller.dart';
 import '../widgets/client_list_tile.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class DeletedClientsScreen extends ConsumerStatefulWidget {
   const DeletedClientsScreen({super.key});
@@ -30,9 +31,9 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
   Future<void> _handleRestore(String id, String name) async {
     final proceed = await ConfirmDialog.show(
       context,
-      title: 'Restore Client',
-      content: 'Are you sure you want to restore $name?',
-      confirmLabel: 'Restore',
+      title: AppLocalizations.of(context)!.restoreClient,
+      content: AppLocalizations.of(context)!.restoreClientConfirm(name),
+      confirmLabel: AppLocalizations.of(context)!.restore,
     );
 
     if (proceed && mounted) {
@@ -40,7 +41,7 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
         await ref.read(deletedClientsControllerProvider.notifier).restore(id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Client restored'), backgroundColor: Colors.green),
+            SnackBar(content: Text(AppLocalizations.of(context)!.clientRestored), backgroundColor: Colors.green),
           );
         }
       } catch (e) {
@@ -59,7 +60,7 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Deleted Clients'),
+        title: Text(AppLocalizations.of(context)!.deletedClients),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -68,7 +69,7 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search deleted clients...',
+                hintText: AppLocalizations.of(context)!.searchDeletedClientsHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
@@ -95,13 +96,13 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
               if (clients.isEmpty) {
                 final isSearching = ref.read(deletedClientSearchQueryProvider).isNotEmpty;
                 if (isSearching) {
-                  return const EmptyStateView(
-                    message: 'No deleted clients match your search.',
+                  return EmptyStateView(
+                    message: AppLocalizations.of(context)!.noDeletedClientsSearch,
                     icon: Icons.search_off,
                   );
                 }
-                return const EmptyStateView(
-                  message: 'No deleted clients.',
+                return EmptyStateView(
+                  message: AppLocalizations.of(context)!.noDeletedClients,
                   icon: Icons.delete_outline,
                 );
               }
@@ -118,7 +119,7 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
                 },
               );
             },
-            loading: () => const LoadingView(message: 'Loading deleted clients...'),
+            loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingDeletedClients),
             error: (error, stack) => ErrorView(
               message: error.toString().replaceAll('Exception: ', ''),
             ),

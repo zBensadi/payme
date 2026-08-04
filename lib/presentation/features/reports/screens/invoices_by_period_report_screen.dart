@@ -1,0 +1,215 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../widgets/loading_view.dart';
+import '../../../widgets/error_view.dart';
+import '../../../widgets/empty_state_view.dart';
+import '../../../../core/utils/date_formatter.dart';
+import '../../../../domain/entities/invoice_status.dart';
+import '../../settings/controllers/settings_controller.dart';
+import '../controllers/reports_controller.dart';
+import '../controllers/report_filter_controller.dart';
+import '../../clients/controllers/client_list_controller.dart';
+import '../../../../domain/entities/client.dart';
+import '../../../../services/csv_export_service.dart';
+import '../../../providers/repository_providers.dart';
+import 'package:payme/l10n/app_localizations.dart';
+import '../../invoices/widgets/invoice_status_badge.dart';
+
+class InvoicesByPeriodReportScreen extends ConsumerWidget {
+  const InvoicesByPeriodReportScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filters = ref.watch(reportFilterProvider);
+    final start = filters.startDate;
+    final end = filters.endDate;
+    
+    final state = ref.watch(invoicesByPeriodReportProvider);
+    final settingsState = ref.watch(settingsControllerProvider);
+    final currency = settingsState.value?.currencyCode ?? '\$';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.reportInvoicesByPeriod),
+        actions: [
+          state.maybeWhen(
+            data: (items) => items.isEmpty
+                ? const SizedBox.shrink()
+                : IconButton(
+                    icon: const Icon(Icons.download),
+                    tooltip: AppLocalizations.of(context)!.exportCsv,
+                    onPressed: () async {
+                      try {
+                        final csvService = ref.read(csvGenerationServiceProvider);
+                        // Using the existing generateInvoicesCsv for InvoiceListItems
+                        final csv = await csvService.generateInvoicesCsv(items);
+                        if (!context.mounted) return;
+                        await ref.read(csvExportServiceProvider).exportCsv(context, csv, 'invoices_by_period.csv');
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorExportFailed(e.toString()))));
+                        }
+                      }
+                    },
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.blue.shade50,
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.date_range),
+                    label: Text(start != null ? DateFormatter.formatDate(start) : AppLocalizations.of(context)!.startDate),
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: start ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (date != null) {
+                        ref.read(reportFilterProvider.notifier).setDateRange(date, end);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.date_range),
+                    label: Text(end != null ? DateFormatter.formatDate(end) : AppLocalizations.of(context)!.endDate),
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: end ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (date != null) {
+                        // Set end date to end of day
+                        ref.read(reportFilterProvider.notifier).setDateRange(start, DateTime(date.year, date.month, date.day, 23, 59, 59));
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: Colors.blue.shade50,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: ref.watch(clientListControllerProvider).when(
+                        data: (clients) {
+                          return DropdownButtonFormField<String?>(
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.filterByClient,
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            initialValue: filters.clientId,
+                            items: [
+                              DropdownMenuItem(value: null, child: Text(AppLocalizations.of(context)!.allClients)),
+                              ...clients.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
+                            ],
+                            onChanged: (val) {
+                              ref.read(reportFilterProvider.notifier).setClient(val);
+                            },
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) => Text(AppLocalizations.of(context)!.errorLoadingClients),
+                      ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: DropdownButtonFormField<InvoiceStatus?>(
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.statusLabel,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    initialValue: filters.status,
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(AppLocalizations.of(context)!.all)),
+                      ...InvoiceStatus.values.map((s) => DropdownMenuItem(value: s, child: Text(InvoiceStatusBadge.getLocalizedStatus(context, s)))),
+                    ],
+                    onChanged: (val) {
+                      ref.read(reportFilterProvider.notifier).setStatus(val);
+                    },
+                  ),
+                ),
+                if (start != null || end != null || filters.clientId != null || filters.status != null) ...[
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      ref.read(reportFilterProvider.notifier).clearFilters();
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Expanded(
+            child: state.when(
+              data: (items) {
+                if (items.isEmpty) {
+                  return EmptyStateView(
+                    message: AppLocalizations.of(context)!.noInvoicesForPeriod,
+                    icon: Icons.search_off,
+                  );
+                }
+                
+                // Need to fetch clients again to show names since InvoiceListItem only has clientId
+                final clientsResult = ref.read(clientListControllerProvider).maybeWhen(data: (d) => d, orElse: () => <Client>[]);
+                final clientMap = {for (var c in clientsResult) c.id: c.name};
+
+                return ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    final clientName = clientMap[item.invoice.clientId] ?? AppLocalizations.of(context)!.unknownClient;
+                    return ListTile(
+                      title: Text('$clientName - ${AppLocalizations.of(context)!.invoiceNumberLabel(item.invoice.invoiceNumber.toString())}'),
+                      subtitle: Text(DateFormatter.formatDate(item.invoice.date)),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('${item.invoice.amount.toStringAsFixed(2)} $currency', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(InvoiceStatusBadge.getLocalizedStatus(context, item.status), style: TextStyle(
+                            color: item.status == InvoiceStatus.paid ? Colors.green : Colors.orange,
+                            fontSize: 12,
+                          )),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingReport),
+              error: (error, _) => ErrorView(
+                message: error.toString(),
+                onRetry: () => ref.invalidate(invoicesByPeriodReportProvider),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

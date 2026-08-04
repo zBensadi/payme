@@ -1,24 +1,19 @@
 # Changelog
 
-## [Unreleased] - Phase 3
+## [1.0.0] - 2026-08-04
 ### Added
-- `AccountingYear` domain entity and repository.
-- Full CRUD for Accounting Years in SQLite, enforcing unique names and single active year state via transaction.
-- UI to create, rename, set active, and delete years.
-- Global `activeYearProvider` injected into the Dashboard.
-- `IdGenerator` for lightweight UUID generation without dependencies.
+- **Full Version 1.0 Release** of PayMe (Offline-First Client Receivables Manager).
+- **Core Entities**: Clients, Invoices, Payments, and Accounting Years.
+- **Reporting**: Outstanding Invoices, Paid Invoices, Client Balances, and Payments by Period with CSV export capabilities.
+- **Settings**: Business Profile (Name, Address, Registration Number, Logo) and System Currency configuration.
+- **PDF Generation**: Generates and previews professional PDF invoices.
+- **Backup & Restore**: Full database disaster recovery via localized ZIP files.
+- **Schema Version**: Deployed with `schema_version = 2`.
 
-### Security
-- Year deletion requires passing the `ReauthGuard` (if the year is not active). Active year deletion is completely blocked.
-
-## [Unreleased]
-### Added
-- **Phase 4**: Client Module implementation (`Client` entity, model, local data source, repository).
-- Shared UI Widgets (`EmptyStateView`, `ErrorView`, `LoadingView`, `ConfirmDialog`).
-- Client state controllers using `NotifierProvider` for robust UI decoupling.
-- Screens for Client Form, Client List, and Deleted Clients with soft-delete logic.
-- Duplicate client check warning during form save.
-- `UI_UX_Guidelines.md` for consistent UI patterns across modules.
+### Fixed
+- Stabilized Backup & Restore to handle optional asset directories.
+- Refined Dashboard First-Run UX for initial Accounting Year setup.
+- Enforced Branding consistency across the application.
 
 ## [1.0.0-phase3] - 2026-08-01
 ### Added

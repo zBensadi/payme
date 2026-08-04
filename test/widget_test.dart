@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:payme/app.dart';
-import 'package:payme/presentation/features/dashboard/screens/placeholder_home_screen.dart';
+import 'package:payme/presentation/features/dashboard/screens/dashboard_screen.dart';
+import 'package:payme/presentation/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:payme/presentation/features/dashboard/models/dashboard_state.dart';
+import 'package:payme/domain/entities/accounting_year.dart';
 import 'package:payme/core/database/database_provider.dart';
 import 'package:payme/core/database/database_service.dart';
 import 'package:payme/presentation/features/auth/controllers/auth_controller.dart';
@@ -38,15 +41,27 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(FakeDatabaseService()),
           authControllerProvider.overrideWith(() => FakeAuthController()),
+          dashboardControllerProvider.overrideWith((ref) => Future.value(
+            DashboardData(
+              activeYear: AccountingYear(
+                id: '1', name: '2026', isActive: true, createdAt: DateTime.now(),
+              ),
+              clientsCount: 0,
+              invoicesCount: 0,
+              totalInvoiced: 0,
+              totalPaid: 0,
+              outstandingBalance: 0,
+            )
+          )),
         ],
         child: const PayMeApp(),
       ),
     );
 
-    // Verify that the PlaceholderHomeScreen renders.
-    expect(find.byType(PlaceholderHomeScreen), findsOneWidget);
+    // Verify that the DashboardScreen renders.
+    expect(find.byType(DashboardScreen), findsOneWidget);
     
-    // Verify that 'PayMe' text is found.
-    expect(find.text('PayMe'), findsWidgets);
+    // Verify that 'PayMe Control Center' text is found.
+    expect(find.text('PayMe Control Center'), findsWidgets);
   });
 }

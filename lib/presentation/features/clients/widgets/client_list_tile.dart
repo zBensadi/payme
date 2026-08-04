@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../domain/entities/client.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class ClientListTile extends StatelessWidget {
   final Client client;
@@ -46,31 +47,31 @@ class ClientListTile extends StatelessWidget {
         },
         itemBuilder: (context) => [
           if (onEdit != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'edit',
               child: ListTile(
-                leading: Icon(Icons.edit, size: 20),
-                title: Text('Edit'),
+                leading: const Icon(Icons.edit, size: 20),
+                title: Text(AppLocalizations.of(context)!.edit),
                 contentPadding: EdgeInsets.zero,
                 dense: true,
               ),
             ),
           if (onRestore != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'restore',
               child: ListTile(
-                leading: Icon(Icons.restore, size: 20, color: Colors.green),
-                title: Text('Restore', style: TextStyle(color: Colors.green)),
+                leading: const Icon(Icons.restore, size: 20, color: Colors.green),
+                title: Text(AppLocalizations.of(context)!.restore, style: const TextStyle(color: Colors.green)),
                 contentPadding: EdgeInsets.zero,
                 dense: true,
               ),
             ),
           if (onDelete != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
               child: ListTile(
-                leading: Icon(Icons.delete, size: 20, color: Colors.red),
-                title: Text('Delete', style: TextStyle(color: Colors.red)),
+                leading: const Icon(Icons.delete, size: 20, color: Colors.red),
+                title: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
                 contentPadding: EdgeInsets.zero,
                 dense: true,
               ),

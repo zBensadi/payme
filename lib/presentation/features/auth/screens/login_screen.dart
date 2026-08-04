@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../core/error/result.dart';
 import '../controllers/auth_controller.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -42,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       setState(() {
         _isLoading = false;
-        _error = 'Incorrect password.';
+        _error = AppLocalizations.of(context)!.incorrectPassword;
       });
     }
   }
@@ -62,16 +63,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const Icon(Icons.lock, size: 64, color: Colors.blue),
                 const SizedBox(height: 24),
-                const Text(
-                  'PayMe',
+                Text(
+                  AppLocalizations.of(context)!.appTitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Enter your password to continue',
+                Text(
+                  AppLocalizations.of(context)!.enterPasswordToContinue,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
                 TextField(
@@ -79,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   obscureText: true,
                   autofocus: true,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: AppLocalizations.of(context)!.password,
                     errorText: _error,
                     border: const OutlineInputBorder(),
                   ),
@@ -93,12 +94,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: _isLoading 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Login'),
+                      : Text(AppLocalizations.of(context)!.login),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => context.push('/forgot-password'),
-                  child: const Text('Forgot Password?'),
+                  child: Text(AppLocalizations.of(context)!.forgotPassword),
                 ),
               ],
             ),

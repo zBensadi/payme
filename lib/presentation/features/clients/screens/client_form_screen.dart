@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../domain/entities/client.dart';
 import '../../../widgets/confirm_dialog.dart';
 import '../controllers/client_form_controller.dart';
 import '../widgets/client_form.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class ClientFormScreen extends ConsumerWidget {
   final Client? client;
@@ -19,7 +20,7 @@ class ClientFormScreen extends ConsumerWidget {
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(client == null ? 'Client created successfully' : 'Client updated successfully'),
+            content: Text(client == null ? AppLocalizations.of(context)!.clientCreated : AppLocalizations.of(context)!.clientUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -29,9 +30,9 @@ class ClientFormScreen extends ConsumerWidget {
       if (e.message == 'duplicate_warning' && context.mounted) {
         final proceed = await ConfirmDialog.show(
           context,
-          title: 'Duplicate Client',
-          content: 'A client with the same name and phone number already exists. Do you want to save anyway?',
-          confirmLabel: 'Save Anyway',
+          title: AppLocalizations.of(context)!.duplicateClientTitle,
+          content: AppLocalizations.of(context)!.duplicateClientMessage,
+          confirmLabel: AppLocalizations.of(context)!.saveAnyway,
         );
         if (proceed && context.mounted) {
           await _handleSave(context, ref, newClient, force: true);
@@ -60,7 +61,7 @@ class ClientFormScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Client' : 'New Client'),
+        title: Text(isEditing ? AppLocalizations.of(context)!.editClient : AppLocalizations.of(context)!.newClient),
       ),
       body: Center(
         child: ConstrainedBox(
@@ -73,7 +74,7 @@ class ClientFormScreen extends ConsumerWidget {
               ),
               if (formState is AsyncLoading)
                 Container(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   child: const Center(
                     child: CircularProgressIndicator(),
                   ),

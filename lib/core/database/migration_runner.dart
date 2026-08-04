@@ -36,8 +36,20 @@ class MigrationRunner {
         _logger.info('Running migration: v1_initial.sql');
         final scriptContent = await loadMigrationScript('v1_initial.sql');
         await applyMigration(db, scriptContent, 1);
+        currentVersion = 1;
       }
-      // Future migrations go here
+      if (currentVersion == 1) {
+        _logger.info('Running migration: v2_invoice_sequence.sql');
+        final scriptContent = await loadMigrationScript('v2_invoice_sequence.sql');
+        await applyMigration(db, scriptContent, 2);
+        currentVersion = 2;
+      }
+      if (currentVersion == 2) {
+        _logger.info('Running migration: v3_add_language.sql');
+        final scriptContent = await loadMigrationScript('v3_add_language.sql');
+        await applyMigration(db, scriptContent, 3);
+        currentVersion = 3;
+      }
     }
   }
 

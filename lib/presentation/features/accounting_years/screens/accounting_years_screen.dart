@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/accounting_year_controller.dart';
 import '../widgets/year_list_tile.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class AccountingYearsScreen extends ConsumerWidget {
   const AccountingYearsScreen({super.key});
@@ -11,24 +12,24 @@ class AccountingYearsScreen extends ConsumerWidget {
     final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('New Accounting Year'),
+        title: Text(AppLocalizations.of(context)!.newAccountingYear),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Year Name (e.g., 2026)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.yearNameHint,
+            border: const OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Create'),
+            child: Text(AppLocalizations.of(context)!.create),
           ),
         ],
       ),
@@ -53,7 +54,7 @@ class AccountingYearsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Accounting Years'),
+        title: Text(AppLocalizations.of(context)!.accountingYears),
       ),
       body: Center(
         child: ConstrainedBox(
@@ -61,11 +62,11 @@ class AccountingYearsScreen extends ConsumerWidget {
           child: state.when(
             data: (years) {
               if (years.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
-                    'No accounting years found.\nCreate one to get started.',
+                    AppLocalizations.of(context)!.noAccountingYearsFound,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 );
               }
@@ -86,7 +87,7 @@ class AccountingYearsScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _handleCreate(context, ref),
-        tooltip: 'Create New Year',
+        tooltip: AppLocalizations.of(context)!.createNewYear,
         child: const Icon(Icons.add),
       ),
     );

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../domain/entities/client.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class ClientForm extends StatefulWidget {
   final Client? initialClient;
@@ -75,13 +76,13 @@ class _ClientFormState extends State<ClientForm> {
         children: [
           TextFormField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Client Name *',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.clientNameLabel,
+              border: const OutlineInputBorder(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter a name';
+                return AppLocalizations.of(context)!.errorEnterName;
               }
               return null;
             },
@@ -91,9 +92,9 @@ class _ClientFormState extends State<ClientForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _phoneController,
-            decoration: const InputDecoration(
-              labelText: 'Phone (Optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.phoneOptional,
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.next,
@@ -101,9 +102,9 @@ class _ClientFormState extends State<ClientForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Email (Optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.emailOptional,
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -111,9 +112,9 @@ class _ClientFormState extends State<ClientForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _addressController,
-            decoration: const InputDecoration(
-              labelText: 'Address (Optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.addressOptional,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
             textInputAction: TextInputAction.next,
@@ -121,9 +122,9 @@ class _ClientFormState extends State<ClientForm> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _notesController,
-            decoration: const InputDecoration(
-              labelText: 'Notes (Optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.notesOptional,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 4,
             textInputAction: TextInputAction.done,
@@ -135,7 +136,7 @@ class _ClientFormState extends State<ClientForm> {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text('Save Client'),
+            child: Text(AppLocalizations.of(context)!.saveClient),
           ),
         ],
       ),

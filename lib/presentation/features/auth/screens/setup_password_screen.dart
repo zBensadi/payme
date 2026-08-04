@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../core/error/result.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class SetupPasswordScreen extends ConsumerStatefulWidget {
   const SetupPasswordScreen({super.key});
@@ -29,12 +30,12 @@ class _SetupPasswordScreenState extends ConsumerState<SetupPasswordScreen> {
     final confirm = _confirmController.text;
 
     if (password.length < 6) {
-      setState(() => _error = 'Password must be at least 6 characters');
+      setState(() => _error = AppLocalizations.of(context)!.errorPasswordTooShort);
       return;
     }
 
     if (password != confirm) {
-      setState(() => _error = 'Passwords do not match');
+      setState(() => _error = AppLocalizations.of(context)!.errorPasswordsDoNotMatch);
       return;
     }
 
@@ -62,7 +63,7 @@ class _SetupPasswordScreenState extends ConsumerState<SetupPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Password')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.setupPassword)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -75,33 +76,33 @@ class _SetupPasswordScreenState extends ConsumerState<SetupPasswordScreen> {
               children: [
                 const Icon(Icons.lock_outline, size: 64, color: Colors.blue),
                 const SizedBox(height: 24),
-                const Text(
-                  'Welcome to PayMe',
+                Text(
+                  AppLocalizations.of(context)!.welcomeToPayMe,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Create an administrator password to secure your business data.',
+                Text(
+                  AppLocalizations.of(context)!.createAdminPassword,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _confirmController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.confirmPassword,
+                    border: const OutlineInputBorder(),
                   ),
                   onSubmitted: (_) => _submit(),
                 ),
@@ -117,7 +118,7 @@ class _SetupPasswordScreenState extends ConsumerState<SetupPasswordScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Create Password'),
+                      : Text(AppLocalizations.of(context)!.createPassword),
                 ),
               ],
             ),

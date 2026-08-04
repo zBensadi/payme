@@ -3,7 +3,6 @@ import 'package:payme/core/error/result.dart';
 import 'package:payme/core/security/password_hasher.dart';
 import 'package:payme/data/datasources/local/admin_credential_local_datasource.dart';
 import 'package:payme/services/auth_service.dart';
-import 'package:sqflite/sqflite.dart';
 
 // Fake data source to avoid build_runner/mockito overhead
 class FakeAdminCredentialLocalDataSource implements AdminCredentialLocalDataSource {

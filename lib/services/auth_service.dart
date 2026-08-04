@@ -123,4 +123,41 @@ class AuthService {
       return Failure(AuthFailure('Failed to reset password.'));
     }
   }
+
+  /// Changes the password assuming the user knows the current password.
+  /// Generates a new recovery key.
+  Future<Result<String>> changePassword(String oldPassword, String newPassword) async {
+    final cred = await _dataSource.getCredential();
+    if (cred == null) {
+      return const Failure(AuthFailure('No credentials found.'));
+    }
+
+    try {
+      final storedHash = cred['password_hash'] as String;
+      final storedSalt = cred['password_salt'] as String;
+
+      final isValid = await _hasher.verifyPassword(oldPassword, storedHash, storedSalt);
+      if (!isValid) {
+        return const Failure(AuthFailure('Incorrect current password.'));
+      }
+
+      final passwordSalt = _hasher.generateSalt();
+      final passwordHash = await _hasher.hashPassword(newPassword, passwordSalt);
+
+      final newRecoveryKey = _hasher.generateRecoveryKey();
+      final recoveryKeySalt = _hasher.generateSalt();
+      final recoveryKeyHash = await _hasher.hashPassword(newRecoveryKey, recoveryKeySalt);
+
+      await _dataSource.saveCredential(
+        passwordHash: passwordHash,
+        passwordSalt: passwordSalt,
+        recoveryKeyHash: recoveryKeyHash,
+        recoveryKeySalt: recoveryKeySalt,
+      );
+
+      return Success(newRecoveryKey);
+    } catch (e) {
+      return Failure(AuthFailure('Failed to change password.'));
+    }
+  }
 }

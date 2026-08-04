@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:payme/l10n/app_localizations.dart';
 
 class FatalAuthErrorScreen extends StatelessWidget {
   const FatalAuthErrorScreen({super.key});
@@ -18,18 +19,16 @@ class FatalAuthErrorScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.error_outline, size: 80, color: Colors.red),
                 const SizedBox(height: 24),
-                const Text(
-                  'Authentication Corrupted',
+                Text(
+                  AppLocalizations.of(context)!.authCorrupted,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'The application has detected existing business data, but the administrator credentials could not be found or are corrupted.\n\n'
-                  'To protect your data from unauthorized takeover, creating a new administrator account is blocked.\n\n'
-                  'Please restore the database from a known good backup.',
+                Text(
+                  AppLocalizations.of(context)!.authCorruptedDescription,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ],
             ),
