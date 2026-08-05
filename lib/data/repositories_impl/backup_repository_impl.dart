@@ -18,14 +18,14 @@ class BackupRepositoryImpl implements BackupRepository {
       for (final path in sourcePaths) {
         final entity = FileSystemEntity.typeSync(path);
         if (entity == FileSystemEntityType.file) {
-          encoder.addFile(File(path));
+          await encoder.addFile(File(path));
         } else if (entity == FileSystemEntityType.directory) {
           // Add directory and its contents
-          encoder.addDirectory(Directory(path));
+          await encoder.addDirectory(Directory(path));
         }
       }
       
-      encoder.close();
+      await encoder.close();
       return Success(null);
     } catch (e) {
       return Failure(FileSystemFailure('Failed to create ZIP archive: $e'));
@@ -43,7 +43,7 @@ class BackupRepositoryImpl implements BackupRepository {
         await destDir.create(recursive: true);
       }
       
-      extractFileToDisk(zipPath, destinationDirPath);
+      await extractFileToDisk(zipPath, destinationDirPath);
       return Success(null);
     } catch (e) {
       return Failure(FileSystemFailure('Failed to extract ZIP archive: $e'));
