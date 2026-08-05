@@ -157,14 +157,14 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
               if (clients.isEmpty) {
                 final isSearching = ref.read(clientSearchQueryProvider).isNotEmpty;
                 if (isSearching) {
-                  return const EmptyStateView(
-                    message: 'No clients match your search.',
+                  return EmptyStateView(
+                    message: AppLocalizations.of(context)!.noDeletedClientsSearch,
                     icon: Icons.search_off,
                   );
                 }
                 return EmptyStateView(
-                  message: 'You haven\'t added any clients yet.',
-                  actionLabel: 'Add Client',
+                  message: AppLocalizations.of(context)!.clientListEmpty,
+                  actionLabel: AppLocalizations.of(context)!.addClient,
                   icon: Icons.people_outline,
                   onAction: () => context.push('/clients/new'),
                 );
@@ -187,7 +187,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
                 ),
               );
             },
-            loading: () => const LoadingView(message: 'Loading clients...'),
+            loading: () => const LoadingView(message: '...'),
             error: (error, stack) => ErrorView(
               message: error.toString().replaceAll('Exception: ', ''),
               onRetry: () => ref.read(clientListControllerProvider.notifier).refresh(),

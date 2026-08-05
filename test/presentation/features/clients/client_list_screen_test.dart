@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:payme/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payme/core/error/result.dart';
 import 'package:payme/domain/entities/client.dart';
@@ -76,13 +77,17 @@ void main() {
         overrides: [
           clientRepositoryProvider.overrideWithValue(fakeRepo),
         ],
-        child: const MaterialApp(home: ClientListScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ClientListScreen(),
+        ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('You haven\'t added any clients yet'), findsOneWidget);
+    expect(find.textContaining('No clients found.'), findsOneWidget);
   });
 
   testWidgets('ClientListScreen displays visible clients', (WidgetTester tester) async {
@@ -95,7 +100,11 @@ void main() {
         overrides: [
           clientRepositoryProvider.overrideWithValue(fakeRepo),
         ],
-        child: const MaterialApp(home: ClientListScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ClientListScreen(),
+        ),
       ),
     );
 

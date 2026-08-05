@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:payme/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payme/core/error/result.dart';
 import 'package:payme/domain/entities/accounting_year.dart';
@@ -69,7 +70,11 @@ void main() {
         overrides: [
           accountingYearRepositoryProvider.overrideWithValue(fakeRepo),
         ],
-        child: const MaterialApp(home: AccountingYearsScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AccountingYearsScreen(),
+        ),
       ),
     );
 
@@ -88,7 +93,11 @@ void main() {
         overrides: [
           accountingYearRepositoryProvider.overrideWithValue(fakeRepo),
         ],
-        child: const MaterialApp(home: AccountingYearsScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AccountingYearsScreen(),
+        ),
       ),
     );
 
