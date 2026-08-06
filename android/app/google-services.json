@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "935426834457",
+    "project_id": "payme-dev-967bb",
+    "storage_bucket": "payme-dev-967bb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935426834457:android:2f56ef714bff503f9bea88",
+        "android_client_info": {
+          "package_name": "com.erascript.payme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdnSiRtSe3jvi53-ghg_ZC7ZJW33IIAAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
