@@ -1,1 +1,58 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"payme-dev-967bb","appId":"1:935426834457:android:2f56ef714bff503f9bea88","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"payme-dev-967bb","configurations":{"android":"1:935426834457:android:2f56ef714bff503f9bea88","windows":"1:935426834457:web:8d24076040f386a39bea88"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "payme-dev-967bb",
+          "appId": "1:935426834457:android:2f56ef714bff503f9bea88",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "payme-dev-967bb",
+          "configurations": {
+            "android": "1:935426834457:android:2f56ef714bff503f9bea88",
+            "windows": "1:935426834457:web:8d24076040f386a39bea88"
+          }
+        }
+      }
+    }
+  }
+}
