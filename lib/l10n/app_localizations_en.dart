@@ -810,4 +810,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordResetFailed => 'Failed to send password reset email.';
+
+  @override
+  String get bootstrapInstructions =>
+      'Please enter your business name to get started.';
+
+  @override
+  String get completeSetup => 'Complete Setup';
 }

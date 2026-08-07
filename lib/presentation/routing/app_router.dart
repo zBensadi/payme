@@ -10,6 +10,7 @@ import '../features/auth/screens/setup_password_screen.dart';
 import '../features/auth/screens/recovery_key_display_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/firebase_forgot_password_screen.dart';
+import '../features/auth/screens/firebase_bootstrap_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
 
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -65,8 +66,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
       }
 
+      if (authState == FirebaseAuthState.bootstrapping) {
+        if (state.uri.path != '/firebase-bootstrap') {
+          return '/firebase-bootstrap';
+        }
+      }
+
       if (authState == FirebaseAuthState.authenticated) {
-        if (isGoingToAuth || state.uri.path == '/splash') {
+        if (isGoingToAuth || state.uri.path == '/splash' || state.uri.path == '/firebase-bootstrap') {
           return '/';
         }
       }
@@ -87,6 +94,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/firebase-forgot-password',
         builder: (context, state) => const FirebaseForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/firebase-bootstrap',
+        builder: (context, state) => const FirebaseBootstrapScreen(),
       ),
       GoRoute(
         path: '/login',

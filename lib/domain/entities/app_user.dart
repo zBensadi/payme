@@ -9,6 +9,8 @@ class AppUser {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  bool get requiresBootstrap => businessId == null;
+
   const AppUser({
     required this.uid,
     required this.email,

@@ -1575,6 +1575,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to send password reset email.'**
   String get passwordResetFailed;
+
+  /// No description provided for @bootstrapInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your business name to get started.'**
+  String get bootstrapInstructions;
+
+  /// No description provided for @completeSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Setup'**
+  String get completeSetup;
 }
 
 class _AppLocalizationsDelegate

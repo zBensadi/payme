@@ -416,5 +416,8 @@
   "firebaseAuthUserNotFound": "No account found for this email.",
   "passwordResetInstructions": "Enter your email address to receive a password reset link.",
   "passwordResetSuccess": "Password reset email sent. Please check your inbox.",
-  "passwordResetFailed": "Failed to send password reset email."
+  "passwordResetFailed": "Failed to send password reset email.",
+  "welcomeToPayMe": "Welcome to PayMe",
+  "bootstrapInstructions": "Please enter your business name to get started.",
+  "completeSetup": "Complete Setup"
 }

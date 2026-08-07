@@ -10,6 +10,7 @@ enum FirebaseAuthState {
   authenticated,
   unauthenticated,
   failure,
+  bootstrapping,
 }
 
 // Providers
@@ -31,10 +32,12 @@ class FirebaseAuthController extends Notifier<FirebaseAuthState> {
     // We don't want to use ref.listen directly in build for async streams without careful handling,
     // so we'll just listen to the stream manually.
     authService.authStateChanges().listen((user) {
-      if (user != null) {
-        state = FirebaseAuthState.authenticated;
-      } else {
+      if (user == null) {
         state = FirebaseAuthState.unauthenticated;
+      } else if (user.requiresBootstrap) {
+        state = FirebaseAuthState.bootstrapping;
+      } else {
+        state = FirebaseAuthState.authenticated;
       }
     });
 
