@@ -1527,6 +1527,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore Backup'**
   String get restoreBackup;
+
+  /// No description provided for @invalidEmailFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format'**
+  String get invalidEmailFormat;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @firebaseAuthInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password.'**
+  String get firebaseAuthInvalidCredentials;
+
+  /// No description provided for @firebaseAuthUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this email.'**
+  String get firebaseAuthUserNotFound;
+
+  /// No description provided for @passwordResetInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address to receive a password reset link.'**
+  String get passwordResetInstructions;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent. Please check your inbox.'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @passwordResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send password reset email.'**
+  String get passwordResetFailed;
 }
 
 class _AppLocalizationsDelegate

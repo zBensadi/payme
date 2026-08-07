@@ -784,4 +784,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restoreBackup => 'Restore Backup';
+
+  @override
+  String get invalidEmailFormat => 'Invalid email format';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get firebaseAuthInvalidCredentials => 'Invalid email or password.';
+
+  @override
+  String get firebaseAuthUserNotFound => 'No account found for this email.';
+
+  @override
+  String get passwordResetInstructions =>
+      'Enter your email address to receive a password reset link.';
+
+  @override
+  String get passwordResetSuccess =>
+      'Password reset email sent. Please check your inbox.';
+
+  @override
+  String get passwordResetFailed => 'Failed to send password reset email.';
 }

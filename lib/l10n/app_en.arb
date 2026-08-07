@@ -408,5 +408,13 @@
   "ok": "OK",
   "backupDesc": "Safeguard your data by creating a complete archive of your database and attachments.",
   "createBackup": "Create Backup",
-  "restoreBackup": "Restore Backup"
+  "restoreBackup": "Restore Backup",
+  "invalidEmailFormat": "Invalid email format",
+  "emailRequired": "Email is required",
+  "passwordRequired": "Password is required",
+  "firebaseAuthInvalidCredentials": "Invalid email or password.",
+  "firebaseAuthUserNotFound": "No account found for this email.",
+  "passwordResetInstructions": "Enter your email address to receive a password reset link.",
+  "passwordResetSuccess": "Password reset email sent. Please check your inbox.",
+  "passwordResetFailed": "Failed to send password reset email."
 }

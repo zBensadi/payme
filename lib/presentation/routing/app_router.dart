@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/controllers/auth_controller.dart';
+import '../features/auth/controllers/firebase_auth_controller.dart';
 import '../features/auth/screens/login_screen.dart';
+import '../features/auth/screens/firebase_login_screen.dart';
 import '../features/auth/screens/setup_password_screen.dart';
 import '../features/auth/screens/recovery_key_display_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
+import '../features/auth/screens/firebase_forgot_password_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
 
 import '../features/dashboard/screens/dashboard_screen.dart';
@@ -39,41 +42,31 @@ import '../features/settings/screens/change_password_screen.dart';
 import '../../domain/entities/client.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final authState = ref.watch(firebaseAuthControllerProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      if (authState == AuthState.initial || authState == AuthState.loading) {
+      if (authState == FirebaseAuthState.loading) {
         return '/splash';
       }
 
-      final isGoingToAuth = state.uri.path == '/login' ||
+      final isGoingToAuth = state.uri.path == '/firebase-login' ||
+          state.uri.path == '/firebase-forgot-password' ||
+          state.uri.path == '/login' ||
           state.uri.path == '/setup' ||
           state.uri.path == '/forgot-password' ||
           state.uri.path == '/recovery-key-display' ||
           state.uri.path == '/fatal-error';
 
-      if (authState == AuthState.setupRequired) {
-        if (state.uri.path != '/setup' && state.uri.path != '/recovery-key-display') {
-          return '/setup';
+      if (authState == FirebaseAuthState.unauthenticated || authState == FirebaseAuthState.failure) {
+        if (state.uri.path != '/firebase-login' && state.uri.path != '/firebase-forgot-password') {
+          return '/firebase-login';
         }
       }
 
-      if (authState == AuthState.unauthenticated) {
-        if (!isGoingToAuth) {
-          return '/login';
-        }
-      }
-
-      if (authState == AuthState.fatalError) {
-        if (state.uri.path != '/fatal-error') {
-          return '/fatal-error';
-        }
-      }
-
-      if (authState == AuthState.authenticated) {
-        if (isGoingToAuth) {
+      if (authState == FirebaseAuthState.authenticated) {
+        if (isGoingToAuth || state.uri.path == '/splash') {
           return '/';
         }
       }
@@ -86,6 +79,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
+      ),
+      GoRoute(
+        path: '/firebase-login',
+        builder: (context, state) => const FirebaseLoginScreen(),
+      ),
+      GoRoute(
+        path: '/firebase-forgot-password',
+        builder: (context, state) => const FirebaseForgotPasswordScreen(),
       ),
       GoRoute(
         path: '/login',

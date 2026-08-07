@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +6,7 @@ import '../../../widgets/loading_view.dart';
 import '../../../widgets/error_view.dart';
 import '../../../../domain/entities/business_settings.dart';
 import '../controllers/settings_controller.dart';
+import '../../auth/controllers/firebase_auth_controller.dart';
 import '../widgets/logo_picker.dart';
 import 'package:payme/l10n/app_localizations.dart';
 
@@ -99,6 +100,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: const Icon(Icons.security),
             tooltip: AppLocalizations.of(context)!.changePasswordTitle,
             onPressed: () => context.push('/settings/change-password'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await ref.read(firebaseAuthControllerProvider.notifier).logout();
+            },
           ),
         ],
       ),
