@@ -1,7 +1,11 @@
 import 'sync_priority.dart';
 import 'sync_result.dart';
+import 'sync_domain.dart';
 
 abstract class SynchronizableRepository {
+  /// Domain of the repository for targeted synchronization
+  SyncDomain get syncDomain;
+
   /// Priority determines the order of sync (e.g., Settings=high, Clients=medium)
   SyncPriority get syncPriority;
   

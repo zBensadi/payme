@@ -116,4 +116,45 @@ class ClientLocalDataSource {
       whereArgs: [id],
     );
   }
+
+  Future<List<ClientModel>> getDirtyClients() async {
+    final result = await _db.query(
+      'clients',
+      where: 'is_dirty = 1',
+    );
+    return result.map((map) => ClientModel.fromMap(map)).toList();
+  }
+
+  Future<void> overwriteClient(ClientModel client) async {
+    // Explicitly reset dirty flag and update synced_at
+    final map = client.toMap();
+    map['is_dirty'] = 0;
+    map['synced_at'] = client.updatedAt.toUtc().toIso8601String();
+
+    await _db.insert(
+      'clients',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateSyncMetadata(List<String> ids, DateTime syncedAt) async {
+    if (ids.isEmpty) return;
+    
+    // SQLite limits variables, so process in chunks if necessary
+    for (var i = 0; i < ids.length; i += 900) {
+      final chunk = ids.skip(i).take(900).toList();
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      
+      await _db.update(
+        'clients',
+        {
+          'is_dirty': 0,
+          'synced_at': syncedAt.toUtc().toIso8601String(),
+        },
+        where: 'id IN ($placeholders)',
+        whereArgs: chunk,
+      );
+    }
+  }
 }

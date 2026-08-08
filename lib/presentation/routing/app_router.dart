@@ -42,7 +42,13 @@ import '../features/settings/screens/change_password_screen.dart';
 
 import '../../domain/entities/client.dart';
 
+import '../providers/sync_providers.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Intentionally instantiate the global synchronization engine once for the lifetime of the application.
+  // The service remains idle until authentication succeeds and the businessId streams in.
+  ref.watch(syncServiceProvider);
+
   final authState = ref.watch(firebaseAuthControllerProvider);
 
   return GoRouter(

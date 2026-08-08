@@ -3,17 +3,26 @@ import 'connectivity_service.dart';
 import 'sync_logger.dart';
 import 'sync_status.dart';
 import 'synchronizable_repository.dart';
+import 'sync_domain.dart';
+import 'sync_trigger.dart';
 
 class SyncService {
   final List<SynchronizableRepository> _repositories;
   final ConnectivityService _connectivity;
   final SyncLogger _logger;
+  final SyncTrigger _syncTrigger;
   
   String? _businessId;
   SyncStatus _currentStatus = SyncStatus.idle;
   final _statusController = StreamController<SyncStatus>.broadcast();
   StreamSubscription<bool>? _connectivitySub;
+  StreamSubscription<SyncDomain>? _syncTriggerSub;
   
+  // Debounce state
+  final Set<SyncDomain> _pendingDomains = {};
+  Timer? _debounceTimer;
+  final Duration _debounceDuration;
+
   // Retry state
   int _retryAttempt = 0;
   Timer? _retryTimer;
@@ -23,9 +32,13 @@ class SyncService {
     required List<SynchronizableRepository> repositories,
     required ConnectivityService connectivity,
     required SyncLogger logger,
+    required SyncTrigger syncTrigger,
+    Duration debounceDuration = const Duration(seconds: 2),
   })  : _repositories = List.from(repositories),
         _connectivity = connectivity,
-        _logger = logger {
+        _logger = logger,
+        _syncTrigger = syncTrigger,
+        _debounceDuration = debounceDuration {
     
     // Sort repositories by priority: high -> medium -> low
     _repositories.sort((a, b) => a.syncPriority.index.compareTo(b.syncPriority.index));
@@ -39,9 +52,22 @@ class SyncService {
         // Connectivity restored
         _logger.logInfo('Connectivity restored. Triggering sync.');
         if (_businessId != null) {
-          synchronizeNow();
+          _syncTrigger.requestFullSync();
         }
       }
+    });
+
+    // Listen to autonomous sync triggers
+    _syncTriggerSub = _syncTrigger.syncRequested.listen((domain) {
+      _pendingDomains.add(domain);
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(_debounceDuration, () {
+        if (_pendingDomains.isNotEmpty) {
+          final domainsToSync = Set<SyncDomain>.from(_pendingDomains);
+          _pendingDomains.clear();
+          synchronizeDomains(domainsToSync);
+        }
+      });
     });
   }
 
@@ -49,25 +75,17 @@ class SyncService {
   SyncStatus get currentStatus => _currentStatus;
 
   /// Sets the current business context. Required before synchronization can occur.
-  /// Typically called on:
-  /// - login
-  /// - application startup
   void setBusinessId(String? businessId) {
     _businessId = businessId;
     if (_businessId != null) {
-      synchronizeNow();
+      _syncTrigger.requestFullSync();
     } else {
       _cancelRetry();
       _updateStatus(SyncStatus.idle);
     }
   }
 
-  /// Triggers a manual synchronization cycle. 
-  /// Also called automatically on:
-  /// - login
-  /// - application startup
-  /// - connectivity restored
-  Future<void> synchronizeNow() async {
+  Future<void> synchronizeDomains(Set<SyncDomain> domains) async {
     if (_businessId == null) {
       _logger.logError('Cannot synchronize: businessId is null');
       return;
@@ -84,24 +102,26 @@ class SyncService {
     }
 
     _cancelRetry();
-    await _executeSyncCycle();
+    await _executeSyncCycle(domains);
   }
 
-  Future<void> _executeSyncCycle() async {
+  Future<void> _executeSyncCycle(Set<SyncDomain> domains) async {
     _isSyncing = true;
     _updateStatus(SyncStatus.syncing);
-    _logger.logInfo('Starting sync cycle for business: $_businessId');
+    _logger.logInfo('Starting sync cycle for business: $_businessId, domains: $domains');
 
     try {
+      final targetedRepositories = _repositories.where((r) => domains.contains(r.syncDomain)).toList();
+
       // 1. PUSH phase
-      for (final repo in _repositories) {
+      for (final repo in targetedRepositories) {
         _logger.logInfo('Pushing changes for ${repo.runtimeType}');
         final result = await repo.pushChanges(_businessId!);
         _logger.logOperation(repo.runtimeType.toString(), 'PUSH', result.uploaded, 'SUCCESS');
       }
 
       // 2. PULL phase
-      for (final repo in _repositories) {
+      for (final repo in targetedRepositories) {
         _logger.logInfo('Pulling changes for ${repo.runtimeType}');
         // null lastSyncTime signifies a full pull, or let the repo manage it internally.
         final result = await repo.pullChanges(_businessId!, null);
@@ -114,13 +134,13 @@ class SyncService {
     } catch (e, stack) {
       _logger.logError('Sync cycle failed', e, stack);
       _updateStatus(SyncStatus.failed);
-      _scheduleRetry();
+      _scheduleRetry(domains);
     } finally {
       _isSyncing = false;
     }
   }
 
-  void _scheduleRetry() {
+  void _scheduleRetry(Set<SyncDomain> domains) {
     _retryAttempt++;
     // Exponential backoff: 2s, 4s, 8s, 16s... max 60s
     final delaySeconds = (1 << _retryAttempt).clamp(2, 60);
@@ -128,7 +148,7 @@ class SyncService {
     
     _retryTimer = Timer(Duration(seconds: delaySeconds), () {
       if (_currentStatus != SyncStatus.offline) {
-        synchronizeNow();
+        synchronizeDomains(domains);
       }
     });
   }
@@ -136,6 +156,8 @@ class SyncService {
   void _cancelRetry() {
     _retryTimer?.cancel();
     _retryTimer = null;
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
   }
 
   void _updateStatus(SyncStatus newStatus) {
@@ -147,6 +169,7 @@ class SyncService {
 
   void dispose() {
     _connectivitySub?.cancel();
+    _syncTriggerSub?.cancel();
     _cancelRetry();
     _statusController.close();
   }

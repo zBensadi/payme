@@ -1,4 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'sync_trigger_provider.dart';
+import '../../core/sync/conflict_resolver.dart';
+import '../../domain/entities/business_settings.dart';
+import '../../domain/entities/client.dart';
+import '../../data/datasources/remote/settings_remote_datasource.dart';
+import '../../data/datasources/remote/client_remote_datasource.dart';
 import '../../services/csv_generation_service.dart';
 import '../../core/database/database_provider.dart';
 import '../../services/pdf_generation_service.dart';
@@ -69,9 +75,22 @@ final backupServiceProvider = Provider<BackupService>((ref) {
   );
 });
 
+final clientRemoteDataSourceProvider = Provider<ClientRemoteDataSource>((ref) {
+  return ClientRemoteDataSource();
+});
+
+final clientConflictResolverProvider = Provider<ConflictResolver<Client>>((ref) {
+  return DefaultConflictResolver<Client>();
+});
+
 final clientRepositoryProvider = Provider<ClientRepository>((ref) {
-  final dataSource = ref.watch(clientLocalDataSourceProvider);
-  return ClientRepositoryImpl(dataSource);
+  final localDataSource = ref.watch(clientLocalDataSourceProvider);
+  final remoteDataSource = ref.watch(clientRemoteDataSourceProvider);
+  final conflictResolver = ref.watch(clientConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  final repo = ClientRepositoryImpl(localDataSource, remoteDataSource, conflictResolver, syncTrigger);
+  ref.onDispose(() => repo.dispose());
+  return repo;
 });
 
 // Invoice Providers
@@ -118,9 +137,22 @@ final logoFileDataSourceProvider = Provider<LogoFileDataSource>((ref) {
   return LogoFileDataSource();
 });
 
+final settingsRemoteDataSourceProvider = Provider<SettingsRemoteDataSource>((ref) {
+  return SettingsRemoteDataSource();
+});
+
+final settingsConflictResolverProvider = Provider<ConflictResolver<BusinessSettings>>((ref) {
+  return DefaultConflictResolver<BusinessSettings>();
+});
+
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final settingsLocal = ref.watch(settingsLocalDataSourceProvider);
+  final settingsRemote = ref.watch(settingsRemoteDataSourceProvider);
   final logoFile = ref.watch(logoFileDataSourceProvider);
+  final conflictResolver = ref.watch(settingsConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
 
-  return SettingsRepositoryImpl(settingsLocal, logoFile);
+  final repo = SettingsRepositoryImpl(settingsLocal, settingsRemote, logoFile, conflictResolver, syncTrigger);
+  ref.onDispose(() => repo.dispose());
+  return repo;
 });

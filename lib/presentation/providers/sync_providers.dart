@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'repository_providers.dart';
+import 'sync_trigger_provider.dart';
 import '../features/auth/controllers/current_user_controller.dart';
 import '../../core/sync/connectivity_service.dart';
 import '../../core/sync/sync_logger.dart';
@@ -20,7 +22,10 @@ final syncLoggerProvider = Provider<SyncLogger>((ref) {
 /// In future milestones, this list will be populated with implementations like
 /// ClientRepository, InvoiceRepository, etc.
 final synchronizableRepositoriesProvider = Provider<List<SynchronizableRepository>>((ref) {
-  return [];
+  return [
+    ref.watch(settingsRepositoryProvider) as SynchronizableRepository,
+    ref.watch(clientRepositoryProvider) as SynchronizableRepository,
+  ];
 });
 
 
@@ -29,6 +34,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
     repositories: ref.watch(synchronizableRepositoriesProvider),
     connectivity: ref.watch(connectivityServiceProvider),
     logger: ref.watch(syncLoggerProvider),
+    syncTrigger: ref.watch(syncTriggerProvider),
   );
 
   ref.listen(currentUserProvider, (previous, next) {

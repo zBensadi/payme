@@ -14,6 +14,10 @@ class BusinessSettingsModel {
       currencyLockedAt: map['currency_locked_at'] != null 
           ? DateTime.parse(map['currency_locked_at'] as String) 
           : null,
+      updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at'] as String) : null,
+      remoteId: map['remote_id'] as String?,
+      syncedAt: map['synced_at'] != null ? DateTime.parse(map['synced_at'] as String) : null,
+      isDirty: (map['is_dirty'] as int? ?? 0) == 1,
     );
   }
 
@@ -27,7 +31,11 @@ class BusinessSettingsModel {
       'logo_path': settings.logoPath,
       'currency_code': settings.currencyCode,
       'language_code': settings.languageCode,
-      'currency_locked_at': settings.currencyLockedAt?.toIso8601String(),
+      'currency_locked_at': settings.currencyLockedAt?.toUtc().toIso8601String(),
+      'updated_at': settings.updatedAt?.toUtc().toIso8601String(),
+      'remote_id': settings.remoteId,
+      'synced_at': settings.syncedAt?.toUtc().toIso8601String(),
+      'is_dirty': settings.isDirty ? 1 : 0,
     };
   }
 }

@@ -1,9 +1,33 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:payme/core/error/result.dart';
+import 'package:payme/core/sync/conflict_resolver.dart';
 import 'package:payme/data/datasources/local/client_local_datasource.dart';
+import 'package:payme/data/datasources/remote/client_remote_datasource.dart';
 import 'package:payme/data/repositories_impl/client_repository_impl.dart';
 import 'package:payme/domain/entities/client.dart';
+
+import 'package:payme/core/sync/sync_domain.dart';
+import 'package:payme/core/sync/sync_trigger.dart';
+
+class DummyClientRemoteDataSource implements ClientRemoteDataSource {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class DummySyncTrigger implements SyncTrigger {
+  @override
+  void requestSync(SyncDomain domain) {}
+
+  @override
+  void requestFullSync() {}
+
+  @override
+  Stream<SyncDomain> get syncRequested => Stream.empty();
+
+  @override
+  void dispose() {}
+}
 
 void main() {
   late Database db;
@@ -38,7 +62,10 @@ void main() {
             }));
 
     final dataSource = ClientLocalDataSource(db);
-    repository = ClientRepositoryImpl(dataSource);
+    final remoteDataSource = DummyClientRemoteDataSource();
+    final conflictResolver = DefaultConflictResolver<Client>();
+    final syncTrigger = DummySyncTrigger();
+    repository = ClientRepositoryImpl(dataSource, remoteDataSource, conflictResolver, syncTrigger);
   });
 
   tearDown(() async {

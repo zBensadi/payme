@@ -7,6 +7,9 @@ import 'package:payme/core/sync/sync_service.dart';
 import 'package:payme/core/sync/synchronizable_repository.dart';
 import 'dart:async';
 
+import 'package:payme/core/sync/sync_domain.dart';
+import 'package:payme/core/sync/sync_trigger.dart';
+
 class MockConnectivityService implements ConnectivityService {
   final StreamController<bool> _mockController = StreamController<bool>.broadcast();
   bool _isConnected = true;
@@ -30,14 +33,18 @@ class MockConnectivityService implements ConnectivityService {
 
 class MockSynchronizableRepository implements SynchronizableRepository {
   final SyncPriority _priority;
+  final SyncDomain _domain;
   bool pushCalled = false;
   bool pullCalled = false;
   final bool shouldFail;
 
-  MockSynchronizableRepository(this._priority, {this.shouldFail = false});
+  MockSynchronizableRepository(this._priority, this._domain, {this.shouldFail = false});
 
   @override
   SyncPriority get syncPriority => _priority;
+
+  @override
+  SyncDomain get syncDomain => _domain;
 
   @override
   Future<SyncResult> pushChanges(String businessId) async {
@@ -57,21 +64,29 @@ class MockSynchronizableRepository implements SynchronizableRepository {
 void main() {
   late MockConnectivityService mockConnectivity;
   late SyncLogger syncLogger;
+  late SyncTrigger syncTrigger;
 
   setUp(() {
     mockConnectivity = MockConnectivityService();
     syncLogger = SyncLogger();
+    syncTrigger = SyncTrigger();
+  });
+
+  tearDown(() {
+    syncTrigger.dispose();
   });
 
   test('SyncService orchestrates push then pull in priority order', () async {
-    final highRepo = MockSynchronizableRepository(SyncPriority.high);
-    final lowRepo = MockSynchronizableRepository(SyncPriority.low);
+    final highRepo = MockSynchronizableRepository(SyncPriority.high, SyncDomain.settings);
+    final lowRepo = MockSynchronizableRepository(SyncPriority.low, SyncDomain.clients);
     
     // Pass in reverse order to ensure it sorts correctly
     final service = SyncService(
       repositories: [lowRepo, highRepo],
       connectivity: mockConnectivity,
       logger: syncLogger,
+      syncTrigger: syncTrigger,
+      debounceDuration: Duration.zero,
     );
 
     service.setBusinessId('biz1');
@@ -84,7 +99,7 @@ void main() {
   });
 
   test('SyncService triggers sync on connectivity restored', () async {
-    final repo = MockSynchronizableRepository(SyncPriority.high);
+    final repo = MockSynchronizableRepository(SyncPriority.high, SyncDomain.settings);
     
     mockConnectivity.simulateConnectivity(false);
     
@@ -92,6 +107,8 @@ void main() {
       repositories: [repo],
       connectivity: mockConnectivity,
       logger: syncLogger,
+      syncTrigger: syncTrigger,
+      debounceDuration: Duration.zero,
     );
     service.setBusinessId('biz1');
     

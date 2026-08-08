@@ -97,6 +97,7 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
       final settingsRef = _firestore.collection('business_settings').doc(businessId);
       batch.set(settingsRef, {
         'businessId': businessId,
+        'businessName': businessName,
         'currencyCode': 'DZD',
         'appMode': 'cloud',
         'firestoreSchemaVersion': 1,

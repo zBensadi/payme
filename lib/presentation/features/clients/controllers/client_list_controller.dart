@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/client.dart';
+import '../../../../domain/repositories/client_repository.dart';
 import '../../../../core/error/result.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../utils/riverpod_invalidation_helper.dart';
 
 class ClientSearchQuery extends Notifier<String> {
   @override
@@ -20,11 +22,12 @@ class ClientListController extends AsyncNotifier<List<Client>> {
   @override
   Future<List<Client>> build() async {
     final query = ref.watch(clientSearchQueryProvider);
-    return _fetchClients(query);
+    final repo = ref.watch(clientRepositoryProvider);
+    ref.invalidateOnRepositoryChange(repo);
+    return _fetchClients(query, repo);
   }
 
-  Future<List<Client>> _fetchClients(String query) async {
-    final repo = ref.read(clientRepositoryProvider);
+  Future<List<Client>> _fetchClients(String query, ClientRepository repo) async {
     final result = await repo.getAllVisible(searchQuery: query);
     
     return switch (result) {

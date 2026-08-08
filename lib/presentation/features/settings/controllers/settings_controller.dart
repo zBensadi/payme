@@ -3,15 +3,17 @@ import '../../../../core/error/result.dart';
 import '../../../../domain/entities/business_settings.dart';
 import '../../../../domain/repositories/settings_repository.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../utils/riverpod_invalidation_helper.dart';
 
 final settingsControllerProvider = AsyncNotifierProvider<SettingsController, BusinessSettings>(SettingsController.new);
 
 class SettingsController extends AsyncNotifier<BusinessSettings> {
-  late final SettingsRepository _repository;
+  late SettingsRepository _repository;
 
   @override
   Future<BusinessSettings> build() async {
     _repository = ref.watch(settingsRepositoryProvider);
+    ref.invalidateOnRepositoryChange(_repository);
     return await _fetchSettings();
   }
 

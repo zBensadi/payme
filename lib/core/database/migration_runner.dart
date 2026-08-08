@@ -50,6 +50,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 3);
         currentVersion = 3;
       }
+      if (currentVersion == 3) {
+        _logger.info('Running migration: v4_business_settings_sync.sql');
+        final scriptContent = await loadMigrationScript('v4_business_settings_sync.sql');
+        await applyMigration(db, scriptContent, 4);
+        currentVersion = 4;
+      }
     }
   }
 
