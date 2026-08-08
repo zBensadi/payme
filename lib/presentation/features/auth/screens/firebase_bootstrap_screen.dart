@@ -5,7 +5,7 @@ import 'package:payme/l10n/app_localizations.dart';
 
 import '../../../../services/business_bootstrap_service.dart';
 import '../../../../core/error/result.dart';
-import '../controllers/firebase_auth_controller.dart';
+import '../controllers/current_user_controller.dart';
 
 class FirebaseBootstrapScreen extends ConsumerStatefulWidget {
   const FirebaseBootstrapScreen({super.key});
@@ -58,9 +58,9 @@ class _FirebaseBootstrapScreenState extends ConsumerState<FirebaseBootstrapScree
         _error = (result as Failure).failure.message;
       });
     } else {
-      // Notify the auth controller to re-fetch the user profile from Firestore,
+      // Notify the current user provider to re-fetch the user profile from Firestore,
       // which will naturally emit a new state and cause the router to navigate.
-      ref.invalidate(firebaseAuthControllerProvider);
+      ref.invalidate(currentUserProvider);
     }
   }
 

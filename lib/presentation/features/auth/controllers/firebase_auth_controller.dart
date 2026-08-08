@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../services/firebase_authentication_service.dart';
 import '../../../../core/error/result.dart';
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import '../../../../data/repositories_impl/firebase_authentication_repository.dart';
+
+import 'current_user_controller.dart';
 
 // Abstract Auth State for UI
 enum FirebaseAuthState {
@@ -26,22 +27,21 @@ final firebaseAuthServiceProvider = Provider((ref) {
 class FirebaseAuthController extends Notifier<FirebaseAuthState> {
   @override
   FirebaseAuthState build() {
-    // Listen to Firebase auth state changes
-    final authService = ref.watch(firebaseAuthServiceProvider);
-    
-    // We don't want to use ref.listen directly in build for async streams without careful handling,
-    // so we'll just listen to the stream manually.
-    authService.authStateChanges().listen((user) {
-      if (user == null) {
-        state = FirebaseAuthState.unauthenticated;
-      } else if (user.requiresBootstrap) {
-        state = FirebaseAuthState.bootstrapping;
-      } else {
-        state = FirebaseAuthState.authenticated;
-      }
-    });
+    final currentUserAsync = ref.watch(currentUserProvider);
 
-    return FirebaseAuthState.loading;
+    return currentUserAsync.when(
+      data: (profile) {
+        if (profile == null) {
+          return FirebaseAuthState.unauthenticated;
+        } else if (profile.requiresBootstrap) {
+          return FirebaseAuthState.bootstrapping;
+        } else {
+          return FirebaseAuthState.authenticated;
+        }
+      },
+      loading: () => FirebaseAuthState.loading,
+      error: (_, __) => FirebaseAuthState.failure,
+    );
   }
 
   Future<Result<void>> login(String email, String password) async {

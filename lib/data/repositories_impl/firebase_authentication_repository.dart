@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../core/error/failures.dart';
 import '../../core/error/result.dart';
 import '../../domain/entities/app_user.dart';
@@ -13,31 +13,7 @@ class FirebaseAuthenticationRepository implements AuthenticationRepository {
 
   @override
   Stream<AppUser?> authStateChanges() {
-    return _firebaseAuth.authStateChanges().asyncMap((user) async {
-      if (user == null) return null;
-      
-      try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data()!;
-          return AppUser(
-            uid: data['uid'],
-            email: data['email'],
-            displayName: data['displayName'],
-            businessId: data['businessId'],
-            roleId: data['roleId'],
-            isSuperAdmin: data['isSuperAdmin'] ?? false,
-            isActive: data['isActive'] ?? true,
-            createdAt: (data['createdAt'] as Timestamp).toDate(),
-            updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-          );
-        }
-      } catch (e) {
-        // Fallback to basic user creation if fetch fails (e.g. permission issues or offline)
-      }
-      
-      return _userFromFirebase(user);
-    });
+    return _firebaseAuth.authStateChanges().map(_userFromFirebase);
   }
 
   @override
