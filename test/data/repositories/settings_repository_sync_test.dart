@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:payme/core/sync/sync_domain.dart';
 import 'package:payme/core/sync/sync_trigger.dart';
-import 'package:payme/core/error/result.dart';
+
 import 'package:payme/core/sync/conflict_resolver.dart';
 import 'package:payme/domain/entities/business_settings.dart';
 import 'package:payme/data/repositories_impl/settings_repository_impl.dart';

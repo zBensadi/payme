@@ -3,8 +3,10 @@ import 'sync_trigger_provider.dart';
 import '../../core/sync/conflict_resolver.dart';
 import '../../domain/entities/business_settings.dart';
 import '../../domain/entities/client.dart';
+import '../../domain/entities/invoice.dart';
 import '../../data/datasources/remote/settings_remote_datasource.dart';
 import '../../data/datasources/remote/client_remote_datasource.dart';
+import '../../data/datasources/remote/invoice_remote_datasource.dart';
 import '../../services/csv_generation_service.dart';
 import '../../core/database/database_provider.dart';
 import '../../services/pdf_generation_service.dart';
@@ -102,11 +104,32 @@ final invoiceLocalDataSourceProvider = Provider<InvoiceLocalDataSource>((ref) {
   return InvoiceLocalDataSource(dbState);
 });
 
+final invoiceRemoteDataSourceProvider = Provider<InvoiceRemoteDataSource>((ref) {
+  return InvoiceRemoteDataSource();
+});
+
+final invoiceConflictResolverProvider = Provider<ConflictResolver<Invoice>>((ref) {
+  return DefaultConflictResolver<Invoice>();
+});
+
 final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
   final dataSource = ref.watch(invoiceLocalDataSourceProvider);
   final paymentRepo = ref.watch(paymentRepositoryProvider);
   final fileDataSource = ref.watch(attachmentFileDataSourceProvider);
-  return InvoiceRepositoryImpl(dataSource, paymentRepo, fileDataSource);
+  final remoteDataSource = ref.watch(invoiceRemoteDataSourceProvider);
+  final conflictResolver = ref.watch(invoiceConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  
+  final repo = InvoiceRepositoryImpl(
+    dataSource, 
+    paymentRepo, 
+    fileDataSource, 
+    remoteDataSource, 
+    conflictResolver, 
+    syncTrigger,
+  );
+  ref.onDispose(() => repo.dispose());
+  return repo;
 });
 
 // Payment Providers

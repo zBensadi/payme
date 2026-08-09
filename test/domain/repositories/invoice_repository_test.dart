@@ -13,6 +13,10 @@ import 'package:payme/domain/entities/payment.dart';
 import 'package:payme/domain/repositories/settings_repository.dart';
 import 'package:payme/domain/entities/business_settings.dart';
 import 'package:payme/data/datasources/file/attachment_file_datasource.dart';
+import 'package:payme/core/sync/conflict_resolver.dart';
+import 'package:payme/core/sync/sync_trigger.dart';
+import 'package:payme/core/sync/sync_domain.dart';
+import 'package:payme/data/datasources/remote/invoice_remote_datasource.dart';
 
 class FakeSettingsRepository implements SettingsRepository {
   bool currencyLocked = false;
@@ -54,6 +58,26 @@ class FakeAttachmentFileDataSource extends AttachmentFileDataSource {
   Future<void> deleteAttachment(String relativeFilePath) async {}
 }
 
+class FakeInvoiceRemoteDataSource extends InvoiceRemoteDataSource {
+  @override
+  Future<void> pushInvoices(String businessId, List<Invoice> invoices) async {}
+  @override
+  Future<List<Invoice>> pullInvoices(String businessId, DateTime? lastSyncTime) async => [];
+}
+
+class FakeSyncTrigger implements SyncTrigger {
+  @override
+  void requestSync(SyncDomain domain) {}
+  @override
+  void requestFullSync() {}
+  @override
+  Stream<Set<SyncDomain>> get syncRequests => const Stream.empty();
+  @override
+  Stream<void> get syncRequested => const Stream.empty();
+  @override
+  void dispose() {}
+}
+
 void main() {
   late Database db;
   late DatabaseService dbService;
@@ -81,7 +105,18 @@ void main() {
     localDataSource = InvoiceLocalDataSource(dbService);
     final fakePaymentRepo = FakePaymentRepository();
     final fileDataSource = FakeAttachmentFileDataSource();
-    repository = InvoiceRepositoryImpl(localDataSource, fakePaymentRepo, fileDataSource);
+    final remoteDataSource = FakeInvoiceRemoteDataSource();
+    final conflictResolver = DefaultConflictResolver<Invoice>();
+    final syncTrigger = FakeSyncTrigger();
+
+    repository = InvoiceRepositoryImpl(
+      localDataSource, 
+      fakePaymentRepo, 
+      fileDataSource,
+      remoteDataSource,
+      conflictResolver,
+      syncTrigger,
+    );
 
     // Setup required parent entities
     await db.insert('accounting_years', {
@@ -123,6 +158,7 @@ void main() {
       createdAt: now,
       updatedAt: now,
       isDirty: false,
+      isDeleted: false,
     );
     await repository.create(inv1);
 
@@ -141,6 +177,7 @@ void main() {
       createdAt: now,
       updatedAt: now,
       isDirty: false,
+      isDeleted: false,
     );
     await repository.create(inv2);
 

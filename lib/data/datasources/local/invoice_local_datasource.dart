@@ -11,7 +11,7 @@ class InvoiceLocalDataSource {
     final db = _dbService.db;
     final results = await db.query(
       'invoices',
-      where: 'accounting_year_id = ?',
+      where: 'accounting_year_id = ? AND is_deleted = 0',
       whereArgs: [accountingYearId],
       orderBy: 'invoice_number DESC',
     );
@@ -22,7 +22,7 @@ class InvoiceLocalDataSource {
     final db = _dbService.db;
     final results = await db.query(
       'invoices',
-      where: 'accounting_year_id = ? AND client_id = ?',
+      where: 'accounting_year_id = ? AND client_id = ? AND is_deleted = 0',
       whereArgs: [accountingYearId, clientId],
       orderBy: 'invoice_number DESC',
     );
@@ -73,11 +73,83 @@ class InvoiceLocalDataSource {
 
   Future<void> delete(String id) async {
     final db = _dbService.db;
-    await db.delete(
+    await db.update(
       'invoices',
+      {
+        'is_deleted': 1,
+        'is_dirty': 1,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<List<InvoiceModel>> getDirtyInvoices() async {
+    final db = _dbService.db;
+    final results = await db.query(
+      'invoices',
+      where: 'is_dirty = 1',
+    );
+    return results.map((e) => InvoiceModel.fromMap(e)).toList();
+  }
+
+  Future<void> overwriteInvoice(InvoiceModel invoice) async {
+    final db = _dbService.db;
+    final map = invoice.toMap();
+    map['is_dirty'] = 0;
+    map['synced_at'] = invoice.updatedAt;
+
+    await db.transaction((txn) async {
+      await txn.insert(
+        'invoices',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      final seqResults = await txn.query(
+        'invoice_sequences',
+        columns: ['last_invoice_number'],
+        where: 'accounting_year_id = ?',
+        whereArgs: [invoice.accountingYearId],
+      );
+
+      int currentMax = 0;
+      if (seqResults.isNotEmpty) {
+        currentMax = seqResults.first['last_invoice_number'] as int;
+      }
+
+      if (invoice.invoiceNumber > currentMax) {
+        await txn.insert(
+          'invoice_sequences',
+          {
+            'accounting_year_id': invoice.accountingYearId,
+            'last_invoice_number': invoice.invoiceNumber,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
+  Future<void> updateSyncMetadata(List<String> ids, DateTime syncedAt) async {
+    if (ids.isEmpty) return;
+    
+    final db = _dbService.db;
+    for (var i = 0; i < ids.length; i += 900) {
+      final chunk = ids.skip(i).take(900).toList();
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      
+      await db.update(
+        'invoices',
+        {
+          'is_dirty': 0,
+          'synced_at': syncedAt.toUtc().toIso8601String(),
+        },
+        where: 'id IN ($placeholders)',
+        whereArgs: chunk,
+      );
+    }
   }
 
   Future<int> getHighestInvoiceNumber(String accountingYearId) async {
@@ -98,7 +170,11 @@ class InvoiceLocalDataSource {
     final executor = txn ?? _dbService.db;
     await executor.update(
       'invoices',
-      {'client_id': newClientId},
+      {
+        'client_id': newClientId,
+        'is_dirty': 1,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      },
       where: 'client_id = ?',
       whereArgs: [oldClientId],
     );
@@ -106,8 +182,13 @@ class InvoiceLocalDataSource {
 
   Future<void> deleteAllForClient(String clientId, {Transaction? txn}) async {
     final executor = txn ?? _dbService.db;
-    await executor.delete(
+    await executor.update(
       'invoices',
+      {
+        'is_deleted': 1,
+        'is_dirty': 1,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      },
       where: 'client_id = ?',
       whereArgs: [clientId],
     );

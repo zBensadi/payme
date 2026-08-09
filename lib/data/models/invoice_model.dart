@@ -15,6 +15,7 @@ class InvoiceModel {
   final String? remoteId;
   final String? syncedAt;
   final int isDirty;
+  final bool isDeleted;
 
   const InvoiceModel({
     required this.id,
@@ -31,6 +32,7 @@ class InvoiceModel {
     this.remoteId,
     this.syncedAt,
     required this.isDirty,
+    this.isDeleted = false,
   });
 
   factory InvoiceModel.fromEntity(Invoice entity) {
@@ -49,6 +51,7 @@ class InvoiceModel {
       remoteId: entity.remoteId,
       syncedAt: entity.syncedAt?.toIso8601String(),
       isDirty: entity.isDirty ? 1 : 0,
+      isDeleted: entity.isDeleted,
     );
   }
 
@@ -68,6 +71,7 @@ class InvoiceModel {
       remoteId: remoteId,
       syncedAt: syncedAt != null ? DateTime.parse(syncedAt!) : null,
       isDirty: isDirty == 1,
+      isDeleted: isDeleted,
     );
   }
 
@@ -87,6 +91,7 @@ class InvoiceModel {
       remoteId: map['remote_id'] as String?,
       syncedAt: map['synced_at'] as String?,
       isDirty: map['is_dirty'] as int,
+      isDeleted: (map['is_deleted'] as int) == 1,
     );
   }
 
@@ -106,6 +111,7 @@ class InvoiceModel {
       'remote_id': remoteId,
       'synced_at': syncedAt,
       'is_dirty': isDirty,
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 }

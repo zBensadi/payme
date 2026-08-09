@@ -7,6 +7,7 @@ import '../../../../domain/entities/invoice_status.dart';
 import '../../../../domain/services/invoice_status_calculator.dart';
 import '../../../providers/active_year_provider.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../utils/riverpod_invalidation_helper.dart';
 import '../../clients/controllers/client_list_controller.dart';
 
 class GlobalInvoiceListItem {
@@ -69,6 +70,8 @@ class GlobalInvoiceListController extends AsyncNotifier<List<GlobalInvoiceListIt
     final filter = ref.watch(globalInvoiceFilterProvider);
     
     final invoiceRepo = ref.watch(invoiceRepositoryProvider);
+    ref.invalidateOnRepositoryChange(invoiceRepo);
+    
     final invoiceResult = await invoiceRepo.getInvoicesForYear(activeYearId);
     
     if (invoiceResult is Failure) {

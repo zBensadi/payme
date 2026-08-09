@@ -13,6 +13,7 @@ class Invoice {
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
+  final bool isDeleted;
 
   const Invoice({
     required this.id,
@@ -29,6 +30,7 @@ class Invoice {
     this.remoteId,
     this.syncedAt,
     required this.isDirty,
+    this.isDeleted = false,
   });
 
   Invoice copyWith({
@@ -46,6 +48,7 @@ class Invoice {
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
+    bool? isDeleted,
   }) {
     return Invoice(
       id: id ?? this.id,
@@ -62,6 +65,7 @@ class Invoice {
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 }

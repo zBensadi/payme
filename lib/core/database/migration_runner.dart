@@ -56,6 +56,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 4);
         currentVersion = 4;
       }
+      if (currentVersion == 4) {
+        _logger.info('Running migration: v5_invoice_soft_delete.sql');
+        final scriptContent = await loadMigrationScript('v5_invoice_soft_delete.sql');
+        await applyMigration(db, scriptContent, 5);
+        currentVersion = 5;
+      }
     }
   }
 
