@@ -1,5 +1,6 @@
 enum SyncDomain {
   settings,
+  accountingYears,
   clients,
   invoices,
   payments,

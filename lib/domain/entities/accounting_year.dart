@@ -3,6 +3,7 @@ class AccountingYear {
   final String name;
   final bool isActive;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
@@ -12,6 +13,7 @@ class AccountingYear {
     required this.name,
     required this.isActive,
     required this.createdAt,
+    required this.updatedAt,
     this.remoteId,
     this.syncedAt,
     this.isDirty = false,
@@ -22,6 +24,7 @@ class AccountingYear {
     String? name,
     bool? isActive,
     DateTime? createdAt,
+    DateTime? updatedAt,
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
@@ -31,6 +34,7 @@ class AccountingYear {
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,
@@ -44,8 +48,9 @@ class AccountingYear {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
-          isActive == other.isActive;
+          isActive == other.isActive &&
+          updatedAt == other.updatedAt;
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode ^ isActive.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ isActive.hashCode ^ updatedAt.hashCode;
 }

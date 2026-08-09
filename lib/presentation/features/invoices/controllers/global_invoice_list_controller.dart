@@ -63,14 +63,14 @@ final globalInvoiceListControllerProvider = AsyncNotifierProvider<GlobalInvoiceL
 class GlobalInvoiceListController extends AsyncNotifier<List<GlobalInvoiceListItem>> {
   @override
   Future<List<GlobalInvoiceListItem>> build() async {
+    final invoiceRepo = ref.watch(invoiceRepositoryProvider);
+    ref.invalidateOnRepositoryChange(invoiceRepo);
+
     final activeYearAsync = ref.watch(activeYearProvider);
     final activeYearId = activeYearAsync.maybeWhen(data: (d) => d?.id, orElse: () => null);
     if (activeYearId == null) return [];
 
     final filter = ref.watch(globalInvoiceFilterProvider);
-    
-    final invoiceRepo = ref.watch(invoiceRepositoryProvider);
-    ref.invalidateOnRepositoryChange(invoiceRepo);
     
     final invoiceResult = await invoiceRepo.getInvoicesForYear(activeYearId);
     

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'sync_trigger_provider.dart';
 import '../../core/sync/conflict_resolver.dart';
 import '../../domain/entities/business_settings.dart';
+import '../../domain/entities/accounting_year.dart';
 import '../../domain/entities/client.dart';
 import '../../domain/entities/invoice.dart';
 import '../../data/datasources/remote/settings_remote_datasource.dart';
@@ -16,12 +17,14 @@ import '../../domain/repositories/backup_repository.dart';
 import '../../data/datasources/local/accounting_year_local_datasource.dart';
 import '../../data/repositories_impl/accounting_year_repository_impl.dart';
 import '../../domain/repositories/accounting_year_repository.dart';
+import '../../data/datasources/remote/accounting_year_remote_datasource.dart';
 import '../../data/datasources/local/client_local_datasource.dart';
 import '../../data/datasources/local/invoice_local_datasource.dart';
 import '../../data/datasources/local/payment_local_datasource.dart';
 import '../../data/datasources/local/settings_local_datasource.dart';
 import '../../data/datasources/file/attachment_file_datasource.dart';
 import '../../data/datasources/file/logo_file_datasource.dart';
+import '../../core/sync/accounting_year_conflict_resolver.dart';
 
 import '../../data/repositories_impl/client_repository_impl.dart';
 import '../../data/repositories_impl/invoice_repository_impl.dart';
@@ -40,9 +43,22 @@ final accountingYearLocalDataSourceProvider = Provider<AccountingYearLocalDataSo
   return AccountingYearLocalDataSource(dbService.db);
 });
 
+final accountingYearRemoteDataSourceProvider = Provider<AccountingYearRemoteDataSource>((ref) {
+  return AccountingYearRemoteDataSource();
+});
+
+final accountingYearConflictResolverProvider = Provider<ConflictResolver<AccountingYear>>((ref) {
+  return AccountingYearConflictResolver();
+});
+
 final accountingYearRepositoryProvider = Provider<AccountingYearRepository>((ref) {
-  final dataSource = ref.watch(accountingYearLocalDataSourceProvider);
-  return AccountingYearRepositoryImpl(dataSource);
+  final localDataSource = ref.watch(accountingYearLocalDataSourceProvider);
+  final remoteDataSource = ref.watch(accountingYearRemoteDataSourceProvider);
+  final conflictResolver = ref.watch(accountingYearConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  final repo = AccountingYearRepositoryImpl(localDataSource, remoteDataSource, conflictResolver, syncTrigger);
+  ref.onDispose(() => repo.dispose());
+  return repo;
 });
 
 // Client Providers

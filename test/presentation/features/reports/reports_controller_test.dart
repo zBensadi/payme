@@ -106,7 +106,7 @@ class FakePaymentRepository implements PaymentRepository {
 
 void main() {
   test('ReportsController correctly classifies paid and outstanding invoices', () async {
-    final year = AccountingYear(id: 'y1', name: '2026', isActive: true, createdAt: DateTime.now());
+    final year = AccountingYear(id: 'y1', name: '2026', isActive: true, createdAt: DateTime.now(), updatedAt: DateTime.now());
     
     final container = ProviderContainer(
       overrides: [
@@ -128,7 +128,7 @@ void main() {
   });
   
   test('ReportsController computes client balances correctly', () async {
-    final year = AccountingYear(id: 'y1', name: '2026', isActive: true, createdAt: DateTime.now());
+    final year = AccountingYear(id: 'y1', name: '2026', isActive: true, createdAt: DateTime.now(), updatedAt: DateTime.now());
     
     final container = ProviderContainer(
       overrides: [

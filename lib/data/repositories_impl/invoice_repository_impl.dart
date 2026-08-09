@@ -49,7 +49,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository, SynchronizableReposito
   SyncDomain get syncDomain => SyncDomain.invoices;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.medium;
+  SyncPriority get syncPriority => SyncPriority.low;
 
 
   @override

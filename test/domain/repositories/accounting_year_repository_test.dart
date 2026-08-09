@@ -4,6 +4,29 @@ import 'package:payme/core/error/result.dart';
 import 'package:payme/data/datasources/local/accounting_year_local_datasource.dart';
 import 'package:payme/data/repositories_impl/accounting_year_repository_impl.dart';
 import 'package:payme/domain/entities/accounting_year.dart';
+import 'package:payme/data/datasources/remote/accounting_year_remote_datasource.dart';
+import 'package:payme/core/sync/conflict_resolver.dart';
+import 'package:payme/core/sync/accounting_year_conflict_resolver.dart';
+import 'package:payme/core/sync/sync_trigger.dart';
+import 'package:payme/core/sync/sync_domain.dart';
+
+class FakeAccountingYearRemoteDataSource implements AccountingYearRemoteDataSource {
+  @override
+  Future<void> pushYears(String businessId, List<AccountingYear> years) async {}
+  @override
+  Future<List<AccountingYear>> pullYears(String businessId, DateTime? lastSyncTime) async => [];
+}
+
+class FakeSyncTrigger implements SyncTrigger {
+  @override
+  void requestSync(SyncDomain domain) {}
+  @override
+  void requestFullSync() {}
+  @override
+  Stream<SyncDomain> get syncRequested => const Stream.empty();
+  @override
+  void dispose() {}
+}
 
 void main() {
   late Database db;
@@ -25,6 +48,7 @@ void main() {
                     name TEXT NOT NULL UNIQUE,
                     is_active INTEGER NOT NULL DEFAULT 0,
                     created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
                     remote_id TEXT,
                     synced_at TEXT,
                     is_dirty INTEGER NOT NULL DEFAULT 0
@@ -33,7 +57,16 @@ void main() {
             }));
 
     final dataSource = AccountingYearLocalDataSource(db);
-    repository = AccountingYearRepositoryImpl(dataSource);
+    final remoteDataSource = FakeAccountingYearRemoteDataSource();
+    final conflictResolver = AccountingYearConflictResolver();
+    final syncTrigger = FakeSyncTrigger();
+    
+    repository = AccountingYearRepositoryImpl(
+      dataSource,
+      remoteDataSource,
+      conflictResolver,
+      syncTrigger,
+    );
   });
 
   tearDown(() async {

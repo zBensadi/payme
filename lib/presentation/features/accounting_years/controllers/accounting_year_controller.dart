@@ -3,6 +3,7 @@ import '../../../../domain/entities/accounting_year.dart';
 import '../../../../core/error/result.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/active_year_provider.dart';
+import '../../../utils/riverpod_invalidation_helper.dart';
 
 final accountingYearControllerProvider =
     AsyncNotifierProvider<AccountingYearController, List<AccountingYear>>(
@@ -11,6 +12,7 @@ final accountingYearControllerProvider =
 class AccountingYearController extends AsyncNotifier<List<AccountingYear>> {
   @override
   Future<List<AccountingYear>> build() async {
+    ref.invalidateOnRepositoryChange(accountingYearRepositoryProvider);
     return _fetchYears();
   }
 

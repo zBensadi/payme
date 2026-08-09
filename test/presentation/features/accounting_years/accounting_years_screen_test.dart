@@ -32,6 +32,7 @@ class FakeAccountingYearRepository implements AccountingYearRepository {
       name: name,
       isActive: years.isEmpty,
       createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
     years.add(year);
     return Success(year);

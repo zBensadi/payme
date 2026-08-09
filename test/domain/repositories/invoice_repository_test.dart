@@ -58,7 +58,7 @@ class FakeAttachmentFileDataSource extends AttachmentFileDataSource {
   Future<void> deleteAttachment(String relativeFilePath) async {}
 }
 
-class FakeInvoiceRemoteDataSource extends InvoiceRemoteDataSource {
+class FakeInvoiceRemoteDataSource implements InvoiceRemoteDataSource {
   @override
   Future<void> pushInvoices(String businessId, List<Invoice> invoices) async {}
   @override
@@ -71,9 +71,7 @@ class FakeSyncTrigger implements SyncTrigger {
   @override
   void requestFullSync() {}
   @override
-  Stream<Set<SyncDomain>> get syncRequests => const Stream.empty();
-  @override
-  Stream<void> get syncRequested => const Stream.empty();
+  Stream<SyncDomain> get syncRequested => const Stream.empty();
   @override
   void dispose() {}
 }
@@ -102,6 +100,18 @@ void main() {
     final v2 = await runner.loadMigrationScript('v2_invoice_sequence.sql');
     await runner.applyMigration(db, v2, 2);
 
+    final v3 = await runner.loadMigrationScript('v3_add_language.sql');
+    await runner.applyMigration(db, v3, 3);
+
+    final v4 = await runner.loadMigrationScript('v4_business_settings_sync.sql');
+    await runner.applyMigration(db, v4, 4);
+
+    final v5 = await runner.loadMigrationScript('v5_invoice_soft_delete.sql');
+    await runner.applyMigration(db, v5, 5);
+
+    final v6 = await runner.loadMigrationScript('v6_accounting_year_sync.sql');
+    await runner.applyMigration(db, v6, 6);
+
     localDataSource = InvoiceLocalDataSource(dbService);
     final fakePaymentRepo = FakePaymentRepository();
     final fileDataSource = FakeAttachmentFileDataSource();
@@ -124,6 +134,7 @@ void main() {
       'name': '2026', 
       'is_active': 1,
       'created_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
     });
     await db.insert('clients', {
       'id': 'client1',
