@@ -35,18 +35,23 @@ class PdfGenerationService {
             return pw.Column(
               children: [
                 pw.Expanded(
-                  child: pw.FittedBox(
-                    fit: pw.BoxFit.scaleDown,
-                    alignment: pw.Alignment.topCenter,
-                    child: pw.Container(
-                      width: PdfPageFormat.a4.width - 64, // maintain standard layout width
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
-                          ..add(pw.Spacer())
-                          ..add(_buildFooter(context)),
+                  child: pw.Column(
+                    children: [
+                      pw.Expanded(
+                        child: pw.FittedBox(
+                          fit: pw.BoxFit.scaleDown,
+                          alignment: pw.Alignment.topLeft,
+                          child: pw.Container(
+                            width: PdfPageFormat.a4.width - 64, // maintain standard layout width
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      _buildFooter(context),
+                    ],
                   ),
                 ),
                 pw.Padding(
@@ -54,18 +59,23 @@ class PdfGenerationService {
                   child: pw.Divider(color: PdfColors.grey400, borderStyle: pw.BorderStyle.dashed),
                 ),
                 pw.Expanded(
-                  child: pw.FittedBox(
-                    fit: pw.BoxFit.scaleDown,
-                    alignment: pw.Alignment.topCenter,
-                    child: pw.Container(
-                      width: PdfPageFormat.a4.width - 64, // maintain standard layout width
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
-                          ..add(pw.Spacer())
-                          ..add(_buildFooter(context)),
+                  child: pw.Column(
+                    children: [
+                      pw.Expanded(
+                        child: pw.FittedBox(
+                          fit: pw.BoxFit.scaleDown,
+                          alignment: pw.Alignment.topLeft,
+                          child: pw.Container(
+                            width: PdfPageFormat.a4.width - 64, // maintain standard layout width
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      _buildFooter(context),
+                    ],
                   ),
                 ),
               ],
