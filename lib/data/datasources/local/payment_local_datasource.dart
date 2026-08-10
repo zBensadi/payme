@@ -13,7 +13,7 @@ class PaymentLocalDataSource {
     final db = _dbService.db;
     final paymentMaps = await db.query(
       'payments',
-      where: 'invoice_id = ?',
+      where: 'invoice_id = ? AND is_deleted = 0',
       whereArgs: [invoiceId],
       orderBy: 'date DESC, created_at DESC',
     );
@@ -51,7 +51,7 @@ class PaymentLocalDataSource {
       SELECT p.*
       FROM payments p
       JOIN invoices i ON p.invoice_id = i.id
-      WHERE $whereClause
+      WHERE $whereClause AND p.is_deleted = 0
       ORDER BY p.date DESC, p.created_at DESC
     ''', whereArgs);
 
@@ -137,12 +137,60 @@ class PaymentLocalDataSource {
 
   Future<void> delete(String id) async {
     final db = _dbService.db;
-    // Attachments row will be deleted via ON DELETE CASCADE in SQLite
-    await db.delete(
+    await db.update(
       'payments',
+      {
+        'is_deleted': 1,
+        'is_dirty': 1,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<List<Payment>> getDirtyPayments() async {
+    final db = _dbService.db;
+    final results = await db.query(
+      'payments',
+      where: 'is_dirty = 1',
+    );
+    return results.map((e) => PaymentModel.fromMap(e)).toList();
+  }
+
+  Future<void> overwritePayment(Payment payment) async {
+    final db = _dbService.db;
+    final map = PaymentModel.toMap(payment);
+    map['is_dirty'] = 0;
+    map['synced_at'] = payment.updatedAt.toIso8601String();
+
+    await db.transaction((txn) async {
+      await txn.insert(
+        'payments',
+        map,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  Future<void> updateSyncMetadata(List<String> ids, DateTime syncedAt) async {
+    if (ids.isEmpty) return;
+    
+    final db = _dbService.db;
+    for (var i = 0; i < ids.length; i += 900) {
+      final chunk = ids.skip(i).take(900).toList();
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      
+      await db.update(
+        'payments',
+        {
+          'is_dirty': 0,
+          'synced_at': syncedAt.toUtc().toIso8601String(),
+        },
+        where: 'id IN ($placeholders)',
+        whereArgs: chunk,
+      );
+    }
   }
   
   Future<List<String>> getAttachmentPathsForInvoice(String invoiceId) async {

@@ -68,6 +68,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 6);
         currentVersion = 6;
       }
+      if (currentVersion == 6) {
+        _logger.info('Running migration: v7_payment_sync.sql');
+        final scriptContent = await loadMigrationScript('v7_payment_sync.sql');
+        await applyMigration(db, scriptContent, 7);
+        currentVersion = 7;
+      }
     }
   }
 

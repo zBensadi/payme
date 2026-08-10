@@ -16,6 +16,7 @@ class PaymentModel {
       remoteId: map['remote_id'] as String?,
       syncedAt: map['synced_at'] != null ? DateTime.parse(map['synced_at'] as String) : null,
       isDirty: (map['is_dirty'] as int) == 1,
+      isDeleted: (map['is_deleted'] as int) == 1,
       attachments: [], // hydrated separately
     );
   }
@@ -34,6 +35,7 @@ class PaymentModel {
       'remote_id': payment.remoteId,
       'synced_at': payment.syncedAt?.toIso8601String(),
       'is_dirty': payment.isDirty ? 1 : 0,
+      'is_deleted': payment.isDeleted ? 1 : 0,
     };
   }
 }

@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+
 import '../../../core/error/failures.dart';
 import '../../../core/error/result.dart';
 import '../../../core/utils/id_generator.dart';
@@ -6,13 +10,48 @@ import '../../../domain/entities/payment_attachment.dart';
 import '../../../domain/repositories/payment_repository.dart';
 import '../datasources/local/payment_local_datasource.dart';
 import '../datasources/file/attachment_file_datasource.dart';
-import 'package:path/path.dart' as p;
 
-class PaymentRepositoryImpl implements PaymentRepository {
+import '../../core/sync/synchronizable_repository.dart';
+import '../../core/sync/sync_priority.dart';
+import '../../core/sync/sync_result.dart';
+import '../../core/sync/conflict_resolver.dart';
+import '../../core/sync/sync_domain.dart';
+import '../../core/sync/sync_trigger.dart';
+import '../datasources/remote/payment_remote_datasource.dart';
+import '../../../core/events/repository_event.dart';
+import '../../../core/events/repository_change_publisher.dart';
+import '../models/payment_model.dart';
+
+class PaymentRepositoryImpl implements PaymentRepository, SynchronizableRepository, RepositoryChangePublisher {
   final PaymentLocalDataSource _localDataSource;
   final AttachmentFileDataSource _fileDataSource;
+  final PaymentRemoteDataSource _remoteDataSource;
+  final ConflictResolver<Payment> _conflictResolver;
+  final SyncTrigger _syncTrigger;
 
-  PaymentRepositoryImpl(this._localDataSource, this._fileDataSource);
+  final _eventController = StreamController<RepositoryEvent>.broadcast();
+
+  PaymentRepositoryImpl(
+    this._localDataSource,
+    this._fileDataSource,
+    this._remoteDataSource,
+    this._conflictResolver,
+    this._syncTrigger,
+  );
+
+  @override
+  Stream<RepositoryEvent> watchEvents() => _eventController.stream;
+
+  @override
+  void dispose() {
+    _eventController.close();
+  }
+
+  @override
+  SyncDomain get syncDomain => SyncDomain.payments;
+
+  @override
+  SyncPriority get syncPriority => SyncPriority.low;
 
   @override
   Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId) async {
@@ -53,7 +92,6 @@ class PaymentRepositoryImpl implements PaymentRepository {
         for (final sourcePath in newAttachmentSourcePaths) {
           final originalFileName = p.basename(sourcePath);
           final extension = p.extension(sourcePath).toLowerCase().replaceAll('.', '');
-          // Valid extensions: pdf, jpg, png
           final type = ['pdf', 'jpg', 'jpeg', 'png'].contains(extension) ? (extension == 'jpeg' ? 'jpg' : extension) : 'png';
           final newFileName = '${IdGenerator.generateUniqueId()}.$type';
           
@@ -65,7 +103,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
             filePath: relativePath,
             originalFileName: originalFileName,
             fileType: type,
-            fileSizeBytes: 0, // In a real app we'd query the file size
+            fileSizeBytes: 0,
             createdAt: DateTime.now().toUtc(),
           );
           
@@ -73,8 +111,13 @@ class PaymentRepositoryImpl implements PaymentRepository {
         }
       }
 
-      final finalPayment = payment.copyWith(attachments: newAttachments);
+      final finalPayment = payment.copyWith(
+        attachments: newAttachments,
+        isDirty: true,
+        updatedAt: DateTime.now().toUtc(),
+      );
       final created = await _localDataSource.create(finalPayment);
+      _syncTrigger.requestSync(syncDomain);
       return Success(created);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to create payment: $e'));
@@ -86,7 +129,6 @@ class PaymentRepositoryImpl implements PaymentRepository {
     try {
       List<PaymentAttachment> finalAttachments = payment.attachments.where((a) => !(deletedAttachmentIds?.contains(a.id) ?? false)).toList();
 
-      // Delete physical files for deleted attachments
       if (deletedAttachmentIds != null) {
         for (final deletedId in deletedAttachmentIds) {
           final toDelete = payment.attachments.firstWhere((a) => a.id == deletedId);
@@ -117,8 +159,13 @@ class PaymentRepositoryImpl implements PaymentRepository {
         }
       }
 
-      final finalPayment = payment.copyWith(attachments: finalAttachments);
+      final finalPayment = payment.copyWith(
+        attachments: finalAttachments,
+        isDirty: true,
+        updatedAt: DateTime.now().toUtc(),
+      );
       final updated = await _localDataSource.update(finalPayment, deletedAttachmentIds ?? []);
+      _syncTrigger.requestSync(syncDomain);
       return Success(updated);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to update payment: $e'));
@@ -130,11 +177,11 @@ class PaymentRepositoryImpl implements PaymentRepository {
     try {
       final payment = await _localDataSource.getById(id);
       if (payment != null) {
-        // Delete physical files
         for (final attachment in payment.attachments) {
           await _fileDataSource.deleteAttachment(attachment.filePath);
         }
         await _localDataSource.delete(id);
+        _syncTrigger.requestSync(syncDomain);
       }
       return const Success(null);
     } catch (e) {
@@ -159,6 +206,82 @@ class PaymentRepositoryImpl implements PaymentRepository {
       return Success(paths);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to load attachment paths: $e'));
+    }
+  }
+
+  @override
+  Future<SyncResult> pushChanges(String businessId) async {
+    try {
+      final dirtyModels = await _localDataSource.getDirtyPayments();
+      if (dirtyModels.isEmpty) return const SyncResult(skipped: 0);
+
+      final dirtyPayments = dirtyModels.map((m) => m as Payment).toList();
+      
+      await _remoteDataSource.pushPayments(businessId, dirtyPayments);
+      
+      final ids = dirtyPayments.map((p) => p.id).toList();
+      await _localDataSource.updateSyncMetadata(ids, DateTime.now().toUtc());
+      
+      return SyncResult(uploaded: dirtyPayments.length);
+    } catch (e, stack) {
+      debugPrint('Payment push failed: $e\n$stack');
+      return const SyncResult(failed: 1);
+    }
+  }
+
+  @override
+  Future<SyncResult> pullChanges(String businessId, DateTime? lastSyncTime) async {
+    try {
+      final remotePayments = await _remoteDataSource.pullPayments(businessId, lastSyncTime);
+      if (remotePayments.isEmpty) return const SyncResult(skipped: 0);
+
+      int downloaded = 0;
+      int conflicts = 0;
+
+      for (final remotePayment in remotePayments) {
+        final localModel = await _localDataSource.getById(remotePayment.id);
+        
+        if (localModel == null) {
+          await _localDataSource.overwritePayment(PaymentModel.fromMap(PaymentModel.toMap(remotePayment)));
+          downloaded++;
+        } else {
+          final localPayment = localModel as Payment;
+          
+          if (remotePayment.updatedAt.compareTo(localPayment.updatedAt) <= 0) {
+            continue;
+          }
+
+          if (!localPayment.isDirty) {
+            await _localDataSource.overwritePayment(PaymentModel.fromMap(PaymentModel.toMap(remotePayment)));
+            downloaded++;
+          } else {
+            conflicts++;
+            final winningPayment = _conflictResolver.resolve(
+              localPayment,
+              remotePayment,
+            );
+            
+            if (winningPayment == remotePayment) {
+              await _localDataSource.overwritePayment(PaymentModel.fromMap(PaymentModel.toMap(winningPayment)));
+              downloaded++;
+            }
+          }
+        }
+      }
+
+      if (conflicts > 0 || downloaded > 0) {
+        _eventController.add(RepositoryEvent(
+          type: conflicts > 0 ? RepositoryEventType.conflictResolved : RepositoryEventType.remoteSynchronization,
+          domain: syncDomain,
+          timestamp: DateTime.now().toUtc(),
+          affectedRows: downloaded + conflicts,
+        ));
+      }
+
+      return SyncResult(downloaded: downloaded, conflicts: conflicts);
+    } catch (e, stack) {
+      debugPrint('Payment pull failed: $e\n$stack');
+      return const SyncResult(failed: 1);
     }
   }
 }

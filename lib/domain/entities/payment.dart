@@ -14,6 +14,7 @@ class Payment {
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
+  final bool isDeleted;
   
   // Attachments are loaded optionally
   final List<PaymentAttachment> attachments;
@@ -31,6 +32,7 @@ class Payment {
     this.remoteId,
     this.syncedAt,
     required this.isDirty,
+    this.isDeleted = false,
     this.attachments = const [],
   });
 
@@ -47,6 +49,7 @@ class Payment {
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
+    bool? isDeleted,
     List<PaymentAttachment>? attachments,
   }) {
     return Payment(
@@ -62,6 +65,7 @@ class Payment {
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
       attachments: attachments ?? this.attachments,
     );
   }

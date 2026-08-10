@@ -27,6 +27,7 @@ final synchronizableRepositoriesProvider = Provider<List<SynchronizableRepositor
     ref.watch(clientRepositoryProvider) as SynchronizableRepository,
     ref.watch(accountingYearRepositoryProvider) as SynchronizableRepository,
     ref.watch(invoiceRepositoryProvider) as SynchronizableRepository,
+    ref.watch(paymentRepositoryProvider) as SynchronizableRepository,
   ];
 });
 
