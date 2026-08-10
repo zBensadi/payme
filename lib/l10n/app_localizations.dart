@@ -1587,6 +1587,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete Setup'**
   String get completeSetup;
+
+  /// No description provided for @applicationLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Language'**
+  String get applicationLanguage;
+
+  /// No description provided for @chooseWhatShouldHappen.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what should happen:'**
+  String get chooseWhatShouldHappen;
+
+  /// No description provided for @businessLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Logo'**
+  String get businessLogo;
+
+  /// No description provided for @selectLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Logo'**
+  String get selectLogo;
 }
 
 class _AppLocalizationsDelegate

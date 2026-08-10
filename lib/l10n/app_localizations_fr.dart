@@ -794,35 +794,49 @@ class AppLocalizationsFr extends AppLocalizations {
   String get restoreBackup => 'Restaurer une sauvegarde';
 
   @override
-  String get invalidEmailFormat => 'Invalid email format';
+  String get invalidEmailFormat => 'Format d\'e-mail invalide';
 
   @override
-  String get emailRequired => 'Email is required';
+  String get emailRequired => 'L\'e-mail est requis';
 
   @override
-  String get passwordRequired => 'Password is required';
+  String get passwordRequired => 'Le mot de passe est requis';
 
   @override
-  String get firebaseAuthInvalidCredentials => 'Invalid email or password.';
+  String get firebaseAuthInvalidCredentials =>
+      'E-mail ou mot de passe invalide.';
 
   @override
-  String get firebaseAuthUserNotFound => 'No account found for this email.';
+  String get firebaseAuthUserNotFound => 'Aucun compte trouvé pour cet e-mail.';
 
   @override
   String get passwordResetInstructions =>
-      'Enter your email address to receive a password reset link.';
+      'Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.';
 
   @override
   String get passwordResetSuccess =>
-      'Password reset email sent. Please check your inbox.';
+      'E-mail de réinitialisation envoyé. Veuillez vérifier votre boîte de réception.';
 
   @override
-  String get passwordResetFailed => 'Failed to send password reset email.';
+  String get passwordResetFailed =>
+      'Échec de l\'envoi de l\'e-mail de réinitialisation.';
 
   @override
   String get bootstrapInstructions =>
-      'Please enter your business name to get started.';
+      'Veuillez entrer le nom de votre entreprise pour commencer.';
 
   @override
-  String get completeSetup => 'Complete Setup';
+  String get completeSetup => 'Terminer la configuration';
+
+  @override
+  String get applicationLanguage => 'Langue de l\'Application';
+
+  @override
+  String get chooseWhatShouldHappen => 'Choisissez ce qui doit se passer :';
+
+  @override
+  String get businessLogo => 'Logo de l\'entreprise';
+
+  @override
+  String get selectLogo => 'Sélectionner un logo';
 }

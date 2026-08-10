@@ -419,5 +419,9 @@
   "passwordResetFailed": "Failed to send password reset email.",
   "welcomeToPayMe": "Welcome to PayMe",
   "bootstrapInstructions": "Please enter your business name to get started.",
-  "completeSetup": "Complete Setup"
+  "completeSetup": "Complete Setup",
+  "applicationLanguage": "Application Language",
+  "chooseWhatShouldHappen": "Choose what should happen:",
+  "businessLogo": "Business Logo",
+  "selectLogo": "Select Logo"
 }

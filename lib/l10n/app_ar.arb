@@ -261,5 +261,19 @@
   "ok": "موافق",
   "backupDesc": "قم بحماية بياناتك عن طريق إنشاء أرشيف كامل لقاعدة البيانات والمرفقات الخاصة بك.",
   "createBackup": "إنشاء نسخة احتياطية",
-  "restoreBackup": "استعادة نسخة احتياطية"
+  "restoreBackup": "استعادة نسخة احتياطية",
+  "invalidEmailFormat": "تنسيق البريد الإلكتروني غير صالح",
+  "emailRequired": "البريد الإلكتروني مطلوب",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "firebaseAuthInvalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صالحة.",
+  "firebaseAuthUserNotFound": "لم يتم العثور على حساب لهذا البريد الإلكتروني.",
+  "passwordResetInstructions": "أدخل عنوان بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور.",
+  "passwordResetSuccess": "تم إرسال بريد إلكتروني لإعادة تعيين كلمة المرور. يرجى التحقق من صندوق الوارد الخاص بك.",
+  "passwordResetFailed": "فشل إرسال البريد الإلكتروني لإعادة تعيين كلمة المرور.",
+  "bootstrapInstructions": "يرجى إدخال اسم عملك للبدء.",
+  "completeSetup": "إكمال الإعداد",
+  "applicationLanguage": "لغة التطبيق",
+  "chooseWhatShouldHappen": "اختر ما يجب أن يحدث:",
+  "businessLogo": "شعار الشركة",
+  "selectLogo": "اختيار شعار"
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../../core/storage/app_paths.dart';
 import 'package:path/path.dart' as p;
+import '../../../../../core/extensions/l10n_extension.dart';
 
 class LogoPicker extends StatefulWidget {
   final String? initialLogoPath;
@@ -60,7 +61,7 @@ class _LogoPickerState extends State<LogoPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Business Logo', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(context.l10n.businessLogo, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -78,7 +79,7 @@ class _LogoPickerState extends State<LogoPicker> {
             const SizedBox(width: 16),
             OutlinedButton.icon(
               icon: const Icon(Icons.upload_file),
-              label: const Text('Select Logo'),
+              label: Text(context.l10n.selectLogo),
               onPressed: _pickImage,
             ),
           ],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/auth/controllers/auth_controller.dart';
 import '../features/auth/controllers/firebase_auth_controller.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/firebase_login_screen.dart';
@@ -12,6 +11,8 @@ import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/firebase_forgot_password_screen.dart';
 import '../features/auth/screens/firebase_bootstrap_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
+import '../features/bootstrap/screens/language_select_screen.dart';
+import '../providers/locale_controller.dart';
 
 import '../features/dashboard/screens/dashboard_screen.dart';
 
@@ -64,10 +65,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.uri.path == '/setup' ||
           state.uri.path == '/forgot-password' ||
           state.uri.path == '/recovery-key-display' ||
-          state.uri.path == '/fatal-error';
+          state.uri.path == '/fatal-error' ||
+          state.uri.path == '/language-select';
 
       if (authState == FirebaseAuthState.unauthenticated || authState == FirebaseAuthState.failure) {
-        if (state.uri.path != '/firebase-login' && state.uri.path != '/firebase-forgot-password') {
+        final locale = ref.read(localeControllerProvider);
+        if (locale == null) {
+          if (state.uri.path != '/language-select') {
+            return '/language-select';
+          }
+          return null; // Stay on language select
+        }
+        
+        if (state.uri.path != '/firebase-login' && 
+            state.uri.path != '/firebase-forgot-password' && 
+            state.uri.path != '/language-select') {
           return '/firebase-login';
         }
       }
@@ -92,6 +104,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
+      ),
+      GoRoute(
+        path: '/language-select',
+        builder: (context, state) => const LanguageSelectScreen(),
       ),
       GoRoute(
         path: '/firebase-login',

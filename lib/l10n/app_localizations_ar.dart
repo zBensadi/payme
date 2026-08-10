@@ -781,35 +781,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get restoreBackup => 'استعادة نسخة احتياطية';
 
   @override
-  String get invalidEmailFormat => 'Invalid email format';
+  String get invalidEmailFormat => 'تنسيق البريد الإلكتروني غير صالح';
 
   @override
-  String get emailRequired => 'Email is required';
+  String get emailRequired => 'البريد الإلكتروني مطلوب';
 
   @override
-  String get passwordRequired => 'Password is required';
+  String get passwordRequired => 'كلمة المرور مطلوبة';
 
   @override
-  String get firebaseAuthInvalidCredentials => 'Invalid email or password.';
+  String get firebaseAuthInvalidCredentials =>
+      'البريد الإلكتروني أو كلمة المرور غير صالحة.';
 
   @override
-  String get firebaseAuthUserNotFound => 'No account found for this email.';
+  String get firebaseAuthUserNotFound =>
+      'لم يتم العثور على حساب لهذا البريد الإلكتروني.';
 
   @override
   String get passwordResetInstructions =>
-      'Enter your email address to receive a password reset link.';
+      'أدخل عنوان بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور.';
 
   @override
   String get passwordResetSuccess =>
-      'Password reset email sent. Please check your inbox.';
+      'تم إرسال بريد إلكتروني لإعادة تعيين كلمة المرور. يرجى التحقق من صندوق الوارد الخاص بك.';
 
   @override
-  String get passwordResetFailed => 'Failed to send password reset email.';
+  String get passwordResetFailed =>
+      'فشل إرسال البريد الإلكتروني لإعادة تعيين كلمة المرور.';
 
   @override
-  String get bootstrapInstructions =>
-      'Please enter your business name to get started.';
+  String get bootstrapInstructions => 'يرجى إدخال اسم عملك للبدء.';
 
   @override
-  String get completeSetup => 'Complete Setup';
+  String get completeSetup => 'إكمال الإعداد';
+
+  @override
+  String get applicationLanguage => 'لغة التطبيق';
+
+  @override
+  String get chooseWhatShouldHappen => 'اختر ما يجب أن يحدث:';
+
+  @override
+  String get businessLogo => 'شعار الشركة';
+
+  @override
+  String get selectLogo => 'اختيار شعار';
 }

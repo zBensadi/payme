@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/client.dart';
 import '../controllers/client_list_controller.dart';
-import 'package:payme/l10n/app_localizations.dart';
+import '../../../../core/extensions/l10n_extension.dart';
 
 enum DeleteClientAction {
   transfer,
@@ -39,20 +39,20 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
     }
 
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.deleteClientDialogTitle),
+      title: Text(context.l10n.deleteClientDialogTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.deleteClientDialogContent(widget.invoiceCount)),
+            Text(context.l10n.deleteClientDialogContent(widget.invoiceCount)),
             const SizedBox(height: 16),
-            const Text('Choose what should happen:'),
+            Text(context.l10n.chooseWhatShouldHappen),
             const SizedBox(height: 8),
             
             if (availableClients.isNotEmpty)
               RadioListTile<DeleteClientAction>(
-                title: Text(AppLocalizations.of(context)!.deleteClientDialogTransfer),
+                title: Text(context.l10n.deleteClientDialogTransfer),
                 value: DeleteClientAction.transfer,
                 groupValue: _action,
                 onChanged: (val) => setState(() => _action = val!),
@@ -63,7 +63,7 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: DropdownButtonFormField<String>(
                   value: _selectedClientId,
-                  hint: Text(AppLocalizations.of(context)!.targetClient),
+                  hint: Text(context.l10n.targetClient),
                   items: availableClients.map((c) {
                     return DropdownMenuItem(value: c.id, child: Text(c.name));
                   }).toList(),
@@ -72,8 +72,8 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
               ),
 
             RadioListTile<DeleteClientAction>(
-              title: Text(AppLocalizations.of(context)!.deleteClientDialogDelete),
-              subtitle: Text(AppLocalizations.of(context)!.deleteClientDialogDeleteWarning, style: const TextStyle(color: Colors.red)),
+              title: Text(context.l10n.deleteClientDialogDelete),
+              subtitle: Text(context.l10n.deleteClientDialogDeleteWarning, style: const TextStyle(color: Colors.red)),
               value: DeleteClientAction.delete,
               groupValue: _action,
               onChanged: (val) => setState(() => _action = val!),
@@ -84,7 +84,7 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.cancel),
         ),
         FilledButton(
           onPressed: _canProceed()
@@ -98,7 +98,7 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: Colors.red,
           ),
-          child: const Text('Delete Client'),
+          child: Text(context.l10n.delete),
         ),
       ],
     );

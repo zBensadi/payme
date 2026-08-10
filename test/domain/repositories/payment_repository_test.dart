@@ -9,6 +9,21 @@ import 'package:payme/data/repositories_impl/payment_repository_impl.dart';
 import 'package:payme/domain/entities/payment.dart';
 import 'package:payme/domain/entities/payment_method.dart';
 import 'package:path/path.dart' as p;
+import 'package:payme/core/sync/sync_trigger.dart';
+import 'package:payme/core/sync/conflict_resolver.dart';
+import 'package:payme/data/datasources/remote/payment_remote_datasource.dart';
+
+class FakePaymentRemoteDataSource implements PaymentRemoteDataSource {
+  @override
+  Future<void> pushPayments(String businessId, List<Payment> payments) async {}
+  @override
+  Future<List<Payment>> pullPayments(String businessId, DateTime? lastSyncTime) async => [];
+}
+
+class FakePaymentConflictResolver implements ConflictResolver<Payment> {
+  @override
+  Payment resolve(Payment local, Payment remote) => remote;
+}
 
 class TestDatabaseService implements DatabaseService {
   late Database _db;
@@ -89,6 +104,7 @@ class TestDatabaseService implements DatabaseService {
             remote_id TEXT,
             synced_at TEXT,
             is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
           )
         ''');
@@ -159,8 +175,17 @@ void main() {
     
     final localDataSource = PaymentLocalDataSource(dbService);
     final fileDataSource = TestAttachmentFileDataSource(tempAttachmentsDir);
+    final remoteDataSource = FakePaymentRemoteDataSource();
+    final conflictResolver = FakePaymentConflictResolver();
+    final syncTrigger = SyncTrigger();
     
-    repository = PaymentRepositoryImpl(localDataSource, fileDataSource);
+    repository = PaymentRepositoryImpl(
+      localDataSource, 
+      fileDataSource,
+      remoteDataSource,
+      conflictResolver,
+      syncTrigger,
+    );
 
     // Seed dependencies: Year, Client, Invoice
     await dbService.db.insert('accounting_years', {
@@ -292,10 +317,11 @@ void main() {
 
     // Assert
     final rows = await dbService.db.query('payments');
-    expect(rows.length, 0);
+    expect(rows.length, 1);
+    expect(rows.first['is_deleted'], 1);
 
     final attachRows = await dbService.db.query('payment_attachments');
-    expect(attachRows.length, 0);
+    expect(attachRows.length, 1);
 
     // Verify physical file is gone
     expect(await expectedFile.exists(), false);

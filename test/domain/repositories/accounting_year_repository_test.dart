@@ -5,7 +5,6 @@ import 'package:payme/data/datasources/local/accounting_year_local_datasource.da
 import 'package:payme/data/repositories_impl/accounting_year_repository_impl.dart';
 import 'package:payme/domain/entities/accounting_year.dart';
 import 'package:payme/data/datasources/remote/accounting_year_remote_datasource.dart';
-import 'package:payme/core/sync/conflict_resolver.dart';
 import 'package:payme/core/sync/accounting_year_conflict_resolver.dart';
 import 'package:payme/core/sync/sync_trigger.dart';
 import 'package:payme/core/sync/sync_domain.dart';

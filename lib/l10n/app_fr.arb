@@ -261,5 +261,19 @@
   "ok": "OK",
   "backupDesc": "Protégez vos données en créant une archive complète de votre base de données et de vos pièces jointes.",
   "createBackup": "Créer une sauvegarde",
-  "restoreBackup": "Restaurer une sauvegarde"
+  "restoreBackup": "Restaurer une sauvegarde",
+  "invalidEmailFormat": "Format d'e-mail invalide",
+  "emailRequired": "L'e-mail est requis",
+  "passwordRequired": "Le mot de passe est requis",
+  "firebaseAuthInvalidCredentials": "E-mail ou mot de passe invalide.",
+  "firebaseAuthUserNotFound": "Aucun compte trouvé pour cet e-mail.",
+  "passwordResetInstructions": "Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+  "passwordResetSuccess": "E-mail de réinitialisation envoyé. Veuillez vérifier votre boîte de réception.",
+  "passwordResetFailed": "Échec de l'envoi de l'e-mail de réinitialisation.",
+  "bootstrapInstructions": "Veuillez entrer le nom de votre entreprise pour commencer.",
+  "completeSetup": "Terminer la configuration",
+  "applicationLanguage": "Langue de l'Application",
+  "chooseWhatShouldHappen": "Choisissez ce qui doit se passer :",
+  "businessLogo": "Logo de l'entreprise",
+  "selectLogo": "Sélectionner un logo"
 }

@@ -817,4 +817,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get completeSetup => 'Complete Setup';
+
+  @override
+  String get applicationLanguage => 'Application Language';
+
+  @override
+  String get chooseWhatShouldHappen => 'Choose what should happen:';
+
+  @override
+  String get businessLogo => 'Business Logo';
+
+  @override
+  String get selectLogo => 'Select Logo';
 }

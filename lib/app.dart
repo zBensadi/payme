@@ -4,7 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/routing/app_router.dart';
-import 'presentation/features/settings/controllers/settings_controller.dart';
+import 'presentation/providers/locale_controller.dart';
+import 'core/constants/supported_locales.dart';
 
 class PayMeApp extends ConsumerWidget {
   const PayMeApp({super.key});
@@ -12,6 +13,7 @@ class PayMeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(appRouterProvider);
+    final locale = ref.watch(localeControllerProvider);
 
     return MaterialApp.router(
       title: 'PayMe',
@@ -20,18 +22,14 @@ class PayMeApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
-      locale: Locale(ref.watch(settingsControllerProvider).maybeWhen(data: (d) => d.languageCode, orElse: () => 'en')),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('fr'),
-        Locale('ar'),
-      ],
+      supportedLocales: SupportedLocales.all,
     );
   }
 }
