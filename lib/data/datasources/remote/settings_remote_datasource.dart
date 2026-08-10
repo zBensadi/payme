@@ -18,6 +18,8 @@ class SettingsRemoteDataSource {
       'logoPath': settings.logoPath,
       'currencyCode': settings.currencyCode,
       'languageCode': settings.languageCode,
+      'defaultDocumentTitle': settings.defaultDocumentTitle,
+      'defaultDocumentLayout': settings.defaultDocumentLayout,
       'currencyLockedAt': settings.currencyLockedAt?.toUtc().toIso8601String(),
       'updatedAt': settings.updatedAt?.toUtc().toIso8601String(),
     };
@@ -62,6 +64,8 @@ class SettingsRemoteDataSource {
       logoPath: data['logoPath'],
       currencyCode: data['currencyCode'] ?? 'DZD',
       languageCode: data['languageCode'] ?? 'en',
+      defaultDocumentTitle: data['defaultDocumentTitle'] ?? 'Invoice',
+      defaultDocumentLayout: data['defaultDocumentLayout'] ?? 'standard',
       currencyLockedAt: parseDate(data['currencyLockedAt']),
       updatedAt: parseDate(data['updatedAt']),
       isDirty: false,

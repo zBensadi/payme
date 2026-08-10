@@ -1,3 +1,4 @@
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,6 @@ import '../../../../domain/entities/invoice_status.dart';
 import '../controllers/global_invoice_list_controller.dart';
 import '../widgets/invoice_status_badge.dart';
 import '../../settings/controllers/settings_controller.dart';
-import '../../../../domain/entities/business_settings.dart';
 import '../utils/pdf_preview_helper.dart';
 import 'package:payme/l10n/app_localizations.dart';
 
@@ -122,7 +122,7 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
 
                 return ListTile(
                   title: Text(AppLocalizations.of(context)!.clientInvoiceNumberTitle(clientName, invoice.invoiceNumber.toString())),
-                  subtitle: Text('${DateFormatter.formatDate(invoice.date)} â€¢ ${invoice.amount.toStringAsFixed(2)} $currency'),
+                  subtitle: Text('${DateFormatter.formatDate(invoice.date)} • ${NumberFormatter.formatAmount(invoice.amount)} $currency'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

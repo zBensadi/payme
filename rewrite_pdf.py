@@ -1,4 +1,6 @@
-import 'dart:typed_data';
+import os
+
+content = """import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -35,37 +37,23 @@ class PdfGenerationService {
             return pw.Column(
               children: [
                 pw.Expanded(
-                  child: pw.FittedBox(
-                    fit: pw.BoxFit.scaleDown,
-                    alignment: pw.Alignment.topCenter,
-                    child: pw.Container(
-                      width: PdfPageFormat.a4.width - 64, // maintain standard layout width
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
-                          ..add(pw.Spacer())
-                          ..add(_buildFooter(context)),
-                      ),
-                    ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
+                      ..add(pw.Spacer())
+                      ..add(_buildFooter(context)),
                   ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 16),
-                  child: pw.Divider(color: PdfColors.grey400, borderStyle: pw.BorderStyle.dashed),
+                  child: pw.Divider(color: PdfColors.grey400, style: pw.BorderStyle.dashed),
                 ),
                 pw.Expanded(
-                  child: pw.FittedBox(
-                    fit: pw.BoxFit.scaleDown,
-                    alignment: pw.Alignment.topCenter,
-                    child: pw.Container(
-                      width: PdfPageFormat.a4.width - 64, // maintain standard layout width
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
-                          ..add(pw.Spacer())
-                          ..add(_buildFooter(context)),
-                      ),
-                    ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: _buildInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes)
+                      ..add(pw.Spacer())
+                      ..add(_buildFooter(context)),
                   ),
                 ),
               ],
@@ -165,11 +153,11 @@ class PdfGenerationService {
         ],
         if (settings.phone != null && settings.phone!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(settings.phone!, style: const pw.TextStyle(fontSize: 12)),
+          pw.Text('${settings.phone!}', style: const pw.TextStyle(fontSize: 12)),
         ],
         if (settings.email != null && settings.email!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(settings.email!, style: const pw.TextStyle(fontSize: 12)),
+          pw.Text('${settings.email!}', style: const pw.TextStyle(fontSize: 12)),
         ],
       ],
     );
@@ -199,11 +187,11 @@ class PdfGenerationService {
         ],
         if (client.phone != null && client.phone!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(client.phone!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+          pw.Text('${client.phone!}', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
         ],
         if (client.email != null && client.email!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(client.email!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+          pw.Text('${client.email!}', textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
         ],
       ],
     );
@@ -353,3 +341,6 @@ class PdfGenerationService {
     return date.toIso8601String().split('T')[0];
   }
 }
+"""
+with open(r'c:\proj\payme\lib\services\pdf_generation_service.dart', 'w', encoding='utf-8') as f:
+    f.write(content)

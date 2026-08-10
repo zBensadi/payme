@@ -14,7 +14,10 @@ class SettingsLocalDataSource {
     
     if (maps.isEmpty) {
       // Default initialization if missing
-      final defaultSettings = const BusinessSettings();
+      final defaultSettings = BusinessSettings(
+        isDirty: true,
+        updatedAt: DateTime.now().toUtc(),
+      );
       await db.insert('business_settings', BusinessSettingsModel.toMap(defaultSettings));
       return defaultSettings;
     }

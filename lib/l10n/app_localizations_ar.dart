@@ -826,4 +826,56 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectLogo => 'اختيار شعار';
+
+  @override
+  String get billTo => 'فاتورة إلى';
+
+  @override
+  String get generatedBy => 'تم الإنشاء بواسطة PayMe';
+
+  @override
+  String get page => 'صفحة';
+
+  @override
+  String get ofWord => 'من';
+
+  @override
+  String get documentTitle => 'عنوان المستند';
+
+  @override
+  String get documentLayout => 'تخطيط المستند';
+
+  @override
+  String get layoutStandard => 'قياسي';
+
+  @override
+  String get layoutDuplicate => 'نسخة مكررة';
+
+  @override
+  String get printing => 'طباعة';
+
+  @override
+  String get data => 'البيانات';
+
+  @override
+  String get security => 'الأمان';
+
+  @override
+  String get business => 'الشركة';
+
+  @override
+  String get localization => 'اللغة والمنطقة';
+
+  @override
+  String get syncRequired => 'جاري المزامنة...';
+
+  @override
+  String fileTooLarge(int maxSize) {
+    return 'الملف كبير جدا (الحد الأقصى $maxSize ميغابايت)';
+  }
+
+  @override
+  String attachmentHint(int maxSize, String extensions) {
+    return 'الحد الأقصى $maxSize ميغابايت. المقبولة: $extensions';
+  }
 }

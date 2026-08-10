@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,6 +13,7 @@ import '../../../../services/attachment_opener_service.dart';
 import '../../../providers/repository_providers.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class PaymentFormScreen extends ConsumerStatefulWidget {
   final String clientId;
@@ -58,17 +59,31 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
     final result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: AppConstants.allowedAttachmentExtensions,
     );
 
     if (result != null) {
+      bool hasLargeFiles = false;
       setState(() {
-        for (final path in result.paths) {
-          if (path != null && !_newAttachmentPaths.contains(path)) {
-            _newAttachmentPaths.add(path);
+        for (final file in result.files) {
+          if (file.path != null) {
+            if (file.size > AppConstants.maxAttachmentSizeMB * 1024 * 1024) {
+              hasLargeFiles = true;
+            } else if (!_newAttachmentPaths.contains(file.path!)) {
+              _newAttachmentPaths.add(file.path!);
+            }
           }
         }
       });
+      
+      if (hasLargeFiles && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.fileTooLarge(AppConstants.maxAttachmentSizeMB)),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
@@ -211,7 +226,17 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(AppLocalizations.of(context)!.attachmentsLabel, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(AppLocalizations.of(context)!.attachmentsLabel, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(
+                          AppLocalizations.of(context)!.attachmentHint(AppConstants.maxAttachmentSizeMB, AppConstants.allowedAttachmentExtensions.join(', ')),
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
                     TextButton.icon(
                       icon: const Icon(Icons.attach_file),
                       label: Text(AppLocalizations.of(context)!.addFile),
@@ -219,6 +244,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
                 
                 // Existing attachments
                 ...existingAttachments.map((a) => ListTile(

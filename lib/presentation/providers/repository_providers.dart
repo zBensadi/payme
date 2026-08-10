@@ -1,3 +1,7 @@
+import 'dart:ui';
+import '../../l10n/app_localizations.dart';
+import 'locale_controller.dart';
+import '../../core/pdf/app_pdf_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'sync_trigger_provider.dart';
 import '../../core/sync/conflict_resolver.dart';
@@ -73,8 +77,12 @@ final clientLocalDataSourceProvider = Provider<ClientLocalDataSource>((ref) {
 });
 
 
+
 final pdfGenerationServiceProvider = Provider<PdfGenerationService>((ref) {
-  return PdfGenerationService();
+  final String localeCode = ref.watch(localeControllerProvider)?.languageCode ?? 'en';
+  final appLoc = lookupAppLocalizations(Locale(localeCode));
+  final pdfLoc = AppPdfLocalizations(appLoc);
+  return PdfGenerationService(pdfLoc);
 });
 
 final csvGenerationServiceProvider = Provider<CsvGenerationService>((ref) {

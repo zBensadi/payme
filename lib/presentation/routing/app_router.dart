@@ -45,16 +45,36 @@ import '../../domain/entities/client.dart';
 
 import '../providers/sync_providers.dart';
 
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen<FirebaseAuthState>(
+      firebaseAuthControllerProvider,
+      (_, _) => notifyListeners(),
+    );
+    _ref.listen<Locale?>(
+      localeControllerProvider,
+      (_, _) => notifyListeners(),
+    );
+  }
+}
+
+final routerNotifierProvider = Provider((ref) => RouterNotifier(ref));
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Intentionally instantiate the global synchronization engine once for the lifetime of the application.
   // The service remains idle until authentication succeeds and the businessId streams in.
   ref.watch(syncServiceProvider);
 
-  final authState = ref.watch(firebaseAuthControllerProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: notifier,
     redirect: (context, state) {
+      final authState = ref.read(firebaseAuthControllerProvider);
+
       if (authState == FirebaseAuthState.loading) {
         return '/splash';
       }

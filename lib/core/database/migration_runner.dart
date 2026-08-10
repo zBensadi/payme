@@ -74,6 +74,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 7);
         currentVersion = 7;
       }
+      if (currentVersion == 7) {
+        _logger.info('Running migration: v8_document_settings.sql');
+        final scriptContent = await loadMigrationScript('v8_document_settings.sql');
+        await applyMigration(db, scriptContent, 8);
+        currentVersion = 8;
+      }
     }
   }
 

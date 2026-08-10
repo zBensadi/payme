@@ -1,3 +1,4 @@
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -158,7 +159,7 @@ class PaymentsByPeriodReportScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       alignment: Alignment.centerRight,
                       child: Text(
-                        AppLocalizations.of(context)!.totalAmountLabel(total.toStringAsFixed(2), currency),
+                        AppLocalizations.of(context)!.totalAmountLabel(NumberFormatter.formatAmount(total), currency),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
@@ -169,7 +170,7 @@ class PaymentsByPeriodReportScreen extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final payment = payments[index];
                           return ListTile(
-                            title: Text('${payment.amount.toStringAsFixed(2)} $currency'),
+                            title: Text('${NumberFormatter.formatAmount(payment.amount)} $currency'),
                             subtitle: Text('${DateFormatter.formatDate(payment.date)}'), // Removed displayName as we can just show the badge below if needed, or translate it
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,

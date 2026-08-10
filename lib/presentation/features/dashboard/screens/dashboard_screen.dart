@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,8 @@ import '../widgets/quick_action_card.dart';
 import '../widgets/onboarding_checklist.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'dart:io';
+import '../../../../core/sync/sync_status.dart';
+import '../../../providers/sync_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -111,6 +114,12 @@ class DashboardScreen extends ConsumerWidget {
       body: state.when(
         data: (state) {
           if (state is DashboardNoYear) {
+            // Wait for synchronization to finish before prompting for a new year
+            // This prevents the setup screen from briefly flashing on fresh installs.
+            final syncStatus = ref.watch(syncStatusProvider).maybeWhen(data: (d) => d, orElse: () => null);
+            if (syncStatus == SyncStatus.syncing) {
+              return LoadingView(message: AppLocalizations.of(context)!.loadingDashboard);
+            }
             return _buildNoYearOnboarding(context, ref);
           }
           
@@ -199,7 +208,7 @@ class DashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: SummaryTile(
                         title: AppLocalizations.of(context)!.outstanding,
-                        value: '${dashboard.outstandingBalance.toStringAsFixed(2)} $currency',
+                        value: '${NumberFormatter.formatAmount(dashboard.outstandingBalance)} $currency',
                         icon: Icons.account_balance_wallet,
                         color: dashboard.outstandingBalance > 0 ? Colors.orange : Colors.green,
                       ),
@@ -212,7 +221,7 @@ class DashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: SummaryTile(
                         title: AppLocalizations.of(context)!.totalInvoiced,
-                        value: '${dashboard.totalInvoiced.toStringAsFixed(2)} $currency',
+                        value: '${NumberFormatter.formatAmount(dashboard.totalInvoiced)} $currency',
                         icon: Icons.receipt_long,
                         color: Colors.blue,
                       ),
@@ -221,7 +230,7 @@ class DashboardScreen extends ConsumerWidget {
                     Expanded(
                       child: SummaryTile(
                         title: AppLocalizations.of(context)!.totalPaid,
-                        value: '${dashboard.totalPaid.toStringAsFixed(2)} $currency',
+                        value: '${NumberFormatter.formatAmount(dashboard.totalPaid)} $currency',
                         icon: Icons.payments,
                         color: Colors.green,
                       ),

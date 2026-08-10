@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import os
+
+content = """import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -287,3 +289,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
+"""
+
+with open(r'c:\proj\payme\lib\presentation\features\settings\screens\settings_screen.dart', 'w', encoding='utf-8') as f:
+    f.write(content)

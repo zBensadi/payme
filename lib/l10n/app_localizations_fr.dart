@@ -839,4 +839,56 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectLogo => 'Sélectionner un logo';
+
+  @override
+  String get billTo => 'FACTURER À';
+
+  @override
+  String get generatedBy => 'Généré par PayMe';
+
+  @override
+  String get page => 'Page';
+
+  @override
+  String get ofWord => 'sur';
+
+  @override
+  String get documentTitle => 'Titre du document';
+
+  @override
+  String get documentLayout => 'Mise en page du document';
+
+  @override
+  String get layoutStandard => 'Standard';
+
+  @override
+  String get layoutDuplicate => 'Duplicata';
+
+  @override
+  String get printing => 'Impression';
+
+  @override
+  String get data => 'Données';
+
+  @override
+  String get security => 'Sécurité';
+
+  @override
+  String get business => 'Entreprise';
+
+  @override
+  String get localization => 'Localisation';
+
+  @override
+  String get syncRequired => 'Synchronisation en cours...';
+
+  @override
+  String fileTooLarge(int maxSize) {
+    return 'Le fichier est trop volumineux (Max $maxSize Mo)';
+  }
+
+  @override
+  String attachmentHint(int maxSize, String extensions) {
+    return 'Max $maxSize Mo. Accepté: $extensions';
+  }
 }

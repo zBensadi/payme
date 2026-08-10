@@ -1,3 +1,4 @@
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,7 @@ class ClientLedgerScreen extends ConsumerWidget {
 
                   return ListTile(
                     title: Text(AppLocalizations.of(context)!.invoiceNumberTitle(invoice.invoiceNumber.toString())),
-                    subtitle: Text('${DateFormatter.formatDate(invoice.date)} â€¢ ${invoice.amount.toStringAsFixed(2)} $currency'),
+                    subtitle: Text('${DateFormatter.formatDate(invoice.date)} • ${NumberFormatter.formatAmount(invoice.amount)} $currency'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

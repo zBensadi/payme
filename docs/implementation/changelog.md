@@ -1,5 +1,16 @@
 # Changelog
 
+## [Alpha 13] - 2026-08-10
+### Added
+- Attachment file size limits (5MB max) and format restrictions (`pdf`, `jpg`, `jpeg`, `png`) visually enforced in `PaymentFormScreen`.
+- `BusinessSettings` defaults are instantly marked dirty on a fresh installation for immediate Firebase synchronization.
+
+### Fixed
+- Stabilized settings serialization to include `defaultDocumentTitle` and `defaultDocumentLayout` in the Firebase payload, resolving a data-loss bug.
+- Resolved a layout clipping bug in the `PdfGenerationService` where the "duplicate" document layout overflowed and truncated invoice items. The layout now correctly scales down proportionally to fit half the page.
+- Adjusted `DashboardScreen` behavior on fresh logins to retain the `LoadingView` until initial data synchronization completes, preventing the Accounting Year Setup screen from flashing prematurely.
+- Refactored `GlobalInvoiceListController` to strictly await all dependencies (`activeYearProvider` and `clientListControllerProvider`) during initialization, fixing a bug where invoices failed to load upon immediately opening the screen.
+
 ## [1.0.0] - 2026-08-04
 ### Added
 - **Full Version 1.0 Release** of PayMe (Offline-First Client Receivables Manager).

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/payment.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -29,7 +30,7 @@ class PaymentTile extends ConsumerWidget {
     final currency = settingsState.value?.currencyCode ?? '\$';
 
     return ListTile(
-      title: Text('${payment.amount.toStringAsFixed(2)} $currency'),
+      title: Text('${NumberFormatter.formatAmount(payment.amount)} $currency'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,7 +62,7 @@ class PaymentTile extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              '${attachment.fileType.toUpperCase()} â€¢ ${(attachment.fileSizeBytes / 1024).toStringAsFixed(1)} KB',
+                              '${attachment.fileType.toUpperCase()} • ${(attachment.fileSizeBytes / 1024).toStringAsFixed(1)} KB',
                               style: const TextStyle(fontSize: 10, color: Colors.grey),
                             ),
                           ],

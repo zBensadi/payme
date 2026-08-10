@@ -7,6 +7,8 @@ class BusinessSettings {
   final String? logoPath;
   final String currencyCode;
   final String languageCode;
+  final String defaultDocumentTitle;
+  final String defaultDocumentLayout;
   final DateTime? currencyLockedAt;
   
   // Sync metadata
@@ -24,6 +26,8 @@ class BusinessSettings {
     this.logoPath,
     this.currencyCode = 'USD',
     this.languageCode = 'en',
+    this.defaultDocumentTitle = 'Invoice',
+    this.defaultDocumentLayout = 'standard',
     this.currencyLockedAt,
     this.updatedAt,
     this.remoteId,
@@ -40,6 +44,8 @@ class BusinessSettings {
     String? logoPath,
     String? currencyCode,
     String? languageCode,
+    String? defaultDocumentTitle,
+    String? defaultDocumentLayout,
     DateTime? currencyLockedAt,
     DateTime? updatedAt,
     String? remoteId,
@@ -55,6 +61,8 @@ class BusinessSettings {
       logoPath: logoPath ?? this.logoPath,
       currencyCode: currencyCode ?? this.currencyCode,
       languageCode: languageCode ?? this.languageCode,
+      defaultDocumentTitle: defaultDocumentTitle ?? this.defaultDocumentTitle,
+      defaultDocumentLayout: defaultDocumentLayout ?? this.defaultDocumentLayout,
       currencyLockedAt: currencyLockedAt ?? this.currencyLockedAt,
       updatedAt: updatedAt ?? this.updatedAt,
       remoteId: remoteId ?? this.remoteId,

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/loading_view.dart';
@@ -68,7 +69,7 @@ class PaidInvoicesReportScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(AppLocalizations.of(context)!.totalPaidInvoices, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('${totalPaid.toStringAsFixed(2)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green.shade900)),
+                    Text('${NumberFormatter.formatAmount(totalPaid)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green.shade900)),
                   ],
                 ),
               ),
@@ -79,7 +80,7 @@ class PaidInvoicesReportScreen extends ConsumerWidget {
                     final item = invoices[index];
                     return ListTile(
                       title: Text(AppLocalizations.of(context)!.invoiceNumberLabel(item.invoice.invoiceNumber.toString())),
-                      subtitle: Text('${DateFormatter.formatDate(item.invoice.date)} â€¢ ${AppLocalizations.of(context)!.paidAmountLabel(item.paidAmount.toStringAsFixed(2), currency)}'),
+                      subtitle: Text('${DateFormatter.formatDate(item.invoice.date)} • ${AppLocalizations.of(context)!.paidAmountLabel(NumberFormatter.formatAmount(item.paidAmount), currency)}'),
                       trailing: InvoiceStatusBadge(status: item.status),
                     );
                   },

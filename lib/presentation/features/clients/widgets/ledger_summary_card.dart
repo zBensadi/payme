@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import '../../../../core/formatters/formatters.dart';
 import '../../../../domain/services/client_ledger_calculator.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,14 +28,14 @@ class LedgerSummaryCard extends ConsumerWidget {
                 Expanded(
                   child: _SummaryStat(
                     title: AppLocalizations.of(context)!.totalInvoiced,
-                    value: '${totals.totalInvoiced.toStringAsFixed(2)} $currency',
+                    value: '${NumberFormatter.formatAmount(totals.totalInvoiced)} $currency',
                     color: Colors.blue.shade800,
                   ),
                 ),
                 Expanded(
                   child: _SummaryStat(
                     title: AppLocalizations.of(context)!.totalPaid,
-                    value: '${totals.totalPaid.toStringAsFixed(2)} $currency',
+                    value: '${NumberFormatter.formatAmount(totals.totalPaid)} $currency',
                     color: Colors.green.shade800,
                   ),
                 ),
@@ -54,7 +55,7 @@ class LedgerSummaryCard extends ConsumerWidget {
                 ),
                 _SummaryStat(
                   title: AppLocalizations.of(context)!.remainingBalance,
-                  value: '${totals.remainingBalance.toStringAsFixed(2)} $currency',
+                  value: '${NumberFormatter.formatAmount(totals.remainingBalance)} $currency',
                   color: totals.remainingBalance > 0 ? Colors.red.shade800 : Colors.green.shade800,
                   crossAxisAlignment: CrossAxisAlignment.end,
                 ),

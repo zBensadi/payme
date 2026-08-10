@@ -65,10 +65,12 @@ class GlobalInvoiceListController extends AsyncNotifier<List<GlobalInvoiceListIt
   Future<List<GlobalInvoiceListItem>> build() async {
     final invoiceRepo = ref.watch(invoiceRepositoryProvider);
     ref.invalidateOnRepositoryChange(invoiceRepo);
+    final paymentRepo = ref.watch(paymentRepositoryProvider);
+    ref.invalidateOnRepositoryChange(paymentRepo);
 
-    final activeYearAsync = ref.watch(activeYearProvider);
-    final activeYearId = activeYearAsync.maybeWhen(data: (d) => d?.id, orElse: () => null);
-    if (activeYearId == null) return [];
+    final activeYear = await ref.watch(activeYearProvider.future);
+    if (activeYear == null) return [];
+    final activeYearId = activeYear.id;
 
     final filter = ref.watch(globalInvoiceFilterProvider);
     
@@ -81,7 +83,7 @@ class GlobalInvoiceListController extends AsyncNotifier<List<GlobalInvoiceListIt
     final invoices = (invoiceResult as Success<List<Invoice>>).value;
     
     // We also need all clients to map the names
-    final clients = ref.watch(clientListControllerProvider).maybeWhen(data: (d) => d, orElse: () => <Client>[]);
+    final clients = await ref.watch(clientListControllerProvider.future);
     final clientMap = {for (var c in clients) c.id: c};
 
     // Calculate status for each invoice

@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,14 +71,14 @@ class ClientBalancesReportScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(AppLocalizations.of(context)!.totalPaid, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${totalPaidAll.toStringAsFixed(2)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green.shade800)),
+                        Text('${NumberFormatter.formatAmount(totalPaidAll)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green.shade800)),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(AppLocalizations.of(context)!.totalOutstanding, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${totalRemainingAll.toStringAsFixed(2)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orange.shade900)),
+                        Text('${NumberFormatter.formatAmount(totalRemainingAll)} $currency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orange.shade900)),
                       ],
                     ),
                   ],
@@ -90,9 +91,9 @@ class ClientBalancesReportScreen extends ConsumerWidget {
                     final item = clientBalances[index];
                     return ListTile(
                       title: Text(item.client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(AppLocalizations.of(context)!.invoicesAndPaid(item.totals.invoiceCount.toString(), item.totals.totalPaid.toStringAsFixed(2), currency)),
+                      subtitle: Text(AppLocalizations.of(context)!.invoicesAndPaid(item.totals.invoiceCount.toString(), NumberFormatter.formatAmount(item.totals.totalPaid), currency)),
                       trailing: Text(
-                        '${item.totals.remainingBalance.toStringAsFixed(2)} $currency',
+                        '${NumberFormatter.formatAmount(item.totals.remainingBalance)} $currency',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,

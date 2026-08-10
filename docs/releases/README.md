@@ -3,8 +3,8 @@
 This document tracks the evolution of PayMe V2 from an offline-first SQLite application into a robust, Firebase-integrated SaaS. The development was split into incremental Alpha releases.
 
 ## Current Project Status
-**Status:** Alpha 12 Completed
-The application currently supports full offline-first functionality with reactive Firestore synchronization for Clients, Accounting Years, Invoices, and Payments. It features a complete authentication and business bootstrap flow, along with full runtime localization (English, French, Arabic) and RTL support.
+**Status:** Alpha 13 Completed
+The application currently supports full offline-first functionality with reactive Firestore synchronization for Clients, Accounting Years, Invoices, Payments, and Settings. It features a complete authentication and business bootstrap flow, along with full runtime localization (English, French, Arabic) and RTL support.
 
 ## Current Architecture Summary
 - **Clean Architecture:** Strict separation of Data, Domain, and Presentation layers.
@@ -40,3 +40,5 @@ The application currently supports full offline-first functionality with reactiv
   Bringing the Payments domain up to offline-first parity with soft deletes, sync timestamps, and metadata syncing.
 - [Alpha 12: Localization Infrastructure](./alpha_12.md)
   Integrating `LocaleController` with `shared_preferences` for runtime language switching, RTL automatic mirroring, and a first-launch language selector.
+- [Alpha 13: UX Polish & Synchronization Finalization](./alpha_13.md)
+  Finalizing the offline-first replication logic by stabilizing the settings synchronization, refining the PDF generation layout, and polishing the overall UX for a premium user experience on fresh installs and bootstrap sequences.

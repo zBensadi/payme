@@ -1,3 +1,4 @@
+import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -190,7 +191,7 @@ class InvoicesByPeriodReportScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('${item.invoice.amount.toStringAsFixed(2)} $currency', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('${NumberFormatter.formatAmount(item.invoice.amount)} $currency', style: const TextStyle(fontWeight: FontWeight.bold)),
                           Text(InvoiceStatusBadge.getLocalizedStatus(context, item.status), style: TextStyle(
                             color: item.status == InvoiceStatus.paid ? Colors.green : Colors.orange,
                             fontSize: 12,

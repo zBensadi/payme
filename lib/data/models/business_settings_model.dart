@@ -11,6 +11,8 @@ class BusinessSettingsModel {
       logoPath: map['logo_path'] as String?,
       currencyCode: map['currency_code'] as String,
       languageCode: map['language_code'] as String? ?? 'en',
+      defaultDocumentTitle: map['default_document_title'] as String? ?? 'Invoice',
+      defaultDocumentLayout: map['default_document_layout'] as String? ?? 'standard',
       currencyLockedAt: map['currency_locked_at'] != null 
           ? DateTime.parse(map['currency_locked_at'] as String) 
           : null,
@@ -31,6 +33,8 @@ class BusinessSettingsModel {
       'logo_path': settings.logoPath,
       'currency_code': settings.currencyCode,
       'language_code': settings.languageCode,
+      'default_document_title': settings.defaultDocumentTitle,
+      'default_document_layout': settings.defaultDocumentLayout,
       'currency_locked_at': settings.currencyLockedAt?.toUtc().toIso8601String(),
       'updated_at': settings.updatedAt?.toUtc().toIso8601String(),
       'remote_id': settings.remoteId,
