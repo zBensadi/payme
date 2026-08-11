@@ -64,6 +64,10 @@ class TestDatabaseService implements DatabaseService {
           CREATE TABLE clients (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            rc TEXT,
+            nif TEXT,
+            nis TEXT,
+            art TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             is_deleted INTEGER NOT NULL DEFAULT 0

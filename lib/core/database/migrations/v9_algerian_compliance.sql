@@ -1,0 +1,9 @@
+ALTER TABLE business_settings ADD COLUMN rc TEXT;
+ALTER TABLE business_settings ADD COLUMN nif TEXT;
+ALTER TABLE business_settings ADD COLUMN nis TEXT;
+ALTER TABLE business_settings ADD COLUMN art TEXT;
+
+ALTER TABLE clients ADD COLUMN rc TEXT;
+ALTER TABLE clients ADD COLUMN nif TEXT;
+ALTER TABLE clients ADD COLUMN nis TEXT;
+ALTER TABLE clients ADD COLUMN art TEXT;

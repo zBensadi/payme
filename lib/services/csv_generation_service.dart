@@ -5,6 +5,7 @@ import '../domain/repositories/client_repository.dart';
 import '../domain/repositories/invoice_repository.dart';
 import '../core/error/result.dart';
 import '../core/utils/date_formatter.dart';
+import '../domain/entities/client.dart';
 
 class CsvGenerationService {
   final ClientRepository _clientRepository;
@@ -34,13 +35,13 @@ class CsvGenerationService {
   String generateClientBalancesCsv(List<ClientBalanceItem> items) {
     final buffer = StringBuffer();
     // Header
-    buffer.writeln('Client Name,Total Invoiced,Total Paid,Outstanding Balance');
+    buffer.writeln('Client Name,RC,NIF,NIS,ART,Total Invoiced,Total Paid,Outstanding Balance');
     
     // Rows
     for (final item in items) {
       final c = item.client;
       final t = item.totals;
-      buffer.writeln('"${c.name}",${t.totalInvoiced},${t.totalPaid},${t.remainingBalance}');
+      buffer.writeln('"${c.name}","${c.rc ?? ''}","${c.nif ?? ''}","${c.nis ?? ''}","${c.art ?? ''}",${t.totalInvoiced},${t.totalPaid},${t.remainingBalance}');
     }
     
     return buffer.toString();
@@ -70,6 +71,19 @@ class CsvGenerationService {
       // Wrap ref in quotes in case of commas
       final ref = p.reference != null ? '"${p.reference}"' : '';
       buffer.writeln('${p.id},${DateFormatter.formatDate(p.date)},"$invoiceNumber","$clientName",${p.method.name},${p.amount},$ref');
+    }
+    
+    return buffer.toString();
+  }
+
+  String generateClientsCsv(List<Client> clients) {
+    final buffer = StringBuffer();
+    // Header
+    buffer.writeln('Client Name,Phone,Email,Address,RC,NIF,NIS,ART');
+    
+    // Rows
+    for (final c in clients) {
+      buffer.writeln('"${c.name}","${c.phone ?? ''}","${c.email ?? ''}","${c.address ?? ''}","${c.rc ?? ''}","${c.nif ?? ''}","${c.nis ?? ''}","${c.art ?? ''}"');
     }
     
     return buffer.toString();

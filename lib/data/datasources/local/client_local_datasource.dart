@@ -11,9 +11,9 @@ class ClientLocalDataSource {
     List<Object?> whereArgs = [];
 
     if (searchQuery != null && searchQuery.trim().isNotEmpty) {
-      whereClause += ' AND (name LIKE ? OR phone LIKE ?)';
+      whereClause += ' AND (name LIKE ? OR phone LIKE ? OR rc LIKE ? OR nif LIKE ? OR nis LIKE ? OR art LIKE ?)';
       final likeQuery = '%${searchQuery.trim()}%';
-      whereArgs.addAll([likeQuery, likeQuery]);
+      whereArgs.addAll([likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]);
     }
 
     final result = await _db.query(
@@ -31,9 +31,9 @@ class ClientLocalDataSource {
     List<Object?> whereArgs = [];
 
     if (searchQuery != null && searchQuery.trim().isNotEmpty) {
-      whereClause += ' AND (name LIKE ? OR phone LIKE ?)';
+      whereClause += ' AND (name LIKE ? OR phone LIKE ? OR rc LIKE ? OR nif LIKE ? OR nis LIKE ? OR art LIKE ?)';
       final likeQuery = '%${searchQuery.trim()}%';
-      whereArgs.addAll([likeQuery, likeQuery]);
+      whereArgs.addAll([likeQuery, likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]);
     }
 
     final result = await _db.query(

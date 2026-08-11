@@ -18,4 +18,8 @@ class AppPdfLocalizations implements PdfLocalizations {
   @override String get amount => _appLoc.amount;
   @override String get date => _appLoc.date;
   @override String get dueDate => _appLoc.dueDateLabel;
+  @override String get rc => _appLoc.rc;
+  @override String get nif => _appLoc.nif;
+  @override String get nis => _appLoc.nis;
+  @override String get art => _appLoc.art;
 }

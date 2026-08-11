@@ -13,6 +13,8 @@ import '../../../../domain/entities/client.dart';
 import '../../../../core/error/result.dart';
 import '../../../providers/repository_providers.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../../../../services/csv_export_service.dart';
+import 'package:intl/intl.dart';
 
 class ClientListScreen extends ConsumerStatefulWidget {
   const ClientListScreen({super.key});
@@ -119,6 +121,27 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.clients),
         actions: [
+          state.maybeWhen(
+            data: (clients) => clients.isEmpty
+                ? const SizedBox.shrink()
+                : IconButton(
+                    icon: const Icon(Icons.download),
+                    tooltip: AppLocalizations.of(context)!.exportCsv,
+                    onPressed: () async {
+                      try {
+                        final csvService = ref.read(csvGenerationServiceProvider);
+                        final csv = csvService.generateClientsCsv(clients);
+                        final timestamp = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+                        await ref.read(csvExportServiceProvider).exportCsv(context, csv, 'clients_$timestamp.csv');
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorExportFailed(e.toString()))));
+                        }
+                      }
+                    },
+                  ),
+            orElse: () => const SizedBox.shrink(),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: AppLocalizations.of(context)!.deletedClients,

@@ -881,4 +881,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String attachmentHint(int maxSize, String extensions) {
     return 'Max ${maxSize}MB. Accepted: $extensions';
   }
+
+  @override
+  String get legalInformation => 'Legal Information';
+
+  @override
+  String get rc => 'RC';
+
+  @override
+  String get nif => 'NIF';
+
+  @override
+  String get nis => 'NIS';
+
+  @override
+  String get art => 'ART';
 }

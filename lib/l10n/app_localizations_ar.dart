@@ -878,4 +878,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String attachmentHint(int maxSize, String extensions) {
     return 'الحد الأقصى $maxSize ميغابايت. المقبولة: $extensions';
   }
+
+  @override
+  String get legalInformation => 'المعلومات القانونية';
+
+  @override
+  String get rc => 'السجل التجاري (RC)';
+
+  @override
+  String get nif => 'رقم التعريف الجبائي (NIF)';
+
+  @override
+  String get nis => 'رقم التعريف الإحصائي (NIS)';
+
+  @override
+  String get art => 'المادة الضريبية (ART)';
 }

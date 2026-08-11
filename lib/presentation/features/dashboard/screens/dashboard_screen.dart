@@ -14,7 +14,6 @@ import '../widgets/quick_action_card.dart';
 import '../widgets/onboarding_checklist.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'dart:io';
-import '../../../../core/sync/sync_status.dart';
 import '../../../providers/sync_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -116,8 +115,9 @@ class DashboardScreen extends ConsumerWidget {
           if (state is DashboardNoYear) {
             // Wait for synchronization to finish before prompting for a new year
             // This prevents the setup screen from briefly flashing on fresh installs.
-            final syncStatus = ref.watch(syncStatusProvider).maybeWhen(data: (d) => d, orElse: () => null);
-            if (syncStatus == SyncStatus.syncing) {
+            ref.watch(syncStatusProvider); // Watch to trigger rebuilds when sync finishes
+            final syncService = ref.watch(syncServiceProvider);
+            if (!syncService.hasCompletedInitialSync) {
               return LoadingView(message: AppLocalizations.of(context)!.loadingDashboard);
             }
             return _buildNoYearOnboarding(context, ref);

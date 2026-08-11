@@ -16,6 +16,10 @@ class BusinessSettingsModel {
       currencyLockedAt: map['currency_locked_at'] != null 
           ? DateTime.parse(map['currency_locked_at'] as String) 
           : null,
+      rc: map['rc'] as String?,
+      nif: map['nif'] as String?,
+      nis: map['nis'] as String?,
+      art: map['art'] as String?,
       updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at'] as String) : null,
       remoteId: map['remote_id'] as String?,
       syncedAt: map['synced_at'] != null ? DateTime.parse(map['synced_at'] as String) : null,
@@ -36,6 +40,10 @@ class BusinessSettingsModel {
       'default_document_title': settings.defaultDocumentTitle,
       'default_document_layout': settings.defaultDocumentLayout,
       'currency_locked_at': settings.currencyLockedAt?.toUtc().toIso8601String(),
+      'rc': settings.rc,
+      'nif': settings.nif,
+      'nis': settings.nis,
+      'art': settings.art,
       'updated_at': settings.updatedAt?.toUtc().toIso8601String(),
       'remote_id': settings.remoteId,
       'synced_at': settings.syncedAt?.toUtc().toIso8601String(),

@@ -35,6 +35,10 @@ class SettingsController extends AsyncNotifier<BusinessSettings> {
     String? languageCode,
     String? defaultDocumentTitle,
     String? defaultDocumentLayout,
+    String? rc,
+    String? nif,
+    String? nis,
+    String? art,
     String? newLogoSourcePath,
   }) async {
     state = const AsyncLoading();
@@ -49,6 +53,10 @@ class SettingsController extends AsyncNotifier<BusinessSettings> {
       languageCode: languageCode,
       defaultDocumentTitle: defaultDocumentTitle,
       defaultDocumentLayout: defaultDocumentLayout,
+      rc: rc,
+      nif: nif,
+      nis: nis,
+      art: art,
     );
 
     final result = await _repository.updateSettings(

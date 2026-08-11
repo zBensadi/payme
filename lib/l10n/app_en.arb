@@ -437,5 +437,10 @@
         "type": "String"
       }
     }
-  }
+  },
+  "legalInformation": "Legal Information",
+  "rc": "RC",
+  "nif": "NIF",
+  "nis": "NIS",
+  "art": "ART"
 }

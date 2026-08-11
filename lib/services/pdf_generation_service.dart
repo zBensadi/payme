@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:arabic_reshaper/arabic_reshaper.dart';
 
 import '../domain/entities/invoice.dart';
 import '../domain/entities/client.dart';
@@ -8,6 +9,8 @@ import '../domain/entities/business_settings.dart';
 import '../domain/entities/payment.dart';
 import '../core/pdf/pdf_localizations.dart';
 import '../core/formatters/formatters.dart';
+
+import 'package:flutter/services.dart' show rootBundle;
 
 class PdfGenerationService {
   final PdfLocalizations _localizations;
@@ -21,15 +24,30 @@ class PdfGenerationService {
     required List<Payment> payments,
     Uint8List? logoBytes,
   }) async {
-    final pdf = pw.Document();
+    final fontData = await rootBundle.load('assets/fonts/Amiri-Regular.ttf');
+    final fontBoldData = await rootBundle.load('assets/fonts/Amiri-Bold.ttf');
+    
+    final ttf = pw.Font.ttf(fontData);
+    final ttfBold = pw.Font.ttf(fontBoldData);
+    
+    final theme = pw.ThemeData.withFont(
+      base: ttf,
+      bold: ttfBold,
+    );
+
+    final pdf = pw.Document(theme: theme);
 
     final totalPaid = payments.fold(0.0, (sum, p) => sum + p.amount);
     final remainingBalance = invoice.amount - totalPaid;
+
+    final isRtl = settings.languageCode == 'ar';
+    final textDirection = isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
 
     if (settings.defaultDocumentLayout == 'duplicate') {
       pdf.addPage(
         pw.Page(
           pageFormat: PdfPageFormat.a4,
+          textDirection: textDirection,
           margin: const pw.EdgeInsets.all(32),
           build: (context) {
             return pw.Column(
@@ -87,6 +105,7 @@ class PdfGenerationService {
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
+          textDirection: textDirection,
           margin: const pw.EdgeInsets.all(32),
           footer: (context) => _buildFooter(context),
           build: (context) {
@@ -132,7 +151,7 @@ class PdfGenerationService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.end,
         children: [
-          pw.Text(
+          _buildText(
             settings.defaultDocumentTitle.toUpperCase(),
             style: pw.TextStyle(
               fontSize: 32,
@@ -141,7 +160,7 @@ class PdfGenerationService {
             ),
           ),
           pw.SizedBox(height: 4),
-          pw.Text(
+          _buildText(
             '#${invoice.invoiceNumber}',
             style: pw.TextStyle(
               fontSize: 20,
@@ -165,21 +184,37 @@ class PdfGenerationService {
           ),
           pw.SizedBox(height: 12),
         ],
-        pw.Text(
+        _buildText(
           settings.businessName ?? 'Business Name Not Set',
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
         ),
         if (settings.address != null && settings.address!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(settings.address!, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(settings.address!, style: const pw.TextStyle(fontSize: 12)),
         ],
         if (settings.phone != null && settings.phone!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(settings.phone!, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(settings.phone!, style: const pw.TextStyle(fontSize: 12)),
         ],
         if (settings.email != null && settings.email!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(settings.email!, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(settings.email!, style: const pw.TextStyle(fontSize: 12)),
+        ],
+        if (settings.rc != null && settings.rc!.isNotEmpty) ...[
+          pw.SizedBox(height: 6),
+          _buildText('${_localizations.rc}: ${settings.rc}', style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (settings.nif != null && settings.nif!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.nif}: ${settings.nif}', style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (settings.nis != null && settings.nis!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.nis}: ${settings.nis}', style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (settings.art != null && settings.art!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.art}: ${settings.art}', style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
         ],
       ],
     );
@@ -189,7 +224,7 @@ class PdfGenerationService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        pw.Text(
+        _buildText(
           _localizations.billTo.toUpperCase(),
           style: pw.TextStyle(
             fontSize: 12,
@@ -198,22 +233,38 @@ class PdfGenerationService {
           ),
         ),
         pw.SizedBox(height: 8),
-        pw.Text(
+        _buildText(
           client.name,
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           textAlign: pw.TextAlign.right,
         ),
         if (client.address != null && client.address!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(client.address!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(client.address!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
         ],
         if (client.phone != null && client.phone!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(client.phone!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(client.phone!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
         ],
         if (client.email != null && client.email!.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text(client.email!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(client.email!, textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 12)),
+        ],
+        if (client.rc != null && client.rc!.isNotEmpty) ...[
+          pw.SizedBox(height: 6),
+          _buildText('${_localizations.rc}: ${client.rc}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (client.nif != null && client.nif!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.nif}: ${client.nif}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (client.nis != null && client.nis!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.nis}: ${client.nis}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
+        ],
+        if (client.art != null && client.art!.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          _buildText('${_localizations.art}: ${client.art}', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800)),
         ],
       ],
     );
@@ -234,7 +285,7 @@ class PdfGenerationService {
         ),
         if (invoice.description != null && invoice.description!.isNotEmpty) ...[
           pw.SizedBox(height: 24),
-          pw.Text(
+          _buildText(
             _localizations.description,
             style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.grey600),
           ),
@@ -246,17 +297,17 @@ class PdfGenerationService {
               color: PdfColors.grey100,
               borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
             ),
-            child: pw.Text(invoice.description!),
+            child: _buildText(invoice.description!),
           ),
         ],
         if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
           pw.SizedBox(height: 16),
-          pw.Text(
+          _buildText(
             _localizations.notes,
             style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.grey600),
           ),
           pw.SizedBox(height: 8),
-          pw.Text(invoice.notes!, style: const pw.TextStyle(fontSize: 12)),
+          _buildText(invoice.notes!, style: const pw.TextStyle(fontSize: 12)),
         ],
       ],
     );
@@ -266,12 +317,12 @@ class PdfGenerationService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(
+        _buildText(
           title,
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.grey600),
         ),
         pw.SizedBox(height: 4),
-        pw.Text(
+        _buildText(
           value,
           style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
         ),
@@ -312,7 +363,7 @@ class PdfGenerationService {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Text(
+        _buildText(
           label,
           style: pw.TextStyle(
             fontSize: isBold ? 14 : 12,
@@ -320,7 +371,7 @@ class PdfGenerationService {
             color: PdfColors.grey700,
           ),
         ),
-        pw.Text(
+        _buildText(
           '${NumberFormatter.formatAmount(amount)} $currencyCode',
           style: pw.TextStyle(
             fontSize: isBold ? 16 : 12,
@@ -341,15 +392,15 @@ class PdfGenerationService {
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text(
+            _buildText(
               _localizations.generatedBy,
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
             ),
-            pw.Text(
+            _buildText(
               _formatDate(now),
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
             ),
-            pw.Text(
+            _buildText(
               '${_localizations.page} ${context.pageNumber} ${_localizations.of} ${context.pagesCount}',
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
             ),
@@ -361,5 +412,19 @@ class PdfGenerationService {
 
   String _formatDate(DateTime date) {
     return date.toIso8601String().split('T')[0];
+  }
+
+  pw.Widget _buildText(String text, {pw.TextStyle? style, pw.TextAlign? textAlign, pw.TextDirection? textDirection}) {
+    final reshaped = ArabicReshaper.instance.reshape(text);
+    // Explicitly enforce RTL if the text contains Arabic characters or presentation forms
+    final hasArabic = RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]').hasMatch(text);
+    final effectiveDirection = textDirection ?? (hasArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr);
+    
+    return pw.Text(
+      reshaped,
+      style: style,
+      textAlign: textAlign,
+      textDirection: effectiveDirection,
+    );
   }
 }

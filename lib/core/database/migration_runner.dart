@@ -80,6 +80,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 8);
         currentVersion = 8;
       }
+      if (currentVersion == 8) {
+        _logger.info('Running migration: v9_algerian_compliance.sql');
+        final scriptContent = await loadMigrationScript('v9_algerian_compliance.sql');
+        await applyMigration(db, scriptContent, 9);
+        currentVersion = 9;
+      }
     }
   }
 

@@ -5,6 +5,10 @@ class Client {
   final String? email;
   final String? address;
   final String? notes;
+  final String? rc;
+  final String? nif;
+  final String? nis;
+  final String? art;
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -19,6 +23,10 @@ class Client {
     this.email,
     this.address,
     this.notes,
+    this.rc,
+    this.nif,
+    this.nis,
+    this.art,
     this.isDeleted = false,
     required this.createdAt,
     required this.updatedAt,
@@ -34,6 +42,10 @@ class Client {
     String? email,
     String? address,
     String? notes,
+    String? rc,
+    String? nif,
+    String? nis,
+    String? art,
     bool? isDeleted,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -48,6 +60,10 @@ class Client {
       email: email ?? this.email,
       address: address ?? this.address,
       notes: notes ?? this.notes,
+      rc: rc ?? this.rc,
+      nif: nif ?? this.nif,
+      nis: nis ?? this.nis,
+      art: art ?? this.art,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

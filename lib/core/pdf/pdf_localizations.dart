@@ -11,4 +11,8 @@ abstract class PdfLocalizations {
   String get amount;
   String get date;
   String get dueDate;
+  String get rc;
+  String get nif;
+  String get nis;
+  String get art;
 }

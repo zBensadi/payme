@@ -21,6 +21,10 @@ class SettingsRemoteDataSource {
       'defaultDocumentTitle': settings.defaultDocumentTitle,
       'defaultDocumentLayout': settings.defaultDocumentLayout,
       'currencyLockedAt': settings.currencyLockedAt?.toUtc().toIso8601String(),
+      'rc': settings.rc,
+      'nif': settings.nif,
+      'nis': settings.nis,
+      'art': settings.art,
       'updatedAt': settings.updatedAt?.toUtc().toIso8601String(),
     };
 
@@ -67,6 +71,10 @@ class SettingsRemoteDataSource {
       defaultDocumentTitle: data['defaultDocumentTitle'] ?? 'Invoice',
       defaultDocumentLayout: data['defaultDocumentLayout'] ?? 'standard',
       currencyLockedAt: parseDate(data['currencyLockedAt']),
+      rc: data['rc'],
+      nif: data['nif'],
+      nis: data['nis'],
+      art: data['art'],
       updatedAt: parseDate(data['updatedAt']),
       isDirty: false,
       remoteId: doc.id,

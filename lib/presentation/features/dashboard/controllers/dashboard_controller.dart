@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/error/result.dart';
 import '../../../providers/active_year_provider.dart';
 import '../../../providers/repository_providers.dart';
+import '../../../utils/riverpod_invalidation_helper.dart';
 import '../models/dashboard_state.dart';
 
 final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
@@ -13,7 +14,9 @@ final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
   }
 
   // 2. Get all visible clients to count them
-  final clientRepo = ref.read(clientRepositoryProvider);
+  final clientRepo = ref.watch(clientRepositoryProvider);
+  ref.invalidateOnRepositoryChange(clientRepo);
+  
   final clientsResult = await clientRepo.getAllVisible();
   int clientsCount = 0;
   if (clientsResult is Success) {
@@ -21,10 +24,11 @@ final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
   }
 
   // 3. Get all invoices for the active year and compute totals
-  // The easiest way is to use InvoiceRepository and PaymentRepository,
-  // or reuse our logic. We have `invoiceRepository.getInvoicesForYear`.
-  final invoiceRepo = ref.read(invoiceRepositoryProvider);
-  final paymentRepo = ref.read(paymentRepositoryProvider);
+  final invoiceRepo = ref.watch(invoiceRepositoryProvider);
+  ref.invalidateOnRepositoryChange(invoiceRepo);
+  
+  final paymentRepo = ref.watch(paymentRepositoryProvider);
+  ref.invalidateOnRepositoryChange(paymentRepo);
 
   final invoicesResult = await invoiceRepo.getInvoicesForYear(activeYear.id);
   if (invoicesResult is Failure) {

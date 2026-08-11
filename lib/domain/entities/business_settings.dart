@@ -11,6 +11,11 @@ class BusinessSettings {
   final String defaultDocumentLayout;
   final DateTime? currencyLockedAt;
   
+  final String? rc;
+  final String? nif;
+  final String? nis;
+  final String? art;
+  
   // Sync metadata
   final DateTime? updatedAt;
   final String? remoteId;
@@ -29,6 +34,10 @@ class BusinessSettings {
     this.defaultDocumentTitle = 'Invoice',
     this.defaultDocumentLayout = 'standard',
     this.currencyLockedAt,
+    this.rc,
+    this.nif,
+    this.nis,
+    this.art,
     this.updatedAt,
     this.remoteId,
     this.syncedAt,
@@ -47,6 +56,10 @@ class BusinessSettings {
     String? defaultDocumentTitle,
     String? defaultDocumentLayout,
     DateTime? currencyLockedAt,
+    String? rc,
+    String? nif,
+    String? nis,
+    String? art,
     DateTime? updatedAt,
     String? remoteId,
     DateTime? syncedAt,
@@ -64,6 +77,10 @@ class BusinessSettings {
       defaultDocumentTitle: defaultDocumentTitle ?? this.defaultDocumentTitle,
       defaultDocumentLayout: defaultDocumentLayout ?? this.defaultDocumentLayout,
       currencyLockedAt: currencyLockedAt ?? this.currencyLockedAt,
+      rc: rc ?? this.rc,
+      nif: nif ?? this.nif,
+      nis: nis ?? this.nis,
+      art: art ?? this.art,
       updatedAt: updatedAt ?? this.updatedAt,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,

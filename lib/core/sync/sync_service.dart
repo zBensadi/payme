@@ -23,6 +23,8 @@ class SyncService {
   Timer? _debounceTimer;
   final Duration _debounceDuration;
 
+  bool hasCompletedInitialSync = false;
+
   // Retry state
   int _retryAttempt = 0;
   Timer? _retryTimer;
@@ -60,6 +62,21 @@ class SyncService {
     // Listen to autonomous sync triggers
     _syncTriggerSub = _syncTrigger.syncRequested.listen((domain) {
       _pendingDomains.add(domain);
+      
+      if (!hasCompletedInitialSync) {
+        // Use a near-zero debounce for the very first sync to gather synchronously added domains, 
+        // avoiding the 2-second delay but ensuring all domains from requestFullSync are collected.
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(milliseconds: 50), () {
+          if (_pendingDomains.isNotEmpty) {
+            final domainsToSync = Set<SyncDomain>.from(_pendingDomains);
+            _pendingDomains.clear();
+            synchronizeDomains(domainsToSync);
+          }
+        });
+        return;
+      }
+      
       _debounceTimer?.cancel();
       _debounceTimer = Timer(_debounceDuration, () {
         if (_pendingDomains.isNotEmpty) {
@@ -129,11 +146,13 @@ class SyncService {
       }
 
       _retryAttempt = 0;
+      hasCompletedInitialSync = true;
       _updateStatus(SyncStatus.idle);
       _logger.logInfo('Sync cycle completed successfully.');
     } catch (e, stack) {
       _logger.logError('Sync cycle failed', e, stack);
       _updateStatus(SyncStatus.failed);
+      hasCompletedInitialSync = true; // Even if it fails, the initial attempt is over
       _scheduleRetry(domains);
     } finally {
       _isSyncing = false;

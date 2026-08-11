@@ -1707,6 +1707,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Max {maxSize}MB. Accepted: {extensions}'**
   String attachmentHint(int maxSize, String extensions);
+
+  /// No description provided for @legalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Information'**
+  String get legalInformation;
+
+  /// No description provided for @rc.
+  ///
+  /// In en, this message translates to:
+  /// **'RC'**
+  String get rc;
+
+  /// No description provided for @nif.
+  ///
+  /// In en, this message translates to:
+  /// **'NIF'**
+  String get nif;
+
+  /// No description provided for @nis.
+  ///
+  /// In en, this message translates to:
+  /// **'NIS'**
+  String get nis;
+
+  /// No description provided for @art.
+  ///
+  /// In en, this message translates to:
+  /// **'ART'**
+  String get art;
 }
 
 class _AppLocalizationsDelegate

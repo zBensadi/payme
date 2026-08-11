@@ -135,9 +135,9 @@ class SettingsRepositoryImpl implements SettingsRepository, SynchronizableReposi
         return const SyncResult(skipped: 1);
       }
 
-      final localSettings = await _localDataSource.getSettings();
+      final localSettings = await _localDataSource.getSettingsOrNull();
 
-      if (localSettings.isDirty) {
+      if (localSettings != null && localSettings.isDirty) {
         // Conflict!
         final resolvedSettings = _conflictResolver.resolve(localSettings, remoteSettings);
         

@@ -37,7 +37,7 @@ class ClientLedgerScreen extends ConsumerWidget {
           ),
           body: Column(
             children: [
-              LedgerSummaryCard(totals: state.totals),
+              LedgerSummaryCard(totals: state.totals, client: state.client),
               Expanded(
                 child: invoices.isEmpty
                     ? EmptyStateView(

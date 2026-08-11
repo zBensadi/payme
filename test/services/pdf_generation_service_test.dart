@@ -20,10 +20,15 @@ class FakePdfLocalizations implements PdfLocalizations {
   @override String get amount => 'Amount';
   @override String get date => 'Date';
   @override String get dueDate => 'Due Date';
+  @override String get rc => 'RC';
+  @override String get nif => 'NIF';
+  @override String get nis => 'NIS';
+  @override String get art => 'ART';
 }
 
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late PdfGenerationService service;
 
   setUp(() {

@@ -25,6 +25,13 @@ class SettingsLocalDataSource {
     return BusinessSettingsModel.fromMap(maps.first);
   }
 
+  Future<BusinessSettings?> getSettingsOrNull() async {
+    final db = _dbService.db;
+    final maps = await db.query('business_settings', where: 'id = 1');
+    if (maps.isEmpty) return null;
+    return BusinessSettingsModel.fromMap(maps.first);
+  }
+
   Future<void> updateSettings(BusinessSettings settings) async {
     final db = _dbService.db;
     final updatedSettings = settings.copyWith(

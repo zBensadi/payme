@@ -26,6 +26,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _documentTitleController;
+  late TextEditingController _rcController;
+  late TextEditingController _nifController;
+  late TextEditingController _nisController;
+  late TextEditingController _artController;
   String _currencyCode = 'USD';
   String _languageCode = 'en';
   String _documentLayout = 'standard';
@@ -39,6 +43,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _phoneController = TextEditingController();
     _emailController = TextEditingController();
     _documentTitleController = TextEditingController();
+    _rcController = TextEditingController();
+    _nifController = TextEditingController();
+    _nisController = TextEditingController();
+    _artController = TextEditingController();
   }
 
   @override
@@ -48,6 +56,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _phoneController.dispose();
     _emailController.dispose();
     _documentTitleController.dispose();
+    _rcController.dispose();
+    _nifController.dispose();
+    _nisController.dispose();
+    _artController.dispose();
     super.dispose();
   }
 
@@ -57,6 +69,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _addressController.text = settings.address ?? '';
       _phoneController.text = settings.phone ?? '';
       _emailController.text = settings.email ?? '';
+      _rcController.text = settings.rc ?? '';
+      _nifController.text = settings.nif ?? '';
+      _nisController.text = settings.nis ?? '';
+      _artController.text = settings.art ?? '';
       _currencyCode = settings.currencyCode;
       _languageCode = settings.languageCode;
       _documentTitleController.text = settings.defaultDocumentTitle;
@@ -76,6 +92,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           languageCode: _languageCode,
           defaultDocumentTitle: _documentTitleController.text,
           defaultDocumentLayout: _documentLayout,
+          rc: _rcController.text.trim().isEmpty ? null : _rcController.text.trim(),
+          nif: _nifController.text.trim().isEmpty ? null : _nifController.text.trim(),
+          nis: _nisController.text.trim().isEmpty ? null : _nisController.text.trim(),
+          art: _artController.text.trim().isEmpty ? null : _artController.text.trim(),
           newLogoSourcePath: _newLogoPath,
         );
         if (mounted) {
@@ -134,12 +154,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _addressController,
-                      decoration: InputDecoration(labelText: context.l10n.address, border: const OutlineInputBorder()),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
                       controller: _phoneController,
                       decoration: InputDecoration(labelText: context.l10n.phoneNumber, border: const OutlineInputBorder()),
                       keyboardType: TextInputType.phone,
@@ -149,6 +163,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       controller: _emailController,
                       decoration: InputDecoration(labelText: context.l10n.email, border: const OutlineInputBorder()),
                       keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _addressController,
+                      decoration: InputDecoration(labelText: context.l10n.address, border: const OutlineInputBorder()),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _rcController,
+                      maxLength: 50,
+                      decoration: InputDecoration(labelText: context.l10n.rc, border: const OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _nifController,
+                      maxLength: 50,
+                      decoration: InputDecoration(labelText: context.l10n.nif, border: const OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _nisController,
+                      maxLength: 50,
+                      decoration: InputDecoration(labelText: context.l10n.nis, border: const OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _artController,
+                      maxLength: 50,
+                      decoration: InputDecoration(labelText: context.l10n.art, border: const OutlineInputBorder()),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(

@@ -23,6 +23,9 @@ class MockSettingsLocalDataSource implements SettingsLocalDataSource {
   Future<BusinessSettings> getSettings() async => _currentSettings;
 
   @override
+  Future<BusinessSettings?> getSettingsOrNull() async => _currentSettings;
+
+  @override
   Future<void> overwriteSettings(BusinessSettings settings) async {
     wasOverwriteCalled = true;
     _currentSettings = settings;
