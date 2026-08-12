@@ -1,9 +1,10 @@
 import '../../core/error/result.dart';
 import '../entities/invoice.dart';
+import '../entities/client_visibility_context.dart';
 
 abstract class InvoiceRepository {
-  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId);
-  Future<Result<List<Invoice>>> getInvoicesForClient(String accountingYearId, String clientId);
+  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId, {ClientVisibilityContext? visibilityContext});
+  Future<Result<List<Invoice>>> getInvoicesForClient(String accountingYearId, String clientId, {ClientVisibilityContext? visibilityContext});
   Future<Result<Invoice?>> getById(String id);
   Future<Result<Invoice>> create(Invoice invoice);
   Future<Result<Invoice>> update(Invoice invoice);

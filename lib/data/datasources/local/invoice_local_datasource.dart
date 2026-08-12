@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/database_service.dart';
+import '../../../core/database/visibility_sql_builder.dart';
 import '../../models/invoice_model.dart';
 
 class InvoiceLocalDataSource {
@@ -7,25 +8,41 @@ class InvoiceLocalDataSource {
 
   InvoiceLocalDataSource(this._dbService);
 
-  Future<List<InvoiceModel>> getInvoicesForYear(String accountingYearId) async {
+  Future<List<InvoiceModel>> getInvoicesForYear(String accountingYearId, {String? visibleToUserId}) async {
     final db = _dbService.db;
-    final results = await db.query(
-      'invoices',
-      where: 'accounting_year_id = ? AND is_deleted = 0',
-      whereArgs: [accountingYearId],
-      orderBy: 'invoice_number DESC',
-    );
+    
+    String query = 'SELECT invoices.* FROM invoices';
+    List<Object?> args = [accountingYearId];
+    String where = 'invoices.accounting_year_id = ? AND invoices.is_deleted = 0';
+
+    if (visibleToUserId != null && visibleToUserId.isNotEmpty) {
+      query += ' INNER JOIN clients ON invoices.client_id = clients.id';
+      where += VisibilitySqlBuilder.buildVisibilityClause('clients', visibleToUserId);
+      args.add(visibleToUserId);
+    }
+
+    query += ' WHERE $where ORDER BY invoices.invoice_number DESC';
+
+    final results = await db.rawQuery(query, args);
     return results.map((e) => InvoiceModel.fromMap(e)).toList();
   }
 
-  Future<List<InvoiceModel>> getInvoicesForClient(String accountingYearId, String clientId) async {
+  Future<List<InvoiceModel>> getInvoicesForClient(String accountingYearId, String clientId, {String? visibleToUserId}) async {
     final db = _dbService.db;
-    final results = await db.query(
-      'invoices',
-      where: 'accounting_year_id = ? AND client_id = ? AND is_deleted = 0',
-      whereArgs: [accountingYearId, clientId],
-      orderBy: 'invoice_number DESC',
-    );
+    
+    String query = 'SELECT invoices.* FROM invoices';
+    List<Object?> args = [accountingYearId, clientId];
+    String where = 'invoices.accounting_year_id = ? AND invoices.client_id = ? AND invoices.is_deleted = 0';
+
+    if (visibleToUserId != null && visibleToUserId.isNotEmpty) {
+      query += ' INNER JOIN clients ON invoices.client_id = clients.id';
+      where += VisibilitySqlBuilder.buildVisibilityClause('clients', visibleToUserId);
+      args.add(visibleToUserId);
+    }
+
+    query += ' WHERE $where ORDER BY invoices.invoice_number DESC';
+
+    final results = await db.rawQuery(query, args);
     return results.map((e) => InvoiceModel.fromMap(e)).toList();
   }
 

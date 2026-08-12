@@ -1,17 +1,29 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
 import '../../l10n/app_localizations.dart';
 import 'locale_controller.dart';
-import '../../core/pdf/app_pdf_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'sync_trigger_provider.dart';
-import '../../core/sync/conflict_resolver.dart';
-import '../../domain/entities/business_settings.dart';
+import '../../domain/repositories/user_repository.dart';
+import '../../domain/repositories/role_repository.dart';
+import '../../data/datasources/local/user_local_datasource.dart';
+import '../../data/datasources/local/role_local_datasource.dart';
+import '../../data/datasources/remote/user_remote_datasource.dart';
+import '../../data/datasources/remote/role_remote_datasource.dart';
+import '../../data/repositories_impl/user_repository_impl.dart';
+import '../../data/repositories_impl/role_repository_impl.dart';
+
 import '../../domain/entities/accounting_year.dart';
-import '../../domain/entities/client.dart';
-import '../../domain/entities/invoice.dart';
-import '../../domain/entities/payment.dart';
-import '../../data/datasources/remote/settings_remote_datasource.dart';
+import '../../core/pdf/app_pdf_localizations.dart';
 import '../../data/datasources/remote/client_remote_datasource.dart';
+import '../../data/repositories_impl/secured/secured_client_repository.dart';
+import '../../data/repositories_impl/secured/secured_invoice_repository.dart';
+import '../../data/repositories_impl/secured/secured_payment_repository.dart';
+import '../../data/repositories_impl/secured/secured_settings_repository.dart';
+import '../../data/repositories_impl/secured/secured_user_repository.dart';
+import '../../data/repositories_impl/secured/secured_role_repository.dart';
+import 'sync_trigger_provider.dart';
+
+import '../features/auth/controllers/current_user_controller.dart';
+import 'permission_service_provider.dart';
 import '../../data/datasources/remote/invoice_remote_datasource.dart';
 import '../../data/datasources/remote/payment_remote_datasource.dart';
 import '../../services/csv_generation_service.dart';
@@ -39,8 +51,18 @@ import '../../data/repositories_impl/settings_repository_impl.dart';
 
 import '../../domain/repositories/client_repository.dart';
 import '../../domain/repositories/invoice_repository.dart';
+import '../../domain/entities/business_settings.dart';
+import '../../domain/entities/app_user.dart';
+import '../../domain/entities/user_role.dart';
+import '../../domain/entities/client.dart';
+import '../../domain/entities/invoice.dart';
+import '../../domain/entities/payment.dart';
+import '../../core/sync/conflict_resolver.dart';
+
+import '../../data/datasources/remote/settings_remote_datasource.dart';
 import '../../domain/repositories/payment_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
+
 
 // Accounting Year Providers
 
@@ -111,7 +133,7 @@ final clientConflictResolverProvider = Provider<ConflictResolver<Client>>((ref) 
   return DefaultConflictResolver<Client>();
 });
 
-final clientRepositoryProvider = Provider<ClientRepository>((ref) {
+final internalClientRepositoryProvider = Provider<ClientRepositoryImpl>((ref) {
   final localDataSource = ref.watch(clientLocalDataSourceProvider);
   final remoteDataSource = ref.watch(clientRemoteDataSourceProvider);
   final conflictResolver = ref.watch(clientConflictResolverProvider);
@@ -119,6 +141,13 @@ final clientRepositoryProvider = Provider<ClientRepository>((ref) {
   final repo = ClientRepositoryImpl(localDataSource, remoteDataSource, conflictResolver, syncTrigger);
   ref.onDispose(() => repo.dispose());
   return repo;
+});
+
+final clientRepositoryProvider = Provider<ClientRepository>((ref) {
+  final inner = ref.watch(internalClientRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredClientRepository(inner, permissionService, currentUser);
 });
 
 // Invoice Providers
@@ -138,9 +167,9 @@ final invoiceConflictResolverProvider = Provider<ConflictResolver<Invoice>>((ref
   return DefaultConflictResolver<Invoice>();
 });
 
-final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
+final internalInvoiceRepositoryProvider = Provider<InvoiceRepositoryImpl>((ref) {
   final dataSource = ref.watch(invoiceLocalDataSourceProvider);
-  final paymentRepo = ref.watch(paymentRepositoryProvider);
+  final paymentRepo = ref.watch(internalPaymentRepositoryProvider);
   final fileDataSource = ref.watch(attachmentFileDataSourceProvider);
   final remoteDataSource = ref.watch(invoiceRemoteDataSourceProvider);
   final conflictResolver = ref.watch(invoiceConflictResolverProvider);
@@ -156,6 +185,13 @@ final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
   );
   ref.onDispose(() => repo.dispose());
   return repo;
+});
+
+final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
+  final inner = ref.watch(internalInvoiceRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredInvoiceRepository(inner, permissionService, currentUser);
 });
 
 // Payment Providers
@@ -179,7 +215,7 @@ final paymentConflictResolverProvider = Provider<ConflictResolver<Payment>>((ref
   return DefaultConflictResolver<Payment>();
 });
 
-final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
+final internalPaymentRepositoryProvider = Provider<PaymentRepositoryImpl>((ref) {
   final localDataSource = ref.watch(paymentLocalDataSourceProvider);
   final fileDataSource = ref.watch(attachmentFileDataSourceProvider);
   final remoteDataSource = ref.watch(paymentRemoteDataSourceProvider);
@@ -194,6 +230,13 @@ final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   );
   ref.onDispose(() => repo.dispose());
   return repo;
+});
+
+final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
+  final inner = ref.watch(internalPaymentRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredPaymentRepository(inner, permissionService, currentUser);
 });
 
 final settingsLocalDataSourceProvider = Provider<SettingsLocalDataSource>((ref) {
@@ -213,7 +256,7 @@ final settingsConflictResolverProvider = Provider<ConflictResolver<BusinessSetti
   return DefaultConflictResolver<BusinessSettings>();
 });
 
-final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+final internalSettingsRepositoryProvider = Provider<SettingsRepositoryImpl>((ref) {
   final settingsLocal = ref.watch(settingsLocalDataSourceProvider);
   final settingsRemote = ref.watch(settingsRemoteDataSourceProvider);
   final logoFile = ref.watch(logoFileDataSourceProvider);
@@ -223,4 +266,78 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final repo = SettingsRepositoryImpl(settingsLocal, settingsRemote, logoFile, conflictResolver, syncTrigger);
   ref.onDispose(() => repo.dispose());
   return repo;
+});
+
+final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  final inner = ref.watch(internalSettingsRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredSettingsRepository(inner, permissionService, currentUser);
+});
+
+// Role Providers
+final roleLocalDataSourceProvider = Provider<RoleLocalDataSource>((ref) {
+  final dbState = ref.watch(databaseProvider);
+  if (!dbState.db.isOpen) throw Exception('Database not initialized');
+  return RoleLocalDataSource(dbState.db);
+});
+
+final roleRemoteDataSourceProvider = Provider<RoleRemoteDataSource>((ref) {
+  return RoleRemoteDataSource();
+});
+
+final roleConflictResolverProvider = Provider<ConflictResolver<UserRole>>((ref) {
+  return DefaultConflictResolver<UserRole>();
+});
+
+final internalRoleRepositoryProvider = Provider<RoleRepositoryImpl>((ref) {
+  final local = ref.watch(roleLocalDataSourceProvider);
+  final remote = ref.watch(roleRemoteDataSourceProvider);
+  final conflict = ref.watch(roleConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  
+  final repo = RoleRepositoryImpl(local, remote, conflict, syncTrigger);
+  ref.onDispose(() => repo.dispose());
+  return repo;
+});
+
+final roleRepositoryProvider = Provider<RoleRepository>((ref) {
+  final inner = ref.watch(internalRoleRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredRoleRepository(inner, permissionService, currentUser);
+});
+
+// User Providers
+final userLocalDataSourceProvider = Provider<UserLocalDataSource>((ref) {
+  final dbState = ref.watch(databaseProvider);
+  if (!dbState.db.isOpen) throw Exception('Database not initialized');
+  return UserLocalDataSource(dbState.db);
+});
+
+final userRemoteDataSourceProvider = Provider<UserRemoteDataSource>((ref) {
+  return UserRemoteDataSource();
+});
+
+final userConflictResolverProvider = Provider<ConflictResolver<AppUser>>((ref) {
+  return DefaultConflictResolver<AppUser>();
+});
+
+final internalUserRepositoryProvider = Provider<UserRepositoryImpl>((ref) {
+  final local = ref.watch(userLocalDataSourceProvider);
+  final remote = ref.watch(userRemoteDataSourceProvider);
+  final conflict = ref.watch(userConflictResolverProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  
+  final repo = UserRepositoryImpl(local, remote, conflict, syncTrigger);
+  ref.onDispose(() => repo.dispose());
+  return repo;
+});
+
+final userRepositoryProvider = Provider<UserRepository>((ref) {
+  final inner = ref.watch(internalUserRepositoryProvider);
+  final roleRepo = ref.watch(internalRoleRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredUserRepository(inner, roleRepo, permissionService, currentUser);
 });

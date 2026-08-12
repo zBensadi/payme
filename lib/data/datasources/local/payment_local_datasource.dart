@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/database_service.dart';
+import '../../../core/database/visibility_sql_builder.dart';
 import '../../models/payment_model.dart';
 import '../../models/payment_attachment_model.dart';
 import '../../../domain/entities/payment.dart';
@@ -9,14 +10,22 @@ class PaymentLocalDataSource {
 
   PaymentLocalDataSource(this._dbService);
 
-  Future<List<Payment>> getPaymentsForInvoice(String invoiceId) async {
+  Future<List<Payment>> getPaymentsForInvoice(String invoiceId, {String? visibleToUserId}) async {
     final db = _dbService.db;
-    final paymentMaps = await db.query(
-      'payments',
-      where: 'invoice_id = ? AND is_deleted = 0',
-      whereArgs: [invoiceId],
-      orderBy: 'date DESC, created_at DESC',
-    );
+    
+    String query = 'SELECT p.* FROM payments p JOIN invoices i ON p.invoice_id = i.id';
+    String whereClause = 'p.invoice_id = ? AND p.is_deleted = 0';
+    List<dynamic> whereArgs = [invoiceId];
+
+    if (visibleToUserId != null && visibleToUserId.isNotEmpty) {
+      query += ' INNER JOIN clients ON i.client_id = clients.id';
+      whereClause += VisibilitySqlBuilder.buildVisibilityClause('clients', visibleToUserId);
+      whereArgs.add(visibleToUserId);
+    }
+
+    query += ' WHERE $whereClause ORDER BY p.date DESC, p.created_at DESC';
+
+    final paymentMaps = await db.rawQuery(query, whereArgs);
 
     final List<Payment> payments = [];
     for (var map in paymentMaps) {
@@ -32,7 +41,7 @@ class PaymentLocalDataSource {
     return payments;
   }
 
-  Future<List<Payment>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end}) async {
+  Future<List<Payment>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end, String? visibleToUserId}) async {
     final db = _dbService.db;
     
     String whereClause = 'i.accounting_year_id = ?';
@@ -47,13 +56,17 @@ class PaymentLocalDataSource {
       whereArgs.add(end.toIso8601String());
     }
 
-    final paymentMaps = await db.rawQuery('''
-      SELECT p.*
-      FROM payments p
-      JOIN invoices i ON p.invoice_id = i.id
-      WHERE $whereClause AND p.is_deleted = 0
-      ORDER BY p.date DESC, p.created_at DESC
-    ''', whereArgs);
+    String query = 'SELECT p.* FROM payments p JOIN invoices i ON p.invoice_id = i.id';
+    
+    if (visibleToUserId != null && visibleToUserId.isNotEmpty) {
+      query += ' INNER JOIN clients ON i.client_id = clients.id';
+      whereClause += VisibilitySqlBuilder.buildVisibilityClause('clients', visibleToUserId);
+      whereArgs.add(visibleToUserId);
+    }
+
+    query += ' WHERE $whereClause AND p.is_deleted = 0 ORDER BY p.date DESC, p.created_at DESC';
+
+    final paymentMaps = await db.rawQuery(query, whereArgs);
 
     final List<Payment> payments = [];
     for (var map in paymentMaps) {

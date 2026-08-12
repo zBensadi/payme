@@ -49,7 +49,7 @@ class SettingsRepositoryImpl implements SettingsRepository, SynchronizableReposi
   SyncDomain get syncDomain => SyncDomain.settings;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.high;
+  SyncPriority get syncPriority => SyncPriority.level1Settings;
 
   @override
   Future<Result<BusinessSettings>> getSettings() async {

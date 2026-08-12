@@ -12,6 +12,7 @@ import '../datasources/local/client_local_datasource.dart';
 import '../datasources/remote/client_remote_datasource.dart';
 import '../models/client_model.dart';
 import 'dart:async';
+import '../../domain/entities/client_visibility_context.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/events/repository_event.dart';
 import '../../../core/events/repository_change_publisher.dart';
@@ -43,12 +44,15 @@ class ClientRepositoryImpl implements ClientRepository, SynchronizableRepository
   SyncDomain get syncDomain => SyncDomain.clients;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.medium;
+  SyncPriority get syncPriority => SyncPriority.level5Clients;
 
   @override
-  Future<Result<List<Client>>> getAllVisible({String? searchQuery}) async {
+  Future<Result<List<Client>>> getAllVisible({String? searchQuery, ClientVisibilityContext? visibilityContext}) async {
     try {
-      final models = await _localDataSource.getAllVisible(searchQuery: searchQuery);
+      final models = await _localDataSource.getAllVisible(
+        searchQuery: searchQuery,
+        visibleToUserId: visibilityContext?.visibleToUserId,
+      );
       return Success(models);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to load clients: $e'));

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../services/firebase_authentication_service.dart';
 import '../../../../core/error/result.dart';
@@ -27,21 +28,33 @@ final firebaseAuthServiceProvider = Provider((ref) {
 class FirebaseAuthController extends Notifier<FirebaseAuthState> {
   @override
   FirebaseAuthState build() {
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] build() called — watching currentUserProvider');
     final currentUserAsync = ref.watch(currentUserProvider);
 
-    return currentUserAsync.when(
-      data: (profile) {
-        if (profile == null) {
+    final result = currentUserAsync.when(
+      data: (currentAppUser) {
+        if (currentAppUser == null) {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] currentUserProvider=data(null) → unauthenticated');
           return FirebaseAuthState.unauthenticated;
-        } else if (profile.requiresBootstrap) {
+        } else if (currentAppUser.user.requiresBootstrap) {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] currentUserProvider=data(sentinel uid=${currentAppUser.user.uid}) → bootstrapping');
           return FirebaseAuthState.bootstrapping;
         } else {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] currentUserProvider=data(uid=${currentAppUser.user.uid} businessId=${currentAppUser.user.businessId}) → authenticated');
           return FirebaseAuthState.authenticated;
         }
       },
-      loading: () => FirebaseAuthState.loading,
-      error: (_, __) => FirebaseAuthState.failure,
+      loading: () {
+        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] currentUserProvider=loading → loading');
+        return FirebaseAuthState.loading;
+      },
+      error: (e, s) {
+        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] currentUserProvider=error: $e → failure');
+        return FirebaseAuthState.failure;
+      },
     );
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] build() returning $result');
+    return result;
   }
 
   Future<Result<void>> login(String email, String password) async {

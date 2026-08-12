@@ -154,9 +154,17 @@ An alternative considered and rejected: adopting the community Windows-desktop F
 
 ---
 
-## 6. Authentication
+## 6. Authentication & Routing Layer
 
 **Cloud mode uses Firebase Authentication, email/password provider, exclusively.** This replaces the *mechanism* of login in cloud mode but not the *concept* — every destructive action still requires re-authentication via the existing `ReauthGuard` pattern (Section 20 of the V1 document), now re-implemented to call Firebase Auth's `reauthenticateWithCredential` instead of comparing a local password hash.
+
+**Authentication Routing Layer:**
+To support the multi-tenant architecture without heavy `collectionGroup` queries, V2 utilizes an **Authentication Routing Layer**. 
+- A lightweight pointer document is maintained at `users/{uid}`.
+- This pointer contains only routing metadata (`businessId`, `roleId`, `updatedAt`, `schemaVersion`). **It is strictly a routing pointer and not a domain model.**
+- Canonical user data exclusively resides under `businesses/{businessId}/users/{uid}`.
+- During app startup, the `FirebaseBootstrapScreen` reads this pointer to resolve the user's tenant. If found, it automatically provisions the local SQLite database with the canonical user and role data, bypassing the bootstrap form.
+- **Fail-Closed Security:** If the routing pointer exists but the canonical domain data is missing or corrupted, the app enters a dedicated error state, blocking access and preventing accidental duplicate business creation.
 
 **Why the offline Recovery Key is retired in cloud mode, not extended:** V1's Recovery Key exists because there is no server to ask "who are you" — the entire premise is offline, single-device, single-admin. Cloud mode inverts that premise: a server (Firebase Auth) already exists, and it already provides a safe, standard password-reset-via-email flow that every user can use independently, without depending on whoever holds a Recovery Key. Layering a second, parallel offline recovery scheme on top of Firebase Auth would be two account-recovery systems solving the same problem — exactly the kind of duplicated ceremony this project's own philosophy rejects. **Local mode keeps the Recovery Key exactly as V1 designed it, unchanged**, since local mode has no server to fall back on.
 
@@ -256,8 +264,9 @@ final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
 | Collection | Mirrors SQLite table | Key fields beyond the obvious |
 |---|---|---|
 | `business_settings/{singleton}` | `business_settings` | `businessId` (see Multi-Tenancy below), `firestoreSchemaVersion` |
-| `users/{uid}` | *(new)* | `roleId`, `permissionOverrides`, `isActive`, `businessId` |
-| `roles/{roleId}` | *(new)* | `defaultPermissions`, `isSystemRole` |
+| `users/{uid}` | *(new)* | **ROUTING POINTER ONLY**: `businessId`, `roleId`. Not a domain model. |
+| `businesses/{businessId}/users/{uid}` | *(new)* | Canonical domain user: `roleId`, `permissionOverrides`, `isActive`, `businessId` |
+| `businesses/{businessId}/roles/{roleId}` | *(new)* | Canonical domain role: `defaultPermissions`, `isSystemRole` |
 | `permissions_catalog/{key}` | *(new)* | descriptive only, see Section 8 |
 | `accounting_years/{id}` | `accounting_years` | `businessId` |
 | `clients/{id}` | `clients` | `visibleTo` (map `uid → true`), `businessId` |

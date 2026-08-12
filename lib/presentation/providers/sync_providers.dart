@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'repository_providers.dart';
 import 'sync_trigger_provider.dart';
@@ -23,28 +24,46 @@ final syncLoggerProvider = Provider<SyncLogger>((ref) {
 /// ClientRepository, InvoiceRepository, etc.
 final synchronizableRepositoriesProvider = Provider<List<SynchronizableRepository>>((ref) {
   return [
-    ref.watch(settingsRepositoryProvider) as SynchronizableRepository,
-    ref.watch(clientRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalSettingsRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalClientRepositoryProvider) as SynchronizableRepository,
     ref.watch(accountingYearRepositoryProvider) as SynchronizableRepository,
-    ref.watch(invoiceRepositoryProvider) as SynchronizableRepository,
-    ref.watch(paymentRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalInvoiceRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalPaymentRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalRoleRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalUserRepositoryProvider) as SynchronizableRepository,
   ];
 });
 
 
 final syncServiceProvider = Provider<SyncService>((ref) {
-  final service = SyncService(
-    repositories: ref.watch(synchronizableRepositoriesProvider),
-    connectivity: ref.watch(connectivityServiceProvider),
-    logger: ref.watch(syncLoggerProvider),
-    syncTrigger: ref.watch(syncTriggerProvider),
-  );
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] ENTER provider build');
+  final repositories = ref.watch(synchronizableRepositoriesProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] synchronizableRepositoriesProvider resolved → ${repositories.length} repos: ${repositories.map((r) => r.runtimeType).join(', ')}');
+  final connectivity = ref.watch(connectivityServiceProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] connectivityServiceProvider resolved');
+  final logger = ref.watch(syncLoggerProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] syncLoggerProvider resolved');
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] syncTriggerProvider resolved');
 
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] BEFORE SyncService() constructor');
+  final service = SyncService(
+    repositories: repositories,
+    connectivity: connectivity,
+    logger: logger,
+    syncTrigger: syncTrigger,
+  );
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] AFTER  SyncService() constructor → ok');
+
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] BEFORE ref.listen(currentUserProvider, fireImmediately: true)');
   ref.listen(currentUserProvider, (previous, next) {
-    service.setBusinessId(next.value?.businessContext?.businessId);
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] currentUserProvider changed → businessId=${next.value?.user.businessId}');
+    service.setBusinessId(next.value?.user.businessId);
   }, fireImmediately: true);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] AFTER  ref.listen(currentUserProvider) registered');
 
   ref.onDispose(() => service.dispose());
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][syncServiceProvider] EXIT provider build → returning SyncService');
   return service;
 });
 

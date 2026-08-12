@@ -142,6 +142,9 @@ class SyncService {
         _logger.logInfo('Pulling changes for ${repo.runtimeType}');
         // null lastSyncTime signifies a full pull, or let the repo manage it internally.
         final result = await repo.pullChanges(_businessId!, null);
+        if (result.failed > 0) {
+          throw Exception('Pull failed for ${repo.syncDomain}. Aborting sync cycle to preserve referential integrity.');
+        }
         _logger.logOperation(repo.runtimeType.toString(), 'PULL', result.downloaded, 'SUCCESS');
       }
 

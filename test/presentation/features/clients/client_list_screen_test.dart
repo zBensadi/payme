@@ -8,11 +8,13 @@ import 'package:payme/domain/repositories/client_repository.dart';
 import 'package:payme/presentation/features/clients/screens/client_list_screen.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 
+import 'package:payme/domain/entities/client_visibility_context.dart';
+
 class FakeClientRepository implements ClientRepository {
   List<Client> clients = [];
 
   @override
-  Future<Result<List<Client>>> getAllVisible({String? searchQuery}) async {
+  Future<Result<List<Client>>> getAllVisible({String? searchQuery, ClientVisibilityContext? visibilityContext}) async {
     var visible = clients.where((c) => !c.isDeleted).toList();
     if (searchQuery != null && searchQuery.isNotEmpty) {
       final q = searchQuery.toLowerCase();

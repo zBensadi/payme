@@ -10,6 +10,8 @@ class InvoiceModel {
   final double amount;
   final String? dueDate;
   final String? notes;
+  final String? createdBy;
+  final String? updatedBy;
   final String createdAt;
   final String updatedAt;
   final String? remoteId;
@@ -27,6 +29,8 @@ class InvoiceModel {
     required this.amount,
     this.dueDate,
     this.notes,
+    this.createdBy,
+    this.updatedBy,
     required this.createdAt,
     required this.updatedAt,
     this.remoteId,
@@ -46,6 +50,8 @@ class InvoiceModel {
       amount: entity.amount,
       dueDate: entity.dueDate?.toIso8601String(),
       notes: entity.notes,
+      createdBy: entity.createdBy,
+      updatedBy: entity.updatedBy,
       createdAt: entity.createdAt.toIso8601String(),
       updatedAt: entity.updatedAt.toIso8601String(),
       remoteId: entity.remoteId,
@@ -66,6 +72,8 @@ class InvoiceModel {
       amount: amount,
       dueDate: dueDate != null ? DateTime.parse(dueDate!) : null,
       notes: notes,
+      createdBy: createdBy,
+      updatedBy: updatedBy,
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       remoteId: remoteId,
@@ -86,6 +94,8 @@ class InvoiceModel {
       amount: (map['amount'] as num).toDouble(),
       dueDate: map['due_date'] as String?,
       notes: map['notes'] as String?,
+      createdBy: map['created_by'] as String?,
+      updatedBy: map['updated_by'] as String?,
       createdAt: map['created_at'] as String,
       updatedAt: map['updated_at'] as String,
       remoteId: map['remote_id'] as String?,
@@ -106,6 +116,8 @@ class InvoiceModel {
       'amount': amount,
       'due_date': dueDate,
       'notes': notes,
+      'created_by': createdBy,
+      'updated_by': updatedBy,
       'created_at': createdAt,
       'updated_at': updatedAt,
       'remote_id': remoteId,

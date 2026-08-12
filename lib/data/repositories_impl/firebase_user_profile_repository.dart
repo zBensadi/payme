@@ -67,18 +67,30 @@ class FirebaseUserProfileRepository implements UserProfileRepository {
         }
       }
 
-      if (appUser.roleId != null) {
-        final roleDoc = await _firestore.collection('roles').doc(appUser.roleId).get();
+      if (appUser.roleId != null && appUser.businessId != null) {
+        final roleDoc = await _firestore
+            .collection('businesses')
+            .doc(appUser.businessId)
+            .collection('roles')
+            .doc(appUser.roleId)
+            .get();
         if (roleDoc.exists) {
           final roleData = roleDoc.data()!;
           userRole = UserRole(
-            roleId: appUser.roleId!,
-            name: roleData['name'],
+            id: appUser.roleId!,
+            name: roleData['name'] ?? '',
             isSystemRole: roleData['isSystemRole'] ?? false,
-            defaultPermissions: roleData['defaultPermissions'] ?? <String, dynamic>{},
+            permissions: List<String>.from(roleData['permissions'] ?? []),
+            createdAt: roleData['createdAt'] != null
+                ? DateTime.parse(roleData['createdAt'] as String).toLocal()
+                : DateTime.now(),
+            updatedAt: roleData['updatedAt'] != null
+                ? DateTime.parse(roleData['updatedAt'] as String).toLocal()
+                : DateTime.now(),
           );
         }
       }
+
 
       return Success(UserProfile(
         user: appUser,

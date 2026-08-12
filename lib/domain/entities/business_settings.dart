@@ -17,6 +17,8 @@ class BusinessSettings {
   final String? art;
   
   // Sync metadata
+  final String? createdBy;
+  final String? updatedBy;
   final DateTime? updatedAt;
   final String? remoteId;
   final DateTime? syncedAt;
@@ -38,6 +40,8 @@ class BusinessSettings {
     this.nif,
     this.nis,
     this.art,
+    this.createdBy,
+    this.updatedBy,
     this.updatedAt,
     this.remoteId,
     this.syncedAt,
@@ -60,6 +64,8 @@ class BusinessSettings {
     String? nif,
     String? nis,
     String? art,
+    String? createdBy,
+    String? updatedBy,
     DateTime? updatedAt,
     String? remoteId,
     DateTime? syncedAt,
@@ -81,6 +87,8 @@ class BusinessSettings {
       nif: nif ?? this.nif,
       nis: nis ?? this.nis,
       art: art ?? this.art,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,

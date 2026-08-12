@@ -45,7 +45,7 @@ class AccountingYearRepositoryImpl implements AccountingYearRepository, Synchron
   SyncDomain get syncDomain => SyncDomain.accountingYears;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.medium;
+  SyncPriority get syncPriority => SyncPriority.level6AccountingYears;
 
 
   @override

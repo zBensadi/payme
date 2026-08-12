@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:payme/domain/entities/client_visibility_context.dart';
 import 'package:payme/core/database/database_service.dart';
 import 'package:payme/core/database/migration_runner.dart';
 import 'package:payme/core/error/result.dart';
@@ -34,11 +35,13 @@ class FakeSettingsRepository implements SettingsRepository {
   }
 }
 
+
+
 class FakePaymentRepository implements PaymentRepository {
   @override
-  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId) async => const Success([]);
+  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId, {ClientVisibilityContext? visibilityContext}) async => const Success([]);
   @override
-  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end}) async => const Success([]);
+  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end, ClientVisibilityContext? visibilityContext}) async => const Success([]);
   @override
   Future<Result<Payment?>> getById(String id) async => const Success(null);
   @override
@@ -111,6 +114,18 @@ void main() {
 
     final v6 = await runner.loadMigrationScript('v6_accounting_year_sync.sql');
     await runner.applyMigration(db, v6, 6);
+
+    final v7 = await runner.loadMigrationScript('v7_payment_sync.sql');
+    await runner.applyMigration(db, v7, 7);
+
+    final v8 = await runner.loadMigrationScript('v8_document_settings.sql');
+    await runner.applyMigration(db, v8, 8);
+
+    final v9 = await runner.loadMigrationScript('v9_algerian_compliance.sql');
+    await runner.applyMigration(db, v9, 9);
+
+    final v10 = await runner.loadMigrationScript('v10_users_and_roles.sql');
+    await runner.applyMigration(db, v10, 10);
 
     localDataSource = InvoiceLocalDataSource(dbService);
     final fakePaymentRepo = FakePaymentRepository();

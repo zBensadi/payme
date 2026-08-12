@@ -77,8 +77,8 @@ void main() {
   });
 
   test('SyncService orchestrates push then pull in priority order', () async {
-    final highRepo = MockSynchronizableRepository(SyncPriority.high, SyncDomain.settings);
-    final lowRepo = MockSynchronizableRepository(SyncPriority.low, SyncDomain.clients);
+    final highRepo = MockSynchronizableRepository(SyncPriority.level1Settings, SyncDomain.settings);
+    final lowRepo = MockSynchronizableRepository(SyncPriority.level7Invoices, SyncDomain.clients);
     
     // Pass in reverse order to ensure it sorts correctly
     final service = SyncService(
@@ -99,7 +99,7 @@ void main() {
   });
 
   test('SyncService triggers sync on connectivity restored', () async {
-    final repo = MockSynchronizableRepository(SyncPriority.high, SyncDomain.settings);
+    final repo = MockSynchronizableRepository(SyncPriority.level1Settings, SyncDomain.settings);
     
     mockConnectivity.simulateConnectivity(false);
     
@@ -118,7 +118,7 @@ void main() {
 
     // Simulate online
     mockConnectivity.simulateConnectivity(true);
-    await Future.delayed(const Duration(milliseconds: 50));
+    await Future.delayed(const Duration(milliseconds: 150));
 
     expect(repo.pushCalled, true);
   });

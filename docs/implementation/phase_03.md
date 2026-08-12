@@ -1,44 +1,31 @@
-# Phase 3: Accounting Years
+# Stage 3: Offline-First Architecture & Authentication Routing
 
 ## Objectives
-- Established the foundational scoping entity: `AccountingYear`.
-- Allowed the user to create, rename, switch the active year, and delete non-active years.
-- Protected deletion of years behind the `ReauthGuard`.
-- Exposed an `activeYearProvider` to track the globally active year for future domain features.
+- Establish the offline-first authorization architecture relying on SQLite as the single source of truth for the local application state.
+- Implement a robust Authentication Routing Layer utilizing a root `users/{uid}` pointer collection in Firestore to direct authenticated users to their canonical domain data.
+- Enforce strict fail-closed security for corrupted data states, preventing accidental duplicate business creation.
+- Seamlessly transition from a brand-new registration, to an existing session, and to the Dashboard.
 
-## Files Created
-- `lib/core/utils/id_generator.dart`: Lightweight random UUID string generator.
-- `lib/domain/entities/accounting_year.dart`: Immutable data class representing an accounting year.
-- `lib/domain/repositories/accounting_year_repository.dart`: Interface for domain interactions.
-- `lib/data/models/accounting_year_model.dart`: SQLite mapping logic.
-- `lib/data/datasources/local/accounting_year_local_datasource.dart`: Data access layer handling SQFLite queries and transactional updates for active status.
-- `lib/data/repositories_impl/accounting_year_repository_impl.dart`: Concrete repository implementation mapping database exceptions to `AppFailure`.
-- `lib/presentation/providers/repository_providers.dart`: Centralized domain providers.
-- `lib/presentation/providers/active_year_provider.dart`: Global provider tracking the active year.
-- `lib/presentation/features/accounting_years/controllers/accounting_year_controller.dart`: `AsyncNotifier` managing UI state.
-- `lib/presentation/features/accounting_years/screens/accounting_years_screen.dart`: UI for viewing and managing years.
-- `lib/presentation/features/accounting_years/widgets/year_list_tile.dart`: Visual list item containing a contextual menu (Rename/Delete/Set Active).
-- `test/domain/repositories/accounting_year_repository_test.dart`: Validates transactional integrity.
-- `test/presentation/features/accounting_years/accounting_years_screen_test.dart`: Validates UI states.
+## Finalized Bootstrap Flow & Routing Layer
+The application implements a decoupled routing layer, separating identity resolution from domain data.
+1. **Firebase Authentication:** Determines the user's base identity (`uid`).
+2. **Routing Pointer (`users/{uid}`):** A lightweight document in the root collection that answers: *"Which business does this user belong to?"* It contains only `businessId`, `roleId`, `updatedAt`, and `schemaVersion`. **This is not a domain model.**
+3. **Canonical Domain Data:** The actual User and Role models reside under `businesses/{businessId}/users/{uid}` and `businesses/{businessId}/roles/{roleId}`.
+4. **Idempotency & Session Recovery:** During startup (`FirebaseBootstrapScreen.initState`), the `checkAndRecoverSession` function reads the pointer. If the pointer and canonical domain data exist, it automatically provisions SQLite and routes the user to the Dashboard.
+5. **Brand-New Registration:** If the pointer does not exist, the user is presented with the Bootstrap form to create a new business. The business, role, user, and pointer are all written atomically in a single Firestore `WriteBatch`.
 
-## Files Modified
-- `lib/presentation/routing/app_router.dart`: Added `/accounting-years` route.
-- `lib/presentation/features/dashboard/screens/placeholder_home_screen.dart`: Added Navigation Drawer and dynamically displayed `activeYearProvider`.
+## Fail-Closed Philosophy
+If the routing pointer exists but the canonical domain documents (User or Role) are missing, the application enters a corrupted state. 
+- The bootstrap form is explicitly **hidden** to prevent the user from accidentally creating a second business and overwriting the pointer.
+- A dedicated **Account Data Error** view is rendered, offering only "Retry" and "Logout" actions.
+- The user remains authenticated but is safely blocked from entering the system.
 
-## Architectural Decisions
-- Strictly adhered to `Result<T>` and `AppFailure` patterns established in Phase 0-2.
-- Implemented `IdGenerator` to avoid pulling in the external `uuid` dependency, satisfying architecture constraint simplicity.
-- Leveraged `db.transaction()` to safely switch active year status, guaranteeing there is never zero or multiple active years.
-- Validated `ReauthGuard` prior to invoking the `delete` command.
-
-## Dependencies Added
-- None
-
-## Tests Executed
-- `accounting_year_repository_test.dart`
-- `accounting_years_screen_test.dart`
-- Tests passed perfectly ensuring correct active state handling and failure paths.
+## SQLite Seeding Process
+Bootstrap is the **only workflow** permitted to write directly to both Firestore and SQLite. 
+- Once the initial provisioning or session recovery is complete, the canonical `AppUser` and `UserRole` are seeded directly into the local SQLite database.
+- `CurrentAppUser` (provided by `currentUserProvider`) remains purely SQLite-driven. It reacts to the seeded data and authorizes the user.
+- `SyncService` starts subsequently, fully decoupled from the identity provisioning logic.
 
 ## Verification Results
-- 100% test pass rate.
-- UI elements safely render the active state, update globally across the app when changed, and correctly display the contextual "Active Year" dashboard banner.
+- All static analysis (`flutter analyze`) and automated tests (`flutter test`) pass successfully.
+- Verified across 8 distinct edge cases including brand-new registration, crash recovery, new device login, missing pointers, and corrupted domain data.

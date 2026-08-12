@@ -21,6 +21,7 @@ import '../datasources/remote/payment_remote_datasource.dart';
 import '../../../core/events/repository_event.dart';
 import '../../../core/events/repository_change_publisher.dart';
 import '../models/payment_model.dart';
+import '../../domain/entities/client_visibility_context.dart';
 
 class PaymentRepositoryImpl implements PaymentRepository, SynchronizableRepository, RepositoryChangePublisher {
   final PaymentLocalDataSource _localDataSource;
@@ -51,12 +52,15 @@ class PaymentRepositoryImpl implements PaymentRepository, SynchronizableReposito
   SyncDomain get syncDomain => SyncDomain.payments;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.low;
+  SyncPriority get syncPriority => SyncPriority.level8Payments;
 
   @override
-  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId) async {
+  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId, {ClientVisibilityContext? visibilityContext}) async {
     try {
-      final payments = await _localDataSource.getPaymentsForInvoice(invoiceId);
+      final payments = await _localDataSource.getPaymentsForInvoice(
+        invoiceId,
+        visibleToUserId: visibilityContext?.visibleToUserId,
+      );
       return Success(payments);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to load payments: $e'));
@@ -64,9 +68,14 @@ class PaymentRepositoryImpl implements PaymentRepository, SynchronizableReposito
   }
 
   @override
-  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end}) async {
+  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end, ClientVisibilityContext? visibilityContext}) async {
     try {
-      final payments = await _localDataSource.getPaymentsByPeriod(yearId, start: start, end: end);
+      final payments = await _localDataSource.getPaymentsByPeriod(
+        yearId, 
+        start: start, 
+        end: end,
+        visibleToUserId: visibilityContext?.visibleToUserId,
+      );
       return Success(payments);
     } catch (e) {
       return Failure(DatabaseFailure('Failed to load payments for period: $e'));

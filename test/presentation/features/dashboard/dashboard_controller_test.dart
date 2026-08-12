@@ -13,10 +13,11 @@ import 'package:payme/domain/repositories/invoice_repository.dart';
 import 'package:payme/domain/repositories/payment_repository.dart';
 import 'package:payme/domain/repositories/client_repository.dart';
 import 'package:payme/presentation/features/dashboard/models/dashboard_state.dart';
+import 'package:payme/domain/entities/client_visibility_context.dart';
 
 class FakeClientRepository implements ClientRepository {
   @override
-  Future<Result<List<Client>>> getAllVisible({String? searchQuery}) async {
+  Future<Result<List<Client>>> getAllVisible({String? searchQuery, ClientVisibilityContext? visibilityContext}) async {
     return Success([
       Client(id: 'c1', name: 'Client 1', createdAt: DateTime.now(), updatedAt: DateTime.now(), isDeleted: false),
       Client(id: 'c2', name: 'Client 2', createdAt: DateTime.now(), updatedAt: DateTime.now(), isDeleted: false),
@@ -40,7 +41,7 @@ class FakeClientRepository implements ClientRepository {
 
 class FakeInvoiceRepository implements InvoiceRepository {
   @override
-  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId) async {
+  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId, {ClientVisibilityContext? visibilityContext}) async {
     if (accountingYearId == 'y1') {
       return Success([
         Invoice(id: 'i1', accountingYearId: 'y1', clientId: 'c1', invoiceNumber: 1, date: DateTime.now(), amount: 1000, createdAt: DateTime.now(), updatedAt: DateTime.now(), isDirty: false),
@@ -50,7 +51,7 @@ class FakeInvoiceRepository implements InvoiceRepository {
     return const Success([]);
   }
   @override
-  Future<Result<List<Invoice>>> getInvoicesForClient(String clientId, String accountingYearId) async => const Success([]);
+  Future<Result<List<Invoice>>> getInvoicesForClient(String accountingYearId, String clientId, {ClientVisibilityContext? visibilityContext}) async => const Success([]);
   @override
   Future<Result<Invoice?>> getById(String id) async => const Success(null);
   @override
@@ -74,7 +75,7 @@ class FakeInvoiceRepository implements InvoiceRepository {
 
 class FakePaymentRepository implements PaymentRepository {
   @override
-  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId) async {
+  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId, {ClientVisibilityContext? visibilityContext}) async {
     if (invoiceId == 'i1') {
       // 200 paid
       return Success([
@@ -89,7 +90,7 @@ class FakePaymentRepository implements PaymentRepository {
     return const Success([]);
   }
   @override
-  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end}) async => const Success([]);
+  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end, ClientVisibilityContext? visibilityContext}) async => const Success([]);
   @override
   Future<Result<Payment?>> getById(String id) async => const Success(null);
   @override

@@ -1,14 +1,20 @@
 import 'package:sqflite/sqflite.dart';
 import '../../models/client_model.dart';
+import '../../../core/database/visibility_sql_builder.dart';
 
 class ClientLocalDataSource {
   final Database _db;
 
   ClientLocalDataSource(this._db);
 
-  Future<List<ClientModel>> getAllVisible({String? searchQuery}) async {
+  Future<List<ClientModel>> getAllVisible({String? searchQuery, String? visibleToUserId}) async {
     String whereClause = 'is_deleted = 0';
     List<Object?> whereArgs = [];
+
+    if (visibleToUserId != null && visibleToUserId.trim().isNotEmpty) {
+      whereClause += VisibilitySqlBuilder.buildVisibilityClause('clients', visibleToUserId);
+      whereArgs.add(visibleToUserId);
+    }
 
     if (searchQuery != null && searchQuery.trim().isNotEmpty) {
       whereClause += ' AND (name LIKE ? OR phone LIKE ? OR rc LIKE ? OR nif LIKE ? OR nis LIKE ? OR art LIKE ?)';

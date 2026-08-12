@@ -1,9 +1,10 @@
 import '../../core/error/result.dart';
 import '../entities/payment.dart';
+import '../entities/client_visibility_context.dart';
 
 abstract class PaymentRepository {
-  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId);
-  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end});
+  Future<Result<List<Payment>>> getPaymentsForInvoice(String invoiceId, {ClientVisibilityContext? visibilityContext});
+  Future<Result<List<Payment>>> getPaymentsByPeriod(String yearId, {DateTime? start, DateTime? end, ClientVisibilityContext? visibilityContext});
   Future<Result<Payment?>> getById(String id);
   
   /// Creates a payment and optionally copies/saves attachments

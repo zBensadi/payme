@@ -55,6 +55,8 @@ class TestDatabaseService implements DatabaseService {
             end_date TEXT NOT NULL,
             is_active INTEGER NOT NULL DEFAULT 0,
             is_closed INTEGER NOT NULL DEFAULT 0,
+            created_by TEXT,
+            updated_by TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
           )
@@ -68,6 +70,9 @@ class TestDatabaseService implements DatabaseService {
             nif TEXT,
             nis TEXT,
             art TEXT,
+            visibility_type TEXT NOT NULL DEFAULT 'everyone',
+            created_by TEXT,
+            updated_by TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             is_deleted INTEGER NOT NULL DEFAULT 0
@@ -84,11 +89,14 @@ class TestDatabaseService implements DatabaseService {
             due_date TEXT NOT NULL,
             amount REAL NOT NULL,
             notes TEXT,
+            created_by TEXT,
+            updated_by TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             remote_id TEXT,
             synced_at TEXT,
             is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY (accounting_year_id) REFERENCES accounting_years(id) ON DELETE CASCADE,
             FOREIGN KEY (client_id) REFERENCES clients(id)
           )
@@ -103,6 +111,8 @@ class TestDatabaseService implements DatabaseService {
             method TEXT NOT NULL,
             reference TEXT,
             notes TEXT,
+            created_by TEXT,
+            updated_by TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             remote_id TEXT,

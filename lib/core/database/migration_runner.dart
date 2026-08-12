@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import '../constants/app_constants.dart';
@@ -85,6 +87,30 @@ class MigrationRunner {
         final scriptContent = await loadMigrationScript('v9_algerian_compliance.sql');
         await applyMigration(db, scriptContent, 9);
         currentVersion = 9;
+      }
+      if (currentVersion == 9) {
+        _logger.info('Running migration: v10_users_and_roles.sql');
+        String scriptContent = await loadMigrationScript('v10_users_and_roles.sql');
+        
+        // Dynamically inject Firebase UID to ensure deterministic migration
+        String uid = 'owner-placeholder-uid';
+        try {
+          if (Firebase.apps.isNotEmpty) {
+            uid = FirebaseAuth.instance.currentUser?.uid ?? 'owner-placeholder-uid';
+          }
+        } catch (_) {
+          // Ignore if Firebase isn't initialized (e.g. in tests)
+        }
+        scriptContent = scriptContent.replaceAll('{{FIREBASE_UID}}', uid);
+        
+        await applyMigration(db, scriptContent, 10);
+        currentVersion = 10;
+      }
+      if (currentVersion == 10) {
+        _logger.info('Running migration: v11_add_business_id_to_users.sql');
+        final scriptContent = await loadMigrationScript('v11_add_business_id_to_users.sql');
+        await applyMigration(db, scriptContent, 11);
+        currentVersion = 11;
       }
     }
   }

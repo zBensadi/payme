@@ -1,6 +1,18 @@
 # Changelog
 
-## [Alpha 13] - 2026-08-10
+## [Stage 3.1 Final] - 2026-08-11
+### Added
+- Implemented **Stage 3 Offline-First Architecture & Sync Foundations** based on the V2 Architecture.
+- Deployed Firebase Authentication for Cloud Mode with decoupled offline recovery options (SQLite first).
+- Implemented **Authentication Routing Layer**:
+  - `users/{uid}` pointer collection in Firestore acting solely as O(1) idempotency checks.
+  - Canonical user data relocated to `businesses/{businessId}/users/{uid}`.
+- Refined `FirebaseBootstrapScreen` to provide strict Fail-Closed security. Missing canonical data routes to a dedicated **Account Data Error** view rather than the registration form.
+- Introduced `CurrentAppUser` relying entirely on SQLite caching.
+
+### Changed
+- Refactored `BootstrapController` and `FirebaseBootstrapRepository` to strictly manage offline seeding without intermingling ongoing sync logic.
+- `SyncService` is completely decoupled from initial setup.
 ### Added
 - Attachment file size limits (5MB max) and format restrictions (`pdf`, `jpg`, `jpeg`, `png`) visually enforced in `PaymentFormScreen`.
 - `BusinessSettings` defaults are instantly marked dirty on a fresh installation for immediate Firebase synchronization.

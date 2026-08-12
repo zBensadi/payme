@@ -44,38 +44,58 @@ import '../features/settings/screens/change_password_screen.dart';
 import '../../domain/entities/client.dart';
 
 import '../providers/sync_providers.dart';
+import '../../domain/entities/permissions.dart';
+import '../providers/repository_providers.dart';
+import '../providers/permission_service_provider.dart';
+import '../features/auth/controllers/current_user_controller.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] constructor — registering listeners');
     _ref.listen<FirebaseAuthState>(
       firebaseAuthControllerProvider,
-      (_, _) => notifyListeners(),
+      (prev, next) {
+        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] firebaseAuthControllerProvider changed: $prev → $next — calling notifyListeners()');
+        notifyListeners();
+      },
     );
     _ref.listen<Locale?>(
       localeControllerProvider,
-      (_, _) => notifyListeners(),
+      (prev, next) {
+        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] localeControllerProvider changed: $prev → $next — calling notifyListeners()');
+        notifyListeners();
+      },
     );
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] constructor complete');
   }
 }
 
 final routerNotifierProvider = Provider((ref) => RouterNotifier(ref));
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][appRouterProvider] ENTER provider build');
+
   // Intentionally instantiate the global synchronization engine once for the lifetime of the application.
   // The service remains idle until authentication succeeds and the businessId streams in.
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][appRouterProvider] BEFORE ref.watch(syncServiceProvider) — this triggers syncServiceProvider construction');
   ref.watch(syncServiceProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][appRouterProvider] AFTER  ref.watch(syncServiceProvider) complete');
 
   final notifier = ref.watch(routerNotifierProvider);
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][appRouterProvider] routerNotifierProvider resolved');
 
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][appRouterProvider] Constructing GoRouter...');
   return GoRouter(
     initialLocation: '/',
     refreshListenable: notifier,
     redirect: (context, state) {
       final authState = ref.read(firebaseAuthControllerProvider);
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] called — path=${state.uri.path} authState=$authState');
 
       if (authState == FirebaseAuthState.loading) {
+        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] authState=loading → redirecting to /splash');
         return '/splash';
       }
 
@@ -92,30 +112,67 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         final locale = ref.read(localeControllerProvider);
         if (locale == null) {
           if (state.uri.path != '/language-select') {
+            debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] unauthenticated + no locale → /language-select');
             return '/language-select';
           }
           return null; // Stay on language select
         }
         
-        if (state.uri.path != '/firebase-login' && 
-            state.uri.path != '/firebase-forgot-password' && 
+        if (state.uri.path != '/firebase-login' &&
+            state.uri.path != '/firebase-forgot-password' &&
             state.uri.path != '/language-select') {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] unauthenticated + locale set → /firebase-login');
           return '/firebase-login';
         }
       }
 
       if (authState == FirebaseAuthState.bootstrapping) {
         if (state.uri.path != '/firebase-bootstrap') {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] bootstrapping → /firebase-bootstrap');
           return '/firebase-bootstrap';
         }
       }
 
       if (authState == FirebaseAuthState.authenticated) {
         if (isGoingToAuth || state.uri.path == '/splash' || state.uri.path == '/firebase-bootstrap') {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] authenticated + on splash/auth screen → /');
           return '/';
+        }
+
+        // Authorization checks
+        final currentUser = ref.read(currentUserProvider).value;
+        final permissionService = ref.read(permissionServiceProvider);
+        final path = state.uri.path;
+        
+        if (path != '/') {
+          String? requiredPermission;
+          if (path.startsWith('/accounting-years')) requiredPermission = Permissions.accountingYearsView;
+          else if (path.startsWith('/clients')) requiredPermission = Permissions.clientsView;
+          else if (path.startsWith('/invoices')) requiredPermission = Permissions.invoicesView;
+          else if (path.startsWith('/reports')) requiredPermission = Permissions.reportsView;
+          else if (path.startsWith('/settings')) requiredPermission = Permissions.settingsView;
+          else if (path.startsWith('/backup')) requiredPermission = Permissions.backupManage;
+
+          if (requiredPermission != null) {
+            final hasPerm = permissionService.hasPermission(currentUser, requiredPermission);
+            if (!hasPerm) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("You don't have permission to access this feature."),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              });
+              return '/';
+            }
+          }
         }
       }
 
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] no redirect needed \u2192 null (staying at ${state.uri.path})');
       return null;
     },
     routes: [

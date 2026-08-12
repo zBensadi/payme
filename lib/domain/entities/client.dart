@@ -9,6 +9,9 @@ class Client {
   final String? nif;
   final String? nis;
   final String? art;
+  final String visibilityType;
+  final String? createdBy;
+  final String? updatedBy;
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -27,6 +30,9 @@ class Client {
     this.nif,
     this.nis,
     this.art,
+    this.visibilityType = 'everyone',
+    this.createdBy,
+    this.updatedBy,
     this.isDeleted = false,
     required this.createdAt,
     required this.updatedAt,
@@ -46,6 +52,9 @@ class Client {
     String? nif,
     String? nis,
     String? art,
+    String? visibilityType,
+    String? createdBy,
+    String? updatedBy,
     bool? isDeleted,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -64,6 +73,9 @@ class Client {
       nif: nif ?? this.nif,
       nis: nis ?? this.nis,
       art: art ?? this.art,
+      visibilityType: visibilityType ?? this.visibilityType,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

@@ -4,6 +4,8 @@ class AccountingYear {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? createdBy;
+  final String? updatedBy;
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
@@ -14,6 +16,8 @@ class AccountingYear {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.createdBy,
+    this.updatedBy,
     this.remoteId,
     this.syncedAt,
     this.isDirty = false,
@@ -25,6 +29,8 @@ class AccountingYear {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? createdBy,
+    String? updatedBy,
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
@@ -35,6 +41,8 @@ class AccountingYear {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,

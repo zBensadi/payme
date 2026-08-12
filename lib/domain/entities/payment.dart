@@ -11,6 +11,8 @@ class Payment {
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? createdBy;
+  final String? updatedBy;
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
@@ -29,6 +31,8 @@ class Payment {
     this.notes,
     required this.createdAt,
     required this.updatedAt,
+    this.createdBy,
+    this.updatedBy,
     this.remoteId,
     this.syncedAt,
     required this.isDirty,
@@ -46,6 +50,8 @@ class Payment {
     String? notes,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? createdBy,
+    String? updatedBy,
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
@@ -62,6 +68,8 @@ class Payment {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,

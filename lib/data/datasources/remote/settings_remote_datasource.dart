@@ -33,8 +33,12 @@ class SettingsRemoteDataSource {
 
     final batch = _firestore.batch();
 
-    // 1. Update business_settings document
-    final settingsRef = _firestore.collection('business_settings').doc(businessId);
+    // 1. Update tenant-scoped settings document
+    final settingsRef = _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('settings')
+        .doc('main');
     batch.set(settingsRef, map, SetOptions(merge: true));
 
     // 2. Update businesses document atomically
@@ -47,7 +51,12 @@ class SettingsRemoteDataSource {
   }
 
   Future<BusinessSettings?> pullSettings(String businessId) async {
-    final doc = await _firestore.collection('business_settings').doc(businessId).get();
+    final doc = await _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('settings')
+        .doc('main')
+        .get();
     if (!doc.exists || doc.data() == null) return null;
 
     final data = doc.data()!;

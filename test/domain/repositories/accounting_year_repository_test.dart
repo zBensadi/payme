@@ -46,6 +46,8 @@ void main() {
                     id TEXT PRIMARY KEY,
                     name TEXT NOT NULL UNIQUE,
                     is_active INTEGER NOT NULL DEFAULT 0,
+                    created_by TEXT,
+                    updated_by TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     remote_id TEXT,

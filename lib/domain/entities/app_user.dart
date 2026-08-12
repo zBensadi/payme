@@ -5,9 +5,14 @@ class AppUser {
   final String? businessId;
   final String? roleId;
   final bool isSuperAdmin;
+  final bool isOwner;
   final bool isActive;
+  final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? remoteId;
+  final DateTime? syncedAt;
+  final bool isDirty;
 
   bool get requiresBootstrap => businessId == null;
 
@@ -18,9 +23,14 @@ class AppUser {
     this.businessId,
     this.roleId,
     required this.isSuperAdmin,
+    this.isOwner = false,
     required this.isActive,
+    this.isDeleted = false,
     required this.createdAt,
     required this.updatedAt,
+    this.remoteId,
+    this.syncedAt,
+    this.isDirty = false,
   });
 
   AppUser copyWith({
@@ -30,9 +40,14 @@ class AppUser {
     String? businessId,
     String? roleId,
     bool? isSuperAdmin,
+    bool? isOwner,
     bool? isActive,
+    bool? isDeleted,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? remoteId,
+    DateTime? syncedAt,
+    bool? isDirty,
   }) {
     return AppUser(
       uid: uid ?? this.uid,
@@ -41,9 +56,14 @@ class AppUser {
       businessId: businessId ?? this.businessId,
       roleId: roleId ?? this.roleId,
       isSuperAdmin: isSuperAdmin ?? this.isSuperAdmin,
+      isOwner: isOwner ?? this.isOwner,
       isActive: isActive ?? this.isActive,
+      isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      remoteId: remoteId ?? this.remoteId,
+      syncedAt: syncedAt ?? this.syncedAt,
+      isDirty: isDirty ?? this.isDirty,
     );
   }
 }

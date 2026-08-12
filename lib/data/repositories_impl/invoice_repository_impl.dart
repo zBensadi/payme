@@ -15,6 +15,7 @@ import '../../core/sync/sync_trigger.dart';
 import '../../../core/events/repository_event.dart';
 import '../../../core/events/repository_change_publisher.dart';
 import '../datasources/remote/invoice_remote_datasource.dart';
+import '../../domain/entities/client_visibility_context.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
@@ -49,13 +50,16 @@ class InvoiceRepositoryImpl implements InvoiceRepository, SynchronizableReposito
   SyncDomain get syncDomain => SyncDomain.invoices;
 
   @override
-  SyncPriority get syncPriority => SyncPriority.low;
+  SyncPriority get syncPriority => SyncPriority.level7Invoices;
 
 
   @override
-  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId) async {
+  Future<Result<List<Invoice>>> getInvoicesForYear(String accountingYearId, {ClientVisibilityContext? visibilityContext}) async {
     try {
-      final models = await _localDataSource.getInvoicesForYear(accountingYearId);
+      final models = await _localDataSource.getInvoicesForYear(
+        accountingYearId,
+        visibleToUserId: visibilityContext?.visibleToUserId,
+      );
       return Success(models.map((m) => m.toEntity()).toList());
     } catch (e) {
       return Failure(DatabaseFailure('Failed to get invoices for year: $e'));
@@ -63,9 +67,13 @@ class InvoiceRepositoryImpl implements InvoiceRepository, SynchronizableReposito
   }
 
   @override
-  Future<Result<List<Invoice>>> getInvoicesForClient(String accountingYearId, String clientId) async {
+  Future<Result<List<Invoice>>> getInvoicesForClient(String accountingYearId, String clientId, {ClientVisibilityContext? visibilityContext}) async {
     try {
-      final models = await _localDataSource.getInvoicesForClient(accountingYearId, clientId);
+      final models = await _localDataSource.getInvoicesForClient(
+        accountingYearId, 
+        clientId,
+        visibleToUserId: visibilityContext?.visibleToUserId,
+      );
       return Success(models.map((m) => m.toEntity()).toList());
     } catch (e) {
       return Failure(DatabaseFailure('Failed to get invoices for client: $e'));
