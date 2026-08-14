@@ -214,8 +214,17 @@ class InvoiceLocalDataSource {
   Future<int> countAllForClient(String clientId) async {
     final db = _dbService.db;
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM invoices WHERE client_id = ?',
+      'SELECT COUNT(*) as count FROM invoices WHERE client_id = ? AND is_deleted = 0',
       [clientId],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<int> countAllForYear(String accountingYearId) async {
+    final db = _dbService.db;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM invoices WHERE accounting_year_id = ? AND is_deleted = 0',
+      [accountingYearId],
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }

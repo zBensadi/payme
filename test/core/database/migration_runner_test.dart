@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:payme/core/database/migration_runner.dart';
+import 'package:payme/core/constants/app_constants.dart';
 import 'package:payme/core/logging/logger_service.dart';
 
 void main() {
@@ -22,6 +23,32 @@ void main() {
 
   tearDown(() async {
     await db.close();
+  });
+
+
+  test('AppConstants.schemaVersion equals 14', () {
+    expect(AppConstants.schemaVersion, 14);
+  });
+
+  test('V12 upgrades to V13 and creates deleted_client_visibilities', () async {
+    // Fake the database being at v12
+    await db.execute('''
+      CREATE TABLE app_meta (id INTEGER PRIMARY KEY, schema_version INTEGER);
+    ''');
+    await db.insert('app_meta', {'id': 1, 'schema_version': 12});
+    
+    // Apply V13
+    final scriptFile = File('lib/core/database/migrations/v13_client_visibility_tombstones.sql');
+    final scriptContent = await scriptFile.readAsString();
+    await runner.applyMigration(db, scriptContent, 13);
+    
+    final tables = await db.query('sqlite_master', where: 'type = ?', whereArgs: ['table']);
+    final tableNames = tables.map((t) => t['name'] as String).toList();
+    
+    expect(tableNames, contains('deleted_client_visibilities'));
+    
+    final meta = await db.query('app_meta');
+    expect(meta.first['schema_version'], 13);
   });
 
   test('MigrationRunner applies v1_initial.sql and creates expected tables', () async {

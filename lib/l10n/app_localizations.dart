@@ -1315,7 +1315,7 @@ abstract class AppLocalizations {
   /// No description provided for @invoicesAndPaid.
   ///
   /// In en, this message translates to:
-  /// **'Invoices: {count} • Paid: {amount} {currency}'**
+  /// **'Invoices: {count} â€¢ Paid: {amount} {currency}'**
   String invoicesAndPaid(String count, String amount, String currency);
 
   /// No description provided for @startDate.
@@ -1435,13 +1435,13 @@ abstract class AppLocalizations {
   /// No description provided for @french.
   ///
   /// In en, this message translates to:
-  /// **'Français'**
+  /// **'FranÃ§ais'**
   String get french;
 
   /// No description provided for @arabic.
   ///
   /// In en, this message translates to:
-  /// **'العربية'**
+  /// **'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©'**
   String get arabic;
 
   /// No description provided for @saveSettings.
@@ -1737,6 +1737,486 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ART'**
   String get art;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles'**
+  String get roles;
+
+  /// No description provided for @hideInactiveUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Inactive Users'**
+  String get hideInactiveUsers;
+
+  /// No description provided for @showInactiveUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Inactive Users'**
+  String get showInactiveUsers;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Users...'**
+  String get searchUsers;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found.'**
+  String get noUsersFound;
+
+  /// No description provided for @unknownRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Role'**
+  String get unknownRole;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @administration.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get administration;
+
+  /// No description provided for @userDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'User Details'**
+  String get userDetails;
+
+  /// No description provided for @changeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Role'**
+  String get changeRole;
+
+  /// No description provided for @activateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate User'**
+  String get activateUser;
+
+  /// No description provided for @deactivateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate User'**
+  String get deactivateUser;
+
+  /// No description provided for @deleteUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete User'**
+  String get deleteUser;
+
+  /// No description provided for @systemOwnerProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'System Owner protection: Action not allowed.'**
+  String get systemOwnerProtection;
+
+  /// No description provided for @userDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User deleted successfully'**
+  String get userDeletedSuccess;
+
+  /// No description provided for @userUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated successfully'**
+  String get userUpdatedSuccess;
+
+  /// No description provided for @roleId.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get roleId;
+
+  /// No description provided for @deactivateWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivate this user? They will not be able to log in.'**
+  String get deactivateWarning;
+
+  /// No description provided for @deleteUserWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete this user?'**
+  String get deleteUserWarning;
+
+  /// No description provided for @rolesListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Management'**
+  String get rolesListTitle;
+
+  /// No description provided for @editRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Role'**
+  String get editRole;
+
+  /// No description provided for @roleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Name'**
+  String get roleName;
+
+  /// No description provided for @roleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get roleDescription;
+
+  /// No description provided for @priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// No description provided for @permissionsGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get permissionsGroup;
+
+  /// No description provided for @systemRoleWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a System Role. Some properties cannot be modified.'**
+  String get systemRoleWarning;
+
+  /// No description provided for @roleColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Color'**
+  String get roleColor;
+
+  /// No description provided for @noRolesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No roles found.'**
+  String get noRolesFound;
+
+  /// No description provided for @roleUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Role updated successfully'**
+  String get roleUpdatedSuccess;
+
+  /// No description provided for @permissions_clients.
+  ///
+  /// In en, this message translates to:
+  /// **'Clients'**
+  String get permissions_clients;
+
+  /// No description provided for @permissions_invoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices'**
+  String get permissions_invoices;
+
+  /// No description provided for @permissions_payments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get permissions_payments;
+
+  /// No description provided for @permissions_accounting.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting Years'**
+  String get permissions_accounting;
+
+  /// No description provided for @permissions_reporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporting & Exports'**
+  String get permissions_reporting;
+
+  /// No description provided for @permissions_system.
+  ///
+  /// In en, this message translates to:
+  /// **'System & Administration'**
+  String get permissions_system;
+
+  /// No description provided for @priorityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher number means higher authority. You cannot assign a priority equal to or higher than your own.'**
+  String get priorityDescription;
+
+  /// No description provided for @createRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Role'**
+  String get createRole;
+
+  /// No description provided for @deleteRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Role'**
+  String get deleteRole;
+
+  /// No description provided for @deleteRoleConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this role?'**
+  String get deleteRoleConfirmation;
+
+  /// No description provided for @errorInsufficientPermissionsRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient permissions to access this repository.'**
+  String get errorInsufficientPermissionsRepo;
+
+  /// No description provided for @errorSettingsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings not found.'**
+  String get errorSettingsNotFound;
+
+  /// No description provided for @errorInvalidRoleAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid role assigned.'**
+  String get errorInvalidRoleAssigned;
+
+  /// No description provided for @errorCannotAssignHigherRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot assign a role with priority equal or higher than your own.'**
+  String get errorCannotAssignHigherRole;
+
+  /// No description provided for @errorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found.'**
+  String get errorUserNotFound;
+
+  /// No description provided for @errorTargetUserNoValidRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Target user has no valid role.'**
+  String get errorTargetUserNoValidRole;
+
+  /// No description provided for @errorRoleNameExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A role with this name already exists.'**
+  String get errorRoleNameExists;
+
+  /// No description provided for @errorCannotCreateHigherRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot create a role with priority equal or higher than your own.'**
+  String get errorCannotCreateHigherRole;
+
+  /// No description provided for @errorCannotAssignUnpossessedPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot assign permissions that you do not possess.'**
+  String get errorCannotAssignUnpossessedPermissions;
+
+  /// No description provided for @errorRoleNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Role not found.'**
+  String get errorRoleNotFound;
+
+  /// No description provided for @errorSystemRoleModification.
+  ///
+  /// In en, this message translates to:
+  /// **'This role is a system role and its structure cannot be modified.'**
+  String get errorSystemRoleModification;
+
+  /// No description provided for @errorCannotElevateRolePriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot elevate role priority to be equal or higher than your own.'**
+  String get errorCannotElevateRolePriority;
+
+  /// No description provided for @errorRoleCannotBeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This role cannot be deleted.'**
+  String get errorRoleCannotBeDeleted;
+
+  /// No description provided for @errorRoleHasUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete this role because users are currently assigned to it.'**
+  String get errorRoleHasUsers;
+
+  /// No description provided for @errorPaymentNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment not found.'**
+  String get errorPaymentNotFound;
+
+  /// No description provided for @errorInvoiceNotFoundMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice not found.'**
+  String get errorInvoiceNotFoundMsg;
+
+  /// No description provided for @errorClientNotFoundMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Client not found.'**
+  String get errorClientNotFoundMsg;
+
+  /// No description provided for @errorDatabaseNotInitialized.
+  ///
+  /// In en, this message translates to:
+  /// **'Database not initialized'**
+  String get errorDatabaseNotInitialized;
+
+  /// No description provided for @errorNoActiveAccountingYear.
+  ///
+  /// In en, this message translates to:
+  /// **'No active accounting year.'**
+  String get errorNoActiveAccountingYear;
+
+  /// No description provided for @errorBusinessSettingsNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Business settings not loaded'**
+  String get errorBusinessSettingsNotLoaded;
+
+  /// No description provided for @errorSourceFileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Source file does not exist.'**
+  String get errorSourceFileNotFound;
+
+  /// No description provided for @errorSyncPullFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull failed. Aborting sync cycle to preserve referential integrity.'**
+  String get errorSyncPullFailed;
+
+  /// No description provided for @errorDatabaseClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Database is closed. It must be reopened first.'**
+  String get errorDatabaseClosed;
+
+  /// No description provided for @errorDatabaseSchemaTooNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Database schema version is newer than the app supports. Please update the app.'**
+  String get errorDatabaseSchemaTooNew;
+
+  /// No description provided for @userCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'User created successfully'**
+  String get userCreatedSuccess;
+
+  /// No description provided for @saveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Profile'**
+  String get saveProfile;
+
+  /// No description provided for @pageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found: {uri}'**
+  String pageNotFound(String uri);
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// No description provided for @visibilityEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get visibilityEveryone;
+
+  /// No description provided for @visibilitySpecificUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Users'**
+  String get visibilitySpecificUsers;
+
+  /// No description provided for @selectUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Users'**
+  String get selectUsers;
+
+  /// No description provided for @deleteAccountingYearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this accounting year?'**
+  String get deleteAccountingYearConfirm;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @createUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Create User'**
+  String get createUser;
+
+  /// No description provided for @clientVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Visibility'**
+  String get clientVisibility;
+
+  /// No description provided for @noUsersSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No users selected.'**
+  String get noUsersSelected;
+
+  /// No description provided for @systemOwnerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Business owner with full permissions'**
+  String get systemOwnerDescription;
+
+  /// No description provided for @priorityPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority: {priority}'**
+  String priorityPrefix(int priority);
 }
 
 class _AppLocalizationsDelegate

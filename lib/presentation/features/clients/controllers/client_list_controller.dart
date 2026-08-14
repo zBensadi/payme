@@ -24,6 +24,8 @@ class ClientListController extends AsyncNotifier<List<Client>> {
     final query = ref.watch(clientSearchQueryProvider);
     final repo = ref.watch(clientRepositoryProvider);
     ref.invalidateOnRepositoryChange(repo);
+    final visibilityRepo = ref.watch(clientVisibilityRepositoryProvider);
+    ref.invalidateOnRepositoryChange(visibilityRepo);
     return _fetchClients(query, repo);
   }
 

@@ -26,11 +26,12 @@ final synchronizableRepositoriesProvider = Provider<List<SynchronizableRepositor
   return [
     ref.watch(internalSettingsRepositoryProvider) as SynchronizableRepository,
     ref.watch(internalClientRepositoryProvider) as SynchronizableRepository,
-    ref.watch(accountingYearRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalAccountingYearRepositoryProvider) as SynchronizableRepository,
     ref.watch(internalInvoiceRepositoryProvider) as SynchronizableRepository,
     ref.watch(internalPaymentRepositoryProvider) as SynchronizableRepository,
     ref.watch(internalRoleRepositoryProvider) as SynchronizableRepository,
     ref.watch(internalUserRepositoryProvider) as SynchronizableRepository,
+    ref.watch(internalClientVisibilityRepositoryProvider) as SynchronizableRepository,
   ];
 });
 

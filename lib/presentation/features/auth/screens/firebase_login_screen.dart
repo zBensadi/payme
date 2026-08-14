@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/error/result.dart';
@@ -53,7 +54,7 @@ class _FirebaseLoginScreenState extends ConsumerState<FirebaseLoginScreen> {
     if (result is Failure) {
       setState(() {
         _isLoading = false;
-        _error = _translateError(result.failure.message);
+        _error = _translateError(result.failure.message.localize(context));
       });
     } else {
       setState(() {

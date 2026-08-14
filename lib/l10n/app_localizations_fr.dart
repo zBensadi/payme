@@ -906,4 +906,268 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get art => 'ART';
+
+  @override
+  String get users => 'Utilisateurs';
+
+  @override
+  String get roles => 'Rôles';
+
+  @override
+  String get hideInactiveUsers => 'Masquer les utilisateurs inactifs';
+
+  @override
+  String get showInactiveUsers => 'Afficher les utilisateurs inactifs';
+
+  @override
+  String get searchUsers => 'Rechercher des utilisateurs...';
+
+  @override
+  String get noUsersFound => 'Aucun utilisateur trouvé.';
+
+  @override
+  String get unknownRole => 'Rôle inconnu';
+
+  @override
+  String get active => 'Actif';
+
+  @override
+  String get inactive => 'Inactif';
+
+  @override
+  String get administration => 'Administration';
+
+  @override
+  String get userDetails => 'Détails de l\'utilisateur';
+
+  @override
+  String get changeRole => 'Changer le rôle';
+
+  @override
+  String get activateUser => 'Activer l\'utilisateur';
+
+  @override
+  String get deactivateUser => 'Désactiver l\'utilisateur';
+
+  @override
+  String get deleteUser => 'Supprimer l\'utilisateur';
+
+  @override
+  String get systemOwnerProtection =>
+      'Protection du propriétaire du système : Action non autorisée.';
+
+  @override
+  String get userDeletedSuccess => 'Utilisateur supprimé avec succès';
+
+  @override
+  String get userUpdatedSuccess => 'Utilisateur mis à jour avec succès';
+
+  @override
+  String get roleId => 'Rôle';
+
+  @override
+  String get deactivateWarning =>
+      'Êtes-vous sûr de vouloir désactiver cet utilisateur ? Il ne pourra plus se connecter.';
+
+  @override
+  String get deleteUserWarning =>
+      'Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?';
+
+  @override
+  String get rolesListTitle => 'Gestion des Rôles';
+
+  @override
+  String get editRole => 'Modifier le rôle';
+
+  @override
+  String get roleName => 'Nom du rôle';
+
+  @override
+  String get roleDescription => 'Description';
+
+  @override
+  String get priority => 'Priorité';
+
+  @override
+  String get permissionsGroup => 'Autorisations';
+
+  @override
+  String get systemRoleWarning =>
+      'Ceci est un rôle système. Certaines propriétés ne peuvent pas être modifiées.';
+
+  @override
+  String get roleColor => 'Couleur du rôle';
+
+  @override
+  String get noRolesFound => 'Aucun rôle trouvé.';
+
+  @override
+  String get roleUpdatedSuccess => 'Rôle mis à jour avec succès';
+
+  @override
+  String get permissions_clients => 'Clients';
+
+  @override
+  String get permissions_invoices => 'Factures';
+
+  @override
+  String get permissions_payments => 'Paiements';
+
+  @override
+  String get permissions_accounting => 'Années Comptables';
+
+  @override
+  String get permissions_reporting => 'Rapports et Exportations';
+
+  @override
+  String get permissions_system => 'Système et Administration';
+
+  @override
+  String get priorityDescription =>
+      'Un nombre plus élevé signifie une priorité plus élevée. Vous ne pouvez pas attribuer une priorité égale ou supérieure à la vôtre.';
+
+  @override
+  String get createRole => 'Créer un rôle';
+
+  @override
+  String get deleteRole => 'Supprimer le rôle';
+
+  @override
+  String get deleteRoleConfirmation =>
+      'Êtes-vous sûr de vouloir supprimer ce rôle ?';
+
+  @override
+  String get errorInsufficientPermissionsRepo =>
+      'Autorisations insuffisantes pour accéder à ce référentiel.';
+
+  @override
+  String get errorSettingsNotFound => 'Paramètres introuvables.';
+
+  @override
+  String get errorInvalidRoleAssigned => 'Rôle attribué non valide.';
+
+  @override
+  String get errorCannotAssignHigherRole =>
+      'Impossible d\'attribuer un rôle avec une priorité égale ou supérieure à la vôtre.';
+
+  @override
+  String get errorUserNotFound => 'Utilisateur introuvable.';
+
+  @override
+  String get errorTargetUserNoValidRole =>
+      'L\'utilisateur cible n\'a pas de rôle valide.';
+
+  @override
+  String get errorRoleNameExists => 'Un rôle avec ce nom existe déjà.';
+
+  @override
+  String get errorCannotCreateHigherRole =>
+      'Impossible de créer un rôle avec une priorité égale ou supérieure à la vôtre.';
+
+  @override
+  String get errorCannotAssignUnpossessedPermissions =>
+      'Impossible d\'attribuer des autorisations que vous ne possédez pas.';
+
+  @override
+  String get errorRoleNotFound => 'Rôle introuvable.';
+
+  @override
+  String get errorSystemRoleModification =>
+      'Ceci est un rôle système et sa structure ne peut pas être modifiée.';
+
+  @override
+  String get errorCannotElevateRolePriority =>
+      'Impossible d\'élever la priorité du rôle à un niveau égal ou supérieur au vôtre.';
+
+  @override
+  String get errorRoleCannotBeDeleted => 'Ce rôle ne peut pas être supprimé.';
+
+  @override
+  String get errorRoleHasUsers =>
+      'Impossible de supprimer ce rôle car des utilisateurs y sont actuellement affectés.';
+
+  @override
+  String get errorPaymentNotFound => 'Paiement introuvable.';
+
+  @override
+  String get errorInvoiceNotFoundMsg => 'Facture introuvable.';
+
+  @override
+  String get errorClientNotFoundMsg => 'Client introuvable.';
+
+  @override
+  String get errorDatabaseNotInitialized => 'Base de données non initialisée';
+
+  @override
+  String get errorNoActiveAccountingYear => 'Aucun exercice comptable actif.';
+
+  @override
+  String get errorBusinessSettingsNotLoaded =>
+      'Paramètres de l\'entreprise non chargés';
+
+  @override
+  String get errorSourceFileNotFound => 'Le fichier source n\'existe pas.';
+
+  @override
+  String get errorSyncPullFailed =>
+      'Échec de la récupération. Annulation du cycle de synchronisation pour préserver l\'intégrité référentielle.';
+
+  @override
+  String get errorDatabaseClosed =>
+      'La base de données est fermée. Elle doit d\'abord être rouverte.';
+
+  @override
+  String get errorDatabaseSchemaTooNew =>
+      'La version du schéma de base de données est plus récente que celle prise en charge par l\'application. Veuillez mettre à jour l\'application.';
+
+  @override
+  String get userCreatedSuccess => 'Utilisateur créé avec succès';
+
+  @override
+  String get saveProfile => 'Enregistrer le profil';
+
+  @override
+  String pageNotFound(String uri) {
+    return 'Page introuvable : $uri';
+  }
+
+  @override
+  String get errorTitle => 'Erreur';
+
+  @override
+  String get visibilityEveryone => 'Tout le monde';
+
+  @override
+  String get visibilitySpecificUsers => 'Utilisateurs spécifiques';
+
+  @override
+  String get selectUsers => 'Sélectionner des utilisateurs';
+
+  @override
+  String get deleteAccountingYearConfirm =>
+      'Êtes-vous sûr de vouloir supprimer cet exercice comptable ?';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get logout => 'Déconnexion';
+
+  @override
+  String get createUser => 'Créer un utilisateur';
+
+  @override
+  String get clientVisibility => 'Visibilité du Client';
+
+  @override
+  String get noUsersSelected => 'Aucun utilisateur sélectionné.';
+
+  @override
+  String get systemOwnerDescription =>
+      'Propriétaire de l\'entreprise avec toutes les autorisations';
+
+  @override
+  String priorityPrefix(int priority) {
+    return 'Priorité : $priority';
+  }
 }

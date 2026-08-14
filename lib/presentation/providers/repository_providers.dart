@@ -15,11 +15,13 @@ import '../../domain/entities/accounting_year.dart';
 import '../../core/pdf/app_pdf_localizations.dart';
 import '../../data/datasources/remote/client_remote_datasource.dart';
 import '../../data/repositories_impl/secured/secured_client_repository.dart';
+import '../../data/repositories_impl/secured/secured_client_visibility_repository.dart';
 import '../../data/repositories_impl/secured/secured_invoice_repository.dart';
 import '../../data/repositories_impl/secured/secured_payment_repository.dart';
 import '../../data/repositories_impl/secured/secured_settings_repository.dart';
 import '../../data/repositories_impl/secured/secured_user_repository.dart';
 import '../../data/repositories_impl/secured/secured_role_repository.dart';
+import '../../data/repositories_impl/secured/secured_accounting_year_repository.dart';
 import 'sync_trigger_provider.dart';
 
 import '../features/auth/controllers/current_user_controller.dart';
@@ -44,6 +46,12 @@ import '../../data/datasources/file/attachment_file_datasource.dart';
 import '../../data/datasources/file/logo_file_datasource.dart';
 import '../../core/sync/accounting_year_conflict_resolver.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../data/datasources/local/client_visibility_local_datasource.dart';
+import '../../data/datasources/remote/client_visibility_remote_datasource.dart';
+import '../../data/repositories_impl/client_visibility_repository_impl.dart';
+import '../../domain/repositories/client_visibility_repository.dart';
+import '../../data/repositories_impl/secured/secured_client_visibility_repository.dart';
 import '../../data/repositories_impl/client_repository_impl.dart';
 import '../../data/repositories_impl/invoice_repository_impl.dart';
 import '../../data/repositories_impl/payment_repository_impl.dart';
@@ -79,14 +87,22 @@ final accountingYearConflictResolverProvider = Provider<ConflictResolver<Account
   return AccountingYearConflictResolver();
 });
 
-final accountingYearRepositoryProvider = Provider<AccountingYearRepository>((ref) {
+final internalAccountingYearRepositoryProvider = Provider<AccountingYearRepositoryImpl>((ref) {
   final localDataSource = ref.watch(accountingYearLocalDataSourceProvider);
+  final invoiceDataSource = ref.watch(invoiceLocalDataSourceProvider);
   final remoteDataSource = ref.watch(accountingYearRemoteDataSourceProvider);
   final conflictResolver = ref.watch(accountingYearConflictResolverProvider);
   final syncTrigger = ref.watch(syncTriggerProvider);
-  final repo = AccountingYearRepositoryImpl(localDataSource, remoteDataSource, conflictResolver, syncTrigger);
+  final repo = AccountingYearRepositoryImpl(localDataSource, invoiceDataSource, remoteDataSource, conflictResolver, syncTrigger);
   ref.onDispose(() => repo.dispose());
   return repo;
+});
+
+final accountingYearRepositoryProvider = Provider<AccountingYearRepository>((ref) {
+  final internal = ref.watch(internalAccountingYearRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredAccountingYearRepository(internal, permissionService, currentUser);
 });
 
 // Client Providers
@@ -305,7 +321,8 @@ final roleRepositoryProvider = Provider<RoleRepository>((ref) {
   final inner = ref.watch(internalRoleRepositoryProvider);
   final permissionService = ref.watch(permissionServiceProvider);
   final currentUser = ref.watch(currentUserProvider).value;
-  return SecuredRoleRepository(inner, permissionService, currentUser);
+  final userRepo = ref.watch(internalUserRepositoryProvider);
+  return SecuredRoleRepository(inner, permissionService, currentUser, userRepo);
 });
 
 // User Providers
@@ -341,3 +358,28 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   final currentUser = ref.watch(currentUserProvider).value;
   return SecuredUserRepository(inner, roleRepo, permissionService, currentUser);
 });
+
+// Client Visibility Providers
+final clientVisibilityLocalDataSourceProvider = Provider<ClientVisibilityLocalDataSource>((ref) {
+  final dbState = ref.watch(databaseProvider);
+  return ClientVisibilityLocalDataSource(dbState);
+});
+
+final clientVisibilityRemoteDataSourceProvider = Provider<ClientVisibilityRemoteDataSource>((ref) {
+  return ClientVisibilityRemoteDataSource(FirebaseFirestore.instance);
+});
+
+final internalClientVisibilityRepositoryProvider = Provider<ClientVisibilityRepositoryImpl>((ref) {
+  final local = ref.watch(clientVisibilityLocalDataSourceProvider);
+  final remote = ref.watch(clientVisibilityRemoteDataSourceProvider);
+  final syncTrigger = ref.watch(syncTriggerProvider);
+  return ClientVisibilityRepositoryImpl(local, remote, syncTrigger);
+});
+
+final clientVisibilityRepositoryProvider = Provider<ClientVisibilityRepository>((ref) {
+  final inner = ref.watch(internalClientVisibilityRepositoryProvider);
+  final permissionService = ref.watch(permissionServiceProvider);
+  final currentUser = ref.watch(currentUserProvider).value;
+  return SecuredClientVisibilityRepository(inner, permissionService, currentUser);
+});
+

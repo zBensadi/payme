@@ -17,6 +17,7 @@ class ClientVisibilityRemoteDataSource {
   }
 
   Future<List<ClientVisibilityModel>> getModifiedSince(String businessId, DateTime? since) async {
+    print('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.getModifiedSince($since)');
     Query<Map<String, dynamic>> query = _collection(businessId);
     
     if (since != null) {
@@ -36,6 +37,11 @@ class ClientVisibilityRemoteDataSource {
   }
 
   Future<void> pushVisibilities(String businessId, List<ClientVisibilityModel> visibilities) async {
+    print('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => e.clientId + "_" + e.userId).toList()}');
+    for (var v in visibilities) {
+      print('[TRACE-VISIBILITY] Firestore path: businesses/$businessId/client_visibility/${v.clientId}_${v.userId}');
+    }
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => e.clientId + "_" + e.userId).toList()}');
     if (visibilities.isEmpty) return;
 
     final batch = _firestore.batch();

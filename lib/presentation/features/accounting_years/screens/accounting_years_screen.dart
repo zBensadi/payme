@@ -1,8 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../domain/entities/permissions.dart';
+import '../../../widgets/require_permission.dart';
 import '../controllers/accounting_year_controller.dart';
 import '../widgets/year_list_tile.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../../../../presentation/utils/sync_refresh_helper.dart';
 
 class AccountingYearsScreen extends ConsumerWidget {
   const AccountingYearsScreen({super.key});
@@ -70,12 +73,16 @@ class AccountingYearsScreen extends ConsumerWidget {
                   ),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                itemCount: years.length,
-                itemBuilder: (context, index) {
-                  return YearListTile(year: years[index]);
-                },
+              return RefreshIndicator(
+                onRefresh: () => SyncRefreshHelper.refresh(ref),
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: years.length,
+                  itemBuilder: (context, index) {
+                    return YearListTile(year: years[index]);
+                  },
+                ),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -85,10 +92,13 @@ class AccountingYearsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _handleCreate(context, ref),
-        tooltip: AppLocalizations.of(context)!.createNewYear,
-        child: const Icon(Icons.add),
+      floatingActionButton: RequirePermission(
+        permission: Permissions.accountingYearsManage,
+        child: FloatingActionButton(
+          onPressed: () => _handleCreate(context, ref),
+          tooltip: AppLocalizations.of(context)!.createNewYear,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

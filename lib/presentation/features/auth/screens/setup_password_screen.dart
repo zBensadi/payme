@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../services/auth_service.dart';
@@ -55,7 +56,7 @@ class _SetupPasswordScreenState extends ConsumerState<SetupPasswordScreen> {
     } else {
       setState(() {
         _isLoading = false;
-        _error = (result as Failure).failure.message;
+        _error = (result as Failure).failure.message.localize(context);
       });
     }
   }

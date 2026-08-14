@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import '../controllers/backup_controller.dart';
@@ -70,7 +71,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     ref.listen<AsyncValue<void>>(backupControllerProvider, (prev, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString()), backgroundColor: Colors.red),
+          SnackBar(content: Text(next.error.toString().localize(context)), backgroundColor: Colors.red),
         );
       }
     });

@@ -66,6 +66,16 @@ class UserRepositoryImpl implements UserRepository, SynchronizableRepository, Re
   }
 
   @override
+  Future<Result<bool>> hasUsersWithRole(String roleId) async {
+    try {
+      final hasUsers = await _localDataSource.hasUsersWithRole(roleId);
+      return Success(hasUsers);
+    } catch (e) {
+      return Failure(DatabaseFailure('Failed to check users by role: $e'));
+    }
+  }
+
+  @override
   Future<Result<void>> createUser(AppUser user) async {
     try {
       final updatedUser = user.copyWith(

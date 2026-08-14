@@ -112,7 +112,27 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 11);
         currentVersion = 11;
       }
+      if (currentVersion == 11) {
+        _logger.info('Running migration: v12_normalize_system_roles.sql');
+        final scriptContent = await loadMigrationScript('v12_normalize_system_roles.sql');
+        await applyMigration(db, scriptContent, 12);
+        currentVersion = 12;
+      }
+      if (currentVersion == 12) {
+        _logger.info('Running migration: v13_client_visibility_tombstones.sql');
+        final scriptContent = await loadMigrationScript('v13_client_visibility_tombstones.sql');
+        await applyMigration(db, scriptContent, 13);
+        currentVersion = 13;
+      }
+      if (currentVersion == 13) {
+        _logger.info('Running migration: v14_accounting_year_soft_delete.sql');
+        final scriptContent = await loadMigrationScript('v14_accounting_year_soft_delete.sql');
+        await applyMigration(db, scriptContent, 14);
+        currentVersion = 14;
+      }
     }
+
+    await db.update('app_meta', {'schema_version': currentVersion});
   }
 
   Future<String> loadMigrationScript(String scriptName) async {

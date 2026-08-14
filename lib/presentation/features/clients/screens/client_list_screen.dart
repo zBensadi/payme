@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/empty_state_view.dart';
@@ -15,6 +16,7 @@ import '../../../providers/repository_providers.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../services/csv_export_service.dart';
 import 'package:intl/intl.dart';
+import '../../../../presentation/utils/sync_refresh_helper.dart';
 
 class ClientListScreen extends ConsumerStatefulWidget {
   const ClientListScreen({super.key});
@@ -194,7 +196,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
               }
 
               return RefreshIndicator(
-                onRefresh: () async => ref.read(clientListControllerProvider.notifier).refresh(),
+                onRefresh: () => SyncRefreshHelper.refresh(ref),
                 child: ListView.separated(
                   itemCount: clients.length,
                   separatorBuilder: (context, index) => const Divider(height: 1),
@@ -212,7 +214,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
             },
             loading: () => const LoadingView(message: '...'),
             error: (error, stack) => ErrorView(
-              message: error.toString().replaceAll('Exception: ', ''),
+              message: error.toString().localize(context).replaceAll('Exception: ', ''),
               onRetry: () => ref.read(clientListControllerProvider.notifier).refresh(),
             ),
         ),

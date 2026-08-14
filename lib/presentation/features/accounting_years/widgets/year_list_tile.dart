@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/accounting_year.dart';
-import '../../../../core/security/reauth_guard.dart';
+import '../../../../domain/entities/permissions.dart';
+import '../../../widgets/require_permission.dart';
 import '../controllers/accounting_year_controller.dart';
 import 'package:payme/l10n/app_localizations.dart';
 
@@ -11,9 +12,26 @@ class YearListTile extends ConsumerWidget {
   const YearListTile({super.key, required this.year});
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
-    // Phase 3 Requirement: Destructive action on non-active year requires ReauthGuard
-    final authenticated = await ReauthGuard.requestReauth(context, ref);
-    if (!authenticated) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.delete),
+        content: Text(AppLocalizations.of(context)!.deleteAccountingYearConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
 
     try {
       await ref.read(accountingYearControllerProvider.notifier).delete(year.id);
@@ -90,45 +108,48 @@ class YearListTile extends ConsumerWidget {
         subtitle: year.isActive 
             ? Text(AppLocalizations.of(context)!.activeYear, style: const TextStyle(color: Colors.green)) 
             : null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!year.isActive)
-              TextButton(
-                onPressed: () async {
-                  try {
-                    await ref.read(accountingYearControllerProvider.notifier).setActive(year.id);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-                      );
+        trailing: RequirePermission(
+          permission: Permissions.accountingYearsManage,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!year.isActive)
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      await ref.read(accountingYearControllerProvider.notifier).setActive(year.id);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+                        );
+                      }
                     }
+                  },
+                  child: Text(AppLocalizations.of(context)!.setActive),
+                ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'rename') {
+                    _handleRename(context, ref);
+                  } else if (value == 'delete') {
+                    _handleDelete(context, ref);
                   }
                 },
-                child: Text(AppLocalizations.of(context)!.setActive),
-              ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'rename') {
-                  _handleRename(context, ref);
-                } else if (value == 'delete') {
-                  _handleDelete(context, ref);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'rename',
-                  child: Text(AppLocalizations.of(context)!.rename),
-                ),
-                if (!year.isActive)
+                itemBuilder: (context) => [
                   PopupMenuItem(
-                    value: 'delete',
-                    child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                    value: 'rename',
+                    child: Text(AppLocalizations.of(context)!.rename),
                   ),
-              ],
-            ),
-          ],
+                  if (!year.isActive)
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -8,22 +8,62 @@ class ClientVisibilityLocalDataSource {
   ClientVisibilityLocalDataSource(this._dbService);
 
   Future<void> addVisibility(ClientVisibilityModel visibility) async {
+    print('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
     final db = _dbService.db;
-    await db.insert(
-      'client_user_visibility',
-      {
-        'client_id': visibility.clientId,
-        'user_id': visibility.userId,
-        'synced_at': null,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.transaction((txn) async {
+      await txn.insert(
+        'client_user_visibility',
+        {
+          'client_id': visibility.clientId,
+          'user_id': visibility.userId,
+          'synced_at': null,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      
+      // Reconciliation: remove any pending deletion tombstone
+      await txn.delete(
+        'deleted_client_visibilities',
+        where: 'client_id = ? AND user_id = ?',
+        whereArgs: [visibility.clientId, visibility.userId],
+      );
+    });
+    final postInsert = await db.rawQuery('SELECT * FROM client_user_visibility WHERE client_id = ? AND user_id = ?', [visibility.clientId, visibility.userId]);
+    print('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility resulting SQLite row: $postInsert');
   }
 
   Future<void> removeVisibility(String clientId, String userId) async {
     final db = _dbService.db;
+    await db.transaction((txn) async {
+      await txn.delete(
+        'client_user_visibility',
+        where: 'client_id = ? AND user_id = ?',
+        whereArgs: [clientId, userId],
+      );
+      
+      // Idempotency: insert a tombstone
+      await txn.insert(
+        'deleted_client_visibilities',
+        {
+          'client_id': clientId,
+          'user_id': userId,
+          'deleted_at': DateTime.now().toUtc().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    });
+  }
+  
+  Future<List<Map<String, dynamic>>> getPendingDeletions() async {
+    final db = _dbService.db;
+    return await db.query('deleted_client_visibilities');
+  }
+  
+  Future<void> clearDeletions(String clientId, String userId) async {
+    final db = _dbService.db;
     await db.delete(
-      'client_user_visibility',
+      'deleted_client_visibilities',
       where: 'client_id = ? AND user_id = ?',
       whereArgs: [clientId, userId],
     );

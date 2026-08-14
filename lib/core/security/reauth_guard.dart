@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/auth_service.dart';
+import '../../services/firebase_reauth_service.dart';
 import '../error/result.dart';
 
 class ReauthGuard {
   /// Prompts the user for their password before proceeding.
   /// Returns [true] if authenticated successfully, [false] if cancelled or failed.
   static Future<bool> requestReauth(BuildContext context, WidgetRef ref) async {
-    final authService = ref.read(authServiceProvider);
+    final authService = ref.read(firebaseReauthServiceProvider);
     
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => _ReauthDialog(authService: authService),
     );
-    
     return result == true;
   }
 }
 
 class _ReauthDialog extends StatefulWidget {
-  final AuthService authService;
+  final FirebaseReauthService authService;
 
   const _ReauthDialog({required this.authService});
 
@@ -47,16 +46,18 @@ class _ReauthDialogState extends State<_ReauthDialog> {
       _error = null;
     });
 
-    final result = await widget.authService.login(_passwordController.text);
+    final result = await widget.authService.reauthenticate(_passwordController.text);
     
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (result is Success) {
       Navigator.of(context).pop(true);
     } else {
       setState(() {
         _isLoading = false;
-        _error = 'Incorrect password.';
+        _error = (result as Failure).failure.message;
         // We do not aggressively clear the field, so user can correct typos.
       });
     }

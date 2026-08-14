@@ -34,14 +34,21 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
         debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] pointer exists → businessId=$businessId roleId=$roleId');
 
         if (businessId != null && roleId != null) {
-          debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] BEFORE businesses/$businessId/roles/$roleId.get()');
+          String effectiveRoleId;
+          try {
+            effectiveRoleId = await _migrateLegacyOwnerRoleIfNeeded(businessId, roleId);
+          } catch (e) {
+            debugPrint('[BSREPO][MIGRATION] Migration failed for $businessId: $e');
+            return Failure(DatabaseFailure('Legacy role migration failed. Please try again.'));
+          }
+          debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] BEFORE businesses/$businessId/roles/$effectiveRoleId.get()');
           final roleDoc = await _firestore
               .collection('businesses')
               .doc(businessId)
               .collection('roles')
-              .doc(roleId)
+              .doc(effectiveRoleId)
               .get();
-          debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] AFTER  businesses/$businessId/roles/$roleId.get() → exists=${roleDoc.exists} data=${roleDoc.data()}');
+          debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] AFTER  businesses/$businessId/roles/$effectiveRoleId.get() → exists=${roleDoc.exists} data=${roleDoc.data()}');
 
           debugPrint('[BSREPO][${DateTime.now().toIso8601String()}] BEFORE businesses/$businessId/users/$uid.get()');
           final userDoc = await _firestore
@@ -61,7 +68,7 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
               email: uData['email'] ?? email,
               displayName: uData['displayName'],
               businessId: businessId,
-              roleId: roleId,
+              roleId: effectiveRoleId,
               isSuperAdmin: uData['isSuperAdmin'] ?? true,
               isOwner: uData['isOwner'] ?? true,
               isActive: uData['isActive'] ?? true,
@@ -120,7 +127,7 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
       // 1. Business provisioning
       final businessId = _uuid.v4();
 
-      final roleId = _uuid.v4();
+      final roleId = 'role-owner';
       final now = DateTime.now().toUtc();
       final nowIso = now.toIso8601String();
       final effectiveDisplayName = displayName ?? email.split('@').first;
@@ -151,7 +158,7 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
         'isSystemRole': true,
         'isEditable': false,
         'isDeletable': false,
-        'priority': 0,
+        'priority': 1000,
         'permissions': <String>[], // Populated by PermissionService.isOwner
         'isDeleted': false,
         'createdAt': nowIso,
@@ -237,7 +244,7 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
         isSystemRole: true,
         isEditable: false,
         isDeletable: false,
-        priority: 0,
+        priority: 1000,
         permissions: const [],
         createdAt: now.toLocal(),
         updatedAt: now.toLocal(),
@@ -253,4 +260,108 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
       return Failure(DatabaseFailure('Unexpected error: $e'));
     }
   }
+
+  Future<String> _migrateLegacyOwnerRoleIfNeeded(String businessId, String currentRoleId) async {
+    final rolesQuery = await _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('roles')
+        .get();
+
+    final legacyRoleIds = <String>[];
+    for (var doc in rolesQuery.docs) {
+      if (doc.id == 'role-owner') continue;
+      
+      if (doc.id == 'role-super-admin') {
+        legacyRoleIds.add(doc.id);
+        continue;
+      }
+      
+      final data = doc.data();
+      if (data['name'] == 'Owner' && data['isSystemRole'] == true && data['isEditable'] == false) {
+        legacyRoleIds.add(doc.id);
+      }
+    }
+
+    if (legacyRoleIds.isEmpty) {
+      return currentRoleId;
+    }
+
+    debugPrint('[BSREPO][MIGRATION] Found legacy roles to migrate: $legacyRoleIds');
+
+    // 1. Create canonical role-owner
+    final nowIso = DateTime.now().toUtc().toIso8601String();
+    await _firestore
+        .collection('businesses')
+        .doc(businessId)
+        .collection('roles')
+        .doc('role-owner')
+        .set({
+      'name': 'Owner',
+      'description': 'Business owner with full permissions',
+      'isSystemRole': true,
+      'isEditable': false,
+      'isDeletable': false,
+      'priority': 1000,
+      'permissions': <String>[],
+      'isDeleted': false,
+      'createdAt': nowIso,
+      'updatedAt': nowIso,
+    }, SetOptions(merge: true));
+
+    // 2. Find all users referencing the legacy roles
+    final allUsers = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+    for (var i = 0; i < legacyRoleIds.length; i += 10) {
+      final end = (i + 10 < legacyRoleIds.length) ? i + 10 : legacyRoleIds.length;
+      final chunk = legacyRoleIds.sublist(i, end);
+      final usersQuery = await _firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('users')
+          .where('roleId', whereIn: chunk)
+          .get();
+      allUsers.addAll(usersQuery.docs);
+    }
+
+    // 3. Chunked updates
+    final int batchSize = 200;
+    for (var i = 0; i < allUsers.length; i += batchSize) {
+      final batch = _firestore.batch();
+      final end = (i + batchSize < allUsers.length) ? i + batchSize : allUsers.length;
+      final chunk = allUsers.sublist(i, end);
+
+      for (var userDoc in chunk) {
+        batch.update(userDoc.reference, {'roleId': 'role-owner', 'updatedAt': nowIso});
+        
+        final pointerRef = _firestore.collection('users').doc(userDoc.id);
+        batch.set(pointerRef, {
+          'businessId': businessId,
+          'roleId': 'role-owner',
+          'updatedAt': nowIso,
+          'schemaVersion': 1,
+        }, SetOptions(merge: true));
+      }
+      
+      // Implicitly throws on failure, aborting migration cleanly.
+      await batch.commit();
+      debugPrint('[BSREPO][MIGRATION] Committed batch of ${chunk.length} users.');
+    }
+
+    // 4. Delete legacy roles
+    final cleanupBatch = _firestore.batch();
+    for (final legacyId in legacyRoleIds) {
+      final legacyRoleRef = _firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('roles')
+          .doc(legacyId);
+      cleanupBatch.delete(legacyRoleRef);
+    }
+    await cleanupBatch.commit();
+    debugPrint('[BSREPO][MIGRATION] Deleted legacy roles $legacyRoleIds.');
+
+    return legacyRoleIds.contains(currentRoleId) ? 'role-owner' : currentRoleId;
+  }
 }
+
+

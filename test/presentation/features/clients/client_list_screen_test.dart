@@ -7,6 +7,7 @@ import 'package:payme/domain/entities/client.dart';
 import 'package:payme/domain/repositories/client_repository.dart';
 import 'package:payme/presentation/features/clients/screens/client_list_screen.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
+import 'package:payme/core/events/repository_event.dart';
 
 import 'package:payme/domain/entities/client_visibility_context.dart';
 
@@ -68,6 +69,12 @@ class FakeClientRepository implements ClientRepository {
     if (index >= 0) clients[index] = clients[index].copyWith(isDeleted: false);
     return const Success(null);
   }
+
+  @override
+  Stream<RepositoryEvent> watchEvents() => const Stream.empty();
+
+  @override
+  void dispose() {}
 }
 
 void main() {

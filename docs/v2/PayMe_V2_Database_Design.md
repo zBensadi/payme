@@ -39,7 +39,7 @@ These apply to every collection unless a collection's section says otherwise.
 
 | Collection | Mirrors SQLite table | New in V2 | Carries `visibleTo` | Carries Sync Metadata | Client-writable |
 |---|---|---|---|---|---|
-| `business_settings/{singleton}` | `business_settings` | No | No | Yes | Yes (`settings.edit` permission) |
+| `businesses/{businessId}/settings/main` | `business_settings` | No | No | Yes | Yes (`settings.edit` permission) |
 | `roles/{roleId}` | — | Yes | No | Yes | No (server-managed; seeded at onboarding, edited only via admin UI → Function) |
 | `permissions_catalog/{key}` | — | Yes | No | No (descriptive only, Section 8 of Architecture) | No |
 | `users/{uid}` | — | Yes | No | Yes | Partial — see Section 4.4 below |
@@ -55,7 +55,7 @@ These apply to every collection unless a collection's section says otherwise.
 
 ## 4. Collection Designs
 
-### 4.1 `business_settings/{singleton}`
+### 4.1 `businesses/{businessId}/settings/main`
 
 **Purpose:** One document per business, holding the same configuration V1's single-row SQLite table holds, plus the fields cloud mode needs to know which schema version it's speaking and which mode the business is in.
 
@@ -459,7 +459,7 @@ This section states, per collection, which fields a Security Rule (Android/direc
 
 | Collection | Read depends on | Write depends on |
 |---|---|---|
-| `business_settings` | `isSignedIn()` only (any authenticated business member can read settings) | `hasPermission('settings.edit')` |
+| `businesses/{businessId}/settings/main` | `isSignedIn()` only (any authenticated business member can read settings) | `hasPermission('settings.edit')` |
 | `roles` | `isSignedIn()` | `hasPermission('roles.manage')`; additionally, `isSystemRole == true` blocks delete; only `role == 'super_admin'` may write `roleId: 'super_admin'` onto a user (this check lives on the `users` write, cross-referencing this collection's `isSystemRole`/`name`) |
 | `permissions_catalog` | `isSignedIn()` | Not client-writable (seeded/updated by deploy-time data, not runtime writes) |
 | `users` | `isSignedIn()` | `hasPermission('users.manage')`; blocked from assigning `roleId: 'super_admin'` unless caller's own role is `super_admin`; blocked from deactivating the last remaining `super_admin` |

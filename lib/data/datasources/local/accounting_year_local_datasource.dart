@@ -7,14 +7,18 @@ class AccountingYearLocalDataSource {
   AccountingYearLocalDataSource(this._db);
 
   Future<List<AccountingYearModel>> getAll() async {
-    final result = await _db.query('accounting_years', orderBy: 'name DESC');
+    final result = await _db.query(
+      'accounting_years', 
+      where: 'is_deleted = 0',
+      orderBy: 'name DESC'
+    );
     return result.map((map) => AccountingYearModel.fromMap(map)).toList();
   }
 
   Future<AccountingYearModel?> getActive() async {
     final result = await _db.query(
       'accounting_years',
-      where: 'is_active = ?',
+      where: 'is_active = ? AND is_deleted = 0',
       whereArgs: [1],
       limit: 1,
     );
@@ -25,7 +29,7 @@ class AccountingYearLocalDataSource {
   Future<AccountingYearModel?> getById(String id) async {
     final result = await _db.query(
       'accounting_years',
-      where: 'id = ?',
+      where: 'id = ? AND is_deleted = 0',
       whereArgs: [id],
       limit: 1,
     );
@@ -72,8 +76,13 @@ class AccountingYearLocalDataSource {
   }
 
   Future<void> delete(String id) async {
-    await _db.delete(
+    await _db.update(
       'accounting_years',
+      {
+        'is_deleted': 1,
+        'is_dirty': 1,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -93,13 +102,10 @@ class AccountingYearLocalDataSource {
     map['synced_at'] = year.updatedAt.toUtc().toIso8601String();
 
     await _db.transaction((txn) async {
-      if (year.isActive) {
+      if (year.isActive && !year.isDeleted) {
         // Enforce only one active year
         await txn.update('accounting_years', {
           'is_active': 0,
-          // We do NOT set is_dirty = 1 here because this is a remote pull correcting the local state.
-          // Setting is_dirty would cause a redundant push of the deactivated years.
-          // However, we should probably update updated_at if we touch it. But we'll leave it simple.
         });
       }
 

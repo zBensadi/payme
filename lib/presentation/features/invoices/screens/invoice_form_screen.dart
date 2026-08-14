@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -150,7 +151,7 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
     ref.listen<AsyncValue<void>>(invoiceFormControllerProvider, (prev, next) {
       if (next is AsyncError && next.error is! FormatException) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+          SnackBar(content: Text(next.error.toString().localize(context).replaceAll('Exception: ', '')), backgroundColor: Colors.red),
         );
       }
     });

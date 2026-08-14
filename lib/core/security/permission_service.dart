@@ -63,10 +63,10 @@ class PermissionService {
   bool canAssignRole(CurrentAppUser? currentUser, UserRole roleToAssign) {
     if (currentUser == null) return false;
 
-    if (currentUser.user.isOwner) return true;
-
     // A user cannot assign a role with priority >= their own priority
     if (currentUser.role.priority <= roleToAssign.priority) return false;
+
+    if (currentUser.user.isOwner) return true;
 
     return true;
   }
@@ -75,12 +75,12 @@ class PermissionService {
   bool canManageRole(CurrentAppUser? currentUser, UserRole targetRole) {
     if (currentUser == null) return false;
     
+    // Cannot manage roles with priority >= their own priority
+    if (currentUser.role.priority <= targetRole.priority) return false;
+
     if (currentUser.user.isOwner) return true;
 
     if (!hasPermission(currentUser, 'roles.manage')) return false;
-
-    // Cannot manage roles with priority >= their own priority
-    if (currentUser.role.priority <= targetRole.priority) return false;
     
     // Cannot manage uneditable roles
     if (!targetRole.isEditable) return false;

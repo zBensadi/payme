@@ -15,11 +15,13 @@ import '../../core/sync/sync_trigger.dart';
 import '../../../core/events/repository_event.dart';
 import '../../../core/events/repository_change_publisher.dart';
 import '../datasources/remote/accounting_year_remote_datasource.dart';
+import '../datasources/local/invoice_local_datasource.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 class AccountingYearRepositoryImpl implements AccountingYearRepository, SynchronizableRepository, RepositoryChangePublisher {
   final AccountingYearLocalDataSource _localDataSource;
+  final InvoiceLocalDataSource _invoiceDataSource;
   final AccountingYearRemoteDataSource _remoteDataSource;
   final ConflictResolver<AccountingYear> _conflictResolver;
   final SyncTrigger _syncTrigger;
@@ -28,6 +30,7 @@ class AccountingYearRepositoryImpl implements AccountingYearRepository, Synchron
 
   AccountingYearRepositoryImpl(
     this._localDataSource,
+    this._invoiceDataSource,
     this._remoteDataSource,
     this._conflictResolver,
     this._syncTrigger,
@@ -142,14 +145,15 @@ class AccountingYearRepositoryImpl implements AccountingYearRepository, Synchron
         return const Failure(ValidationFailure('Cannot delete the currently active accounting year.'));
       }
 
+      final invoiceCount = await _invoiceDataSource.countAllForYear(id);
+      if (invoiceCount > 0) {
+        return const Failure(ValidationFailure('Cannot delete this year because it contains invoices.'));
+      }
+
       await _localDataSource.delete(id);
       _syncTrigger.requestSync(syncDomain);
       return const Success(null);
     } catch (e) {
-      // Catch Foreign Key constraints if invoices are attached
-      if (e is DatabaseException && e.toString().contains('FOREIGN KEY constraint failed')) {
-        return const Failure(ValidationFailure('Cannot delete this year because it contains invoices.'));
-      }
       return Failure(DatabaseFailure('Failed to delete accounting year: $e'));
     }
   }

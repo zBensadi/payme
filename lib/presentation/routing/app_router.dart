@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +41,10 @@ import '../features/reports/screens/invoices_by_period_report_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/backup/screens/backup_restore_screen.dart';
 import '../features/settings/screens/change_password_screen.dart';
+import '../features/admin/users/screens/user_list_screen.dart';
+import '../features/admin/users/screens/user_editor_screen.dart';
+import '../features/admin/roles/screens/role_list_screen.dart';
+import '../features/admin/roles/screens/role_editor_screen.dart';
 
 import '../../domain/entities/client.dart';
 
@@ -48,6 +53,7 @@ import '../../domain/entities/permissions.dart';
 import '../providers/repository_providers.dart';
 import '../providers/permission_service_provider.dart';
 import '../features/auth/controllers/current_user_controller.dart';
+import '../../domain/entities/current_app_user.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -66,6 +72,18 @@ class RouterNotifier extends ChangeNotifier {
       (prev, next) {
         debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] localeControllerProvider changed: $prev → $next — calling notifyListeners()');
         notifyListeners();
+      },
+    );
+    _ref.listen<AsyncValue<CurrentAppUser?>>(
+      currentUserProvider,
+      (prev, next) {
+        final prevPerms = prev?.value?.role.permissions;
+        final nextPerms = next.value?.role.permissions;
+        
+        if (!listEquals(prevPerms, nextPerms)) {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] currentUserProvider permissions changed — calling notifyListeners()');
+          notifyListeners();
+        }
       },
     );
     debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][RouterNotifier] constructor complete');
@@ -146,12 +164,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         
         if (path != '/') {
           String? requiredPermission;
-          if (path.startsWith('/accounting-years')) requiredPermission = Permissions.accountingYearsView;
-          else if (path.startsWith('/clients')) requiredPermission = Permissions.clientsView;
-          else if (path.startsWith('/invoices')) requiredPermission = Permissions.invoicesView;
-          else if (path.startsWith('/reports')) requiredPermission = Permissions.reportsView;
-          else if (path.startsWith('/settings')) requiredPermission = Permissions.settingsView;
-          else if (path.startsWith('/backup')) requiredPermission = Permissions.backupManage;
+          if (path.startsWith('/accounting-years')) {
+            requiredPermission = Permissions.accountingYearsView;
+          } else if (path.startsWith('/clients')) {
+            requiredPermission = Permissions.clientsView;
+          } else if (path.startsWith('/invoices')) {
+            requiredPermission = Permissions.invoicesView;
+          } else if (path.startsWith('/reports')) {
+            requiredPermission = Permissions.reportsView;
+          } else if (path.startsWith('/settings')) {
+            requiredPermission = Permissions.settingsView;
+          } else if (path.startsWith('/backup')) {
+            requiredPermission = Permissions.backupManage;
+          } else if (path.startsWith('/users')) {
+            requiredPermission = Permissions.usersView;
+          } else if (path.startsWith('/roles')) {
+            requiredPermission = Permissions.rolesView;
+          }
 
           if (requiredPermission != null) {
             final hasPerm = permissionService.hasPermission(currentUser, requiredPermission);
@@ -351,6 +380,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'change-password',
             builder: (context, state) => const ChangePasswordScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/users',
+        builder: (context, state) => const UserListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => UserEditorScreen(
+              userId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/roles',
+        builder: (context, state) => const RoleListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => RoleEditorScreen(
+              roleId: state.pathParameters['id']!,
+            ),
           ),
         ],
       ),

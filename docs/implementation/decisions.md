@@ -23,3 +23,20 @@
 - Bootstrap is the ONLY workflow permitted to write directly to both Firestore and SQLite. It seeds SQLite with the canonical `AppUser` and `UserRole` directly.
 - `CurrentAppUser` (provided by `currentUserProvider`) remains purely SQLite-driven.
 - `SyncService` is strictly responsible for ongoing synchronization, remaining completely decoupled from the initial identity provisioning process.
+
+## 2026-08-11: Fail-Closed Authorization Philosophy
+**Decision**: Missing canonical domain data routes to a dedicated 'Account Data Error' view rather than attempting fallback provisioning or registration.
+**Reason**: Prevents users from accidentally overwriting pointers or creating duplicate businesses during edge-case recovery or data corruption events.
+**Details**: The bootstrap flow will unconditionally block access and only permit Retry or Logout actions if the Firestore routing pointer exists but the corresponding `businesses/{businessId}/users/{uid}` canonical data is missing.
+
+## 2026-08-11: Strict Tenant-Scoped Firestore Architecture
+**Decision**: All domain data, including Business Settings, must reside strictly under `businesses/{businessId}/...`.
+**Reason**: Simplifies security rules, enforces data isolation per tenant, and eliminates cross-tenant pollution.
+**Details**:
+- Business settings migrated from the legacy `business_settings/{businessId}` top-level collection to `businesses/{businessId}/settings/main`.
+- All other repositories (`roles`, `users`, `clients`, `accounting_years`, `invoices`, `payments`, `client_visibility`) exclusively read/write under their `businesses/{businessId}/<collection>` path.
+
+## 2026-08-12: AppUser.businessId Persistence in SQLite
+**Decision**: Explicitly persist `businessId` on the `users` SQLite table (`v11` migration) and serialize it within `AppUserModel`.
+**Reason**: While `businessId` is implicit in the Firestore path, the local SQLite structure is flat. The offline-first `currentUserProvider` relies purely on SQLite to reconstruct the domain boundary. Omitting `businessId` in SQLite resulted in the `SyncService` lacking context upon cold offline reboots.
+**Details**: Allows instant and reliable business context restoration without full network synchronizations.

@@ -7,14 +7,27 @@ import '../../../core/error/result.dart';
 import '../../../core/security/permission_service.dart';
 import '../../../domain/entities/permissions.dart';
 import '../../../core/error/failures.dart';
+import '../../../core/events/repository_change_publisher.dart';
+import '../../../core/events/repository_event.dart';
 
-class SecuredUserRepository implements UserRepository {
+class SecuredUserRepository implements UserRepository, RepositoryChangePublisher {
   final UserRepository _inner;
   final RoleRepository _roleRepository;
   final PermissionService _permissionService;
   final CurrentAppUser? _currentUser;
 
   SecuredUserRepository(this._inner, this._roleRepository, this._permissionService, this._currentUser);
+
+  @override
+  Stream<RepositoryEvent> watchEvents() {
+    if (_inner is RepositoryChangePublisher) {
+      return (_inner as RepositoryChangePublisher).watchEvents();
+    }
+    return const Stream.empty();
+  }
+
+  @override
+  void dispose() {}
 
   AppFailure _unauthorized() {
     return const AuthFailure('Unauthorized access to user data.');
@@ -40,6 +53,14 @@ class SecuredUserRepository implements UserRepository {
       return Failure(_unauthorized());
     }
     return await _inner.getUserById(id);
+  }
+
+  @override
+  Future<Result<bool>> hasUsersWithRole(String roleId) async {
+    if (!_permissionService.hasPermission(_currentUser, Permissions.usersView)) {
+      return Failure(_unauthorized());
+    }
+    return await _inner.hasUsersWithRole(roleId);
   }
 
   @override

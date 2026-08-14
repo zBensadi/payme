@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.0.0-alpha.16.1] - 2026-08-12
+### Added
+- **Administration Module: Phase 1 (User Management)**.
+- Implemented comprehensive User Management screen allowing viewing, searching, and filtering of system users.
+- Added comprehensive User Editor supporting role assignment, activation toggles, and soft deletion.
+- Integrated strict UI authorization checks utilizing `RequirePermission` widgets to obscure unauthorized actions.
+- Enforced Priority Hierarchy and System Owner protections visually and programmatically within the administration UI.
+
+### Fixed
+- Fixed an infinite loading state regression in `UserEditorController` caused by premature access to uninitialized user identifiers during frame build.
+- Eliminated Riverpod state mismatch and syntax errors stemming from deprecated `StateNotifier` configurations by standardizing all administration module controllers to the project's native `Notifier` pattern.
+
+
+## [2.0.0-alpha.15] - 2026-08-12
+### Added
+- Documented and finalized the offline-first authorization architecture and Bootstrap recovery flow.
+- Added explicit persistence for `AppUser.businessId` in the local SQLite `users` table via migration `v11` to guarantee instant domain context restoration during cold offline reboots.
+
+### Changed
+- Refactored Business Settings synchronization to strictly use the canonical tenant-scoped Firestore path (`businesses/{businessId}/settings/main`), completing the migration away from the legacy `business_settings` top-level collection.
+- Enforced strict Fail-Closed security routing, blocking users with corrupted canonical domain data from accidentally overwriting their routing pointers.
+- Marked the Offline-First Authorization and Routing Architecture as STABLE and FROZEN.
+
+### Fixed
+- Resolved a critical silent application hang where `businessId` was lost during local SQLite serialization, preventing the `currentUserProvider` from emitting the authenticated session properly.
+
+
 ## [Stage 3.1 Final] - 2026-08-11
 ### Added
 - Implemented **Stage 3 Offline-First Architecture & Sync Foundations** based on the V2 Architecture.

@@ -25,6 +25,7 @@ class AccountingYearRemoteDataSource {
           'id': year.id,
           'name': year.name,
           'isActive': year.isActive,
+          'isDeleted': year.isDeleted,
           'createdAt': year.createdAt.toUtc().toIso8601String(),
           'updatedAt': year.updatedAt.toUtc().toIso8601String(),
         };
@@ -61,6 +62,7 @@ class AccountingYearRemoteDataSource {
         id: data['id'] ?? doc.id,
         name: data['name'] ?? '',
         isActive: data['isActive'] ?? false,
+        isDeleted: data['isDeleted'] ?? false,
         createdAt: parseDate(data['createdAt']),
         updatedAt: parseDate(data['updatedAt']),
         isDirty: false,

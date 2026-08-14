@@ -6,13 +6,26 @@ import '../../../core/error/result.dart';
 import '../../../core/security/permission_service.dart';
 import '../../../domain/entities/permissions.dart';
 import '../../../core/error/failures.dart';
+import '../../../core/events/repository_change_publisher.dart';
+import '../../../core/events/repository_event.dart';
 
-class SecuredPaymentRepository implements PaymentRepository {
+class SecuredPaymentRepository implements PaymentRepository, RepositoryChangePublisher {
   final PaymentRepository _inner;
   final PermissionService _permissionService;
   final CurrentAppUser? _currentUser;
 
   SecuredPaymentRepository(this._inner, this._permissionService, this._currentUser);
+
+  @override
+  Stream<RepositoryEvent> watchEvents() {
+    if (_inner is RepositoryChangePublisher) {
+      return (_inner as RepositoryChangePublisher).watchEvents();
+    }
+    return const Stream.empty();
+  }
+
+  @override
+  void dispose() {}
 
   AppFailure _unauthorized() {
     return const AuthFailure('Unauthorized access to payment data.');

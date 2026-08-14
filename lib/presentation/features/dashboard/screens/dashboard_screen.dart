@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import '../../../../core/formatters/formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import '../../../widgets/error_view.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../accounting_years/controllers/accounting_year_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
+import '../../auth/controllers/firebase_auth_controller.dart';
 import '../models/dashboard_state.dart';
 import '../widgets/summary_tile.dart';
 import '../widgets/quick_action_card.dart';
@@ -15,6 +17,11 @@ import '../widgets/onboarding_checklist.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'dart:io';
 import '../../../providers/sync_providers.dart';
+import '../../../providers/sync_trigger_provider.dart';
+import '../../../../core/sync/sync_status.dart';
+import '../../../../domain/entities/permissions.dart';
+import '../../../widgets/require_permission.dart';
+import '../../../utils/sync_refresh_helper.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -109,6 +116,15 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.controlCenter),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await ref.read(firebaseAuthControllerProvider.notifier).logout();
+            },
+          ),
+        ],
       ),
       body: state.when(
         data: (state) {
@@ -129,8 +145,7 @@ class DashboardScreen extends ConsumerWidget {
           
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(dashboardControllerProvider);
-              await ref.read(dashboardControllerProvider.future);
+              await SyncRefreshHelper.refresh(ref);
             },
             child: ListView(
               padding: const EdgeInsets.all(16.0),
@@ -203,7 +218,54 @@ class DashboardScreen extends ConsumerWidget {
                 
                 const SizedBox(height: 16),
                 
-                Row(
+LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 600;
+                    if (isNarrow) {
+                      return Column(
+                        children: [
+                          SummaryTile(
+                            title: AppLocalizations.of(context)!.outstanding,
+                            value: '${NumberFormatter.formatAmount(dashboard.outstandingBalance)} $currency',
+                            icon: Icons.account_balance_wallet,
+                            color: dashboard.outstandingBalance > 0 ? Colors.orange : Colors.green,
+                          ),
+                          const SizedBox(height: 8),
+                          SummaryTile(
+                            title: AppLocalizations.of(context)!.totalInvoiced,
+                            value: '${NumberFormatter.formatAmount(dashboard.totalInvoiced)} $currency',
+                            icon: Icons.receipt_long,
+                            color: Colors.blue,
+                          ),
+                          const SizedBox(height: 8),
+                          SummaryTile(
+                            title: AppLocalizations.of(context)!.totalPaid,
+                            value: '${NumberFormatter.formatAmount(dashboard.totalPaid)} $currency',
+                            icon: Icons.payments,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(height: 8),
+                          SummaryTile(
+                            title: AppLocalizations.of(context)!.clients,
+                            value: '${dashboard.clientsCount}',
+                            icon: Icons.people,
+                            color: Colors.purple,
+                            onTap: () => context.push('/clients'),
+                          ),
+                          const SizedBox(height: 8),
+                          SummaryTile(
+                            title: AppLocalizations.of(context)!.invoices,
+                            value: '${dashboard.invoicesCount}',
+                            icon: Icons.receipt,
+                            color: Colors.indigo,
+                            onTap: () => context.push('/invoices'),
+                          ),
+                        ],
+                      );
+                    }
+                    return Column(
+                      children: [
+                        Row(
                   children: [
                     Expanded(
                       child: SummaryTile(
@@ -215,8 +277,8 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Row(
+                        const SizedBox(height: 8),
+                        Row(
                   children: [
                     Expanded(
                       child: SummaryTile(
@@ -226,7 +288,7 @@ class DashboardScreen extends ConsumerWidget {
                         color: Colors.blue,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                            const SizedBox(width: 8),
                     Expanded(
                       child: SummaryTile(
                         title: AppLocalizations.of(context)!.totalPaid,
@@ -237,8 +299,8 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Row(
+                        const SizedBox(height: 8),
+                        Row(
                   children: [
                     Expanded(
                       child: SummaryTile(
@@ -249,7 +311,7 @@ class DashboardScreen extends ConsumerWidget {
                         onTap: () => context.push('/clients'),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                            const SizedBox(width: 8),
                     Expanded(
                       child: SummaryTile(
                         title: AppLocalizations.of(context)!.invoices,
@@ -260,6 +322,10 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+                      ],
+                    );
+                  },
                 ),
                 
                 const SizedBox(height: 32),
@@ -298,6 +364,24 @@ class DashboardScreen extends ConsumerWidget {
                       color: Colors.deepOrange,
                       onTap: () => context.push('/accounting-years'),
                     )),
+                    RequirePermission(
+                      permission: Permissions.usersView,
+                      child: SizedBox(width: 160, height: 120, child: QuickActionCard(
+                        title: AppLocalizations.of(context)!.administration,
+                        icon: Icons.admin_panel_settings,
+                        color: Colors.blueGrey,
+                        onTap: () => context.push('/users'),
+                      )),
+                    ),
+                    RequirePermission(
+                      permission: Permissions.rolesView,
+                      child: SizedBox(width: 160, height: 120, child: QuickActionCard(
+                        title: AppLocalizations.of(context)!.roles,
+                        icon: Icons.security,
+                        color: Colors.deepPurple,
+                        onTap: () => context.push('/roles'),
+                      )),
+                    ),
                     SizedBox(width: 160, height: 120, child: QuickActionCard(
                       title: AppLocalizations.of(context)!.reports,
                       icon: Icons.analytics,
@@ -318,7 +402,7 @@ class DashboardScreen extends ConsumerWidget {
         },
         loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingDashboard),
         error: (error, _) => ErrorView(
-          message: error.toString(),
+          message: error.toString().localize(context),
           onRetry: () => ref.invalidate(dashboardControllerProvider),
         ),
       ),

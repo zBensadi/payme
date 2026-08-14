@@ -1,7 +1,7 @@
 # PayMe — Version 2 Architecture Document
 ### From Offline-First Desktop Tool to Cloud-Enabled Multi-User Accounting Application
 
-**Version:** 2.0 (design output)
+**Version:** 2.0.0-alpha.15 (design output) - **STABLE / FROZEN**
 **Author role:** Principal Software Architect
 **Audience:** Solo developer, evolving a released V1 product with real users
 **Companion documents:** `PayMe_Architecture.md` (V1, preserved as the source of truth for everything not explicitly changed here), `PayMe_Development_Roadmap.md` (V1, extended in Section 22 below)
@@ -263,7 +263,7 @@ final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
 
 | Collection | Mirrors SQLite table | Key fields beyond the obvious |
 |---|---|---|
-| `business_settings/{singleton}` | `business_settings` | `businessId` (see Multi-Tenancy below), `firestoreSchemaVersion` |
+| `businesses/{businessId}/settings/main` | `business_settings` | `firestoreSchemaVersion` (tenant-scoped) |
 | `users/{uid}` | *(new)* | **ROUTING POINTER ONLY**: `businessId`, `roleId`. Not a domain model. |
 | `businesses/{businessId}/users/{uid}` | *(new)* | Canonical domain user: `roleId`, `permissionOverrides`, `isActive`, `businessId` |
 | `businesses/{businessId}/roles/{roleId}` | *(new)* | Canonical domain role: `defaultPermissions`, `isSystemRole` |
@@ -445,7 +445,7 @@ match /invoices/{invoiceId} {
 6. **After upload succeeds and is verified**, the local SQLite database transitions from "the database" to "the local mirror" — no data is deleted, the `SyncEngine` simply starts treating it as the target of pulls and the source of pushes going forward.
 7. **Rollback:** if onboarding fails partway (network drop mid-upload, etc.), it is safely re-runnable — already-uploaded rows are recognized by their UUID (`remote_id` already stamped) and skipped, rather than duplicated. Nothing about local mode is disturbed until onboarding fully completes.
 
-**Schema versioning across the migration:** `business_settings/{singleton}.firestoreSchemaVersion` plays the same role Section 24 of the V1 document assigns to SQLite's `schema_version` — the app refuses to sync against a Firestore schema newer than it understands, and a Cloud Function-driven migration path is used for any future Firestore schema change, mirroring `MigrationRunner`'s forward-only, never-edit-a-released-migration discipline (V1 Section 24), now applied to Firestore document shape changes instead of SQL `ALTER TABLE` statements.
+**Schema versioning across the migration:** `businesses/{businessId}/settings/main.firestoreSchemaVersion` plays the same role Section 24 of the V1 document assigns to SQLite's `schema_version` — the app refuses to sync against a Firestore schema newer than it understands, and a Cloud Function-driven migration path is used for any future Firestore schema change, mirroring `MigrationRunner`'s forward-only, never-edit-a-released-migration discipline (V1 Section 24), now applied to Firestore document shape changes instead of SQL `ALTER TABLE` statements.
 
 ---
 

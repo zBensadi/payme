@@ -24,6 +24,16 @@ class UserLocalDataSource {
     return AppUserModel.fromMap(result.first);
   }
 
+    Future<bool> hasUsersWithRole(String roleId) async {
+    final result = await _db.query(
+      'users',
+      where: 'role_id = ?',
+      whereArgs: [roleId],
+      limit: 1,
+    );
+    return result.isNotEmpty;
+  }
+
   Future<void> create(AppUserModel user) async {
     await _db.insert('users', user.toMap());
   }

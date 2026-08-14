@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../widgets/empty_state_view.dart';
 import '../../../widgets/error_view.dart';
@@ -121,7 +122,7 @@ class _DeletedClientsScreenState extends ConsumerState<DeletedClientsScreen> {
             },
             loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingDeletedClients),
             error: (error, stack) => ErrorView(
-              message: error.toString().replaceAll('Exception: ', ''),
+              message: error.toString().localize(context).replaceAll('Exception: ', ''),
             ),
           ),
         ),

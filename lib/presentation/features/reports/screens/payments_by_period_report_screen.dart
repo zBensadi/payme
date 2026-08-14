@@ -1,5 +1,6 @@
 import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/loading_view.dart';
@@ -192,7 +193,7 @@ class PaymentsByPeriodReportScreen extends ConsumerWidget {
               },
               loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingReport),
               error: (error, _) => ErrorView(
-                message: error.toString(),
+                message: error.toString().localize(context),
                 onRetry: () => ref.invalidate(paymentsByPeriodReportProvider),
               ),
             ),

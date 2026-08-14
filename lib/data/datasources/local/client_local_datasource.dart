@@ -8,6 +8,7 @@ class ClientLocalDataSource {
   ClientLocalDataSource(this._db);
 
   Future<List<ClientModel>> getAllVisible({String? searchQuery, String? visibleToUserId}) async {
+    print('[TRACE-VISIBILITY] ClientLocalDataSource.getAllVisible: visibleToUserId=$visibleToUserId');
     String whereClause = 'is_deleted = 0';
     List<Object?> whereArgs = [];
 
@@ -29,7 +30,9 @@ class ClientLocalDataSource {
       orderBy: 'name ASC', // Phase 4 requirement: Alphabetical by client name
     );
 
-    return result.map((map) => ClientModel.fromMap(map)).toList();
+    final clients = result.map((map) => ClientModel.fromMap(map)).toList();
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientLocalDataSource.getAllVisible returns: ${clients.map((c) => c.id).toList()}');
+    return clients;
   }
 
   Future<List<ClientModel>> getAllDeleted({String? searchQuery}) async {
@@ -49,7 +52,9 @@ class ClientLocalDataSource {
       orderBy: 'name ASC',
     );
 
-    return result.map((map) => ClientModel.fromMap(map)).toList();
+    final clients = result.map((map) => ClientModel.fromMap(map)).toList();
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientLocalDataSource.getAllVisible returns: ${clients.map((c) => c.id).toList()}');
+    return clients;
   }
 
   Future<ClientModel?> getById(String id) async {
@@ -80,7 +85,9 @@ class ClientLocalDataSource {
       whereArgs: whereArgs,
     );
 
-    return result.map((map) => ClientModel.fromMap(map)).toList();
+    final clients = result.map((map) => ClientModel.fromMap(map)).toList();
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientLocalDataSource.getAllVisible returns: ${clients.map((c) => c.id).toList()}');
+    return clients;
   }
 
   Future<void> create(ClientModel client) async {
@@ -128,20 +135,30 @@ class ClientLocalDataSource {
       'clients',
       where: 'is_dirty = 1',
     );
-    return result.map((map) => ClientModel.fromMap(map)).toList();
+    final clients = result.map((map) => ClientModel.fromMap(map)).toList();
+    print('TRACE [${DateTime.now().toIso8601String()}] ClientLocalDataSource.getAllVisible returns: ${clients.map((c) => c.id).toList()}');
+    return clients;
   }
 
   Future<void> overwriteClient(ClientModel client) async {
+    print('[TRACE-VISIBILITY] ClientLocalDataSource.overwriteClient(${client.id})');
     // Explicitly reset dirty flag and update synced_at
     final map = client.toMap();
     map['is_dirty'] = 0;
     map['synced_at'] = client.updatedAt.toUtc().toIso8601String();
 
-    await _db.insert(
+    final count = await _db.update(
       'clients',
       map,
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      where: 'id = ?',
+      whereArgs: [client.id],
     );
+
+    if (count == 0) {
+      await _db.insert('clients', map);
+    }
+    final postOverwrite = await _db.rawQuery('SELECT * FROM client_user_visibility WHERE client_id = ?', [client.id]);
+    print('[TRACE-VISIBILITY] SQLite visibility rows after overwriteClient: $postOverwrite');
   }
 
   Future<void> updateSyncMetadata(List<String> ids, DateTime syncedAt) async {

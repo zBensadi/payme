@@ -5,6 +5,7 @@ import '../../../providers/active_year_provider.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../utils/riverpod_invalidation_helper.dart';
 import '../models/dashboard_state.dart';
+import '../../../../domain/entities/invoice.dart';
 
 final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
   // 1. Get Active Year
@@ -31,11 +32,10 @@ final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
   ref.invalidateOnRepositoryChange(paymentRepo);
 
   final invoicesResult = await invoiceRepo.getInvoicesForYear(activeYear.id);
-  if (invoicesResult is Failure) {
-    throw Exception((invoicesResult as Failure).failure.message);
+  List<Invoice> invoices = [];
+  if (invoicesResult is Success) {
+    invoices = (invoicesResult as Success).value;
   }
-
-  final invoices = (invoicesResult as Success).value;
   
   double totalInvoiced = 0;
   double totalPaid = 0;
@@ -62,3 +62,4 @@ final dashboardControllerProvider = FutureProvider<DashboardState>((ref) async {
     outstandingBalance: totalInvoiced - totalPaid,
   );
 });
+

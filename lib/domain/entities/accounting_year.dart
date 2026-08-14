@@ -9,6 +9,7 @@ class AccountingYear {
   final String? remoteId;
   final DateTime? syncedAt;
   final bool isDirty;
+  final bool isDeleted;
 
   const AccountingYear({
     required this.id,
@@ -21,6 +22,7 @@ class AccountingYear {
     this.remoteId,
     this.syncedAt,
     this.isDirty = false,
+    this.isDeleted = false,
   });
 
   AccountingYear copyWith({
@@ -34,6 +36,7 @@ class AccountingYear {
     String? remoteId,
     DateTime? syncedAt,
     bool? isDirty,
+    bool? isDeleted,
   }) {
     return AccountingYear(
       id: id ?? this.id,
@@ -46,6 +49,7 @@ class AccountingYear {
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 
@@ -57,8 +61,9 @@ class AccountingYear {
           id == other.id &&
           name == other.name &&
           isActive == other.isActive &&
+          isDeleted == other.isDeleted &&
           updatedAt == other.updatedAt;
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode ^ isActive.hashCode ^ updatedAt.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ isActive.hashCode ^ isDeleted.hashCode ^ updatedAt.hashCode;
 }

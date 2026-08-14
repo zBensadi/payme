@@ -12,6 +12,7 @@ class AccountingYearModel extends AccountingYear {
     super.remoteId,
     super.syncedAt,
     super.isDirty,
+    super.isDeleted,
   });
 
   factory AccountingYearModel.fromMap(Map<String, dynamic> map) {
@@ -26,6 +27,7 @@ class AccountingYearModel extends AccountingYear {
       remoteId: map['remote_id'] as String?,
       syncedAt: map['synced_at'] != null ? DateTime.parse(map['synced_at'] as String).toLocal() : null,
       isDirty: (map['is_dirty'] as int) == 1,
+      isDeleted: (map['is_deleted'] as int?) == 1,
     );
   }
 
@@ -41,6 +43,7 @@ class AccountingYearModel extends AccountingYear {
       'remote_id': remoteId,
       'synced_at': syncedAt?.toUtc().toIso8601String(),
       'is_dirty': isDirty ? 1 : 0,
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 
@@ -56,6 +59,7 @@ class AccountingYearModel extends AccountingYear {
       remoteId: entity.remoteId,
       syncedAt: entity.syncedAt,
       isDirty: entity.isDirty,
+      isDeleted: entity.isDeleted,
     );
   }
 }

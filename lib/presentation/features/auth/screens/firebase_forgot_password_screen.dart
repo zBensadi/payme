@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/error/result.dart';
@@ -54,7 +55,7 @@ class _FirebaseForgotPasswordScreenState extends ConsumerState<FirebaseForgotPas
         _message = AppLocalizations.of(context)!.passwordResetSuccess;
         _isError = false;
       } else {
-        _message = _translateError((result as Failure).failure.message);
+        _message = _translateError((result as Failure).failure.message.localize(context));
         _isError = true;
       }
     });

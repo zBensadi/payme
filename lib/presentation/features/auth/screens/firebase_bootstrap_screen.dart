@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:payme/l10n/app_localizations.dart';
@@ -68,7 +69,7 @@ class _FirebaseBootstrapScreenState
     setState(() {
       _isCheckingSession = false;
       if (result is Failure) {
-        _error = (result as Failure).failure.message;
+        _error = (result as Failure).failure.message.localize(context);
         _isCorrupted = true;
       }
     });
@@ -116,7 +117,7 @@ class _FirebaseBootstrapScreenState
       debugPrint('[BSSCREEN][${DateTime.now().toIso8601String()}] bootstrap failed → setState(isLoading=false)');
       setState(() {
         _isLoading = false;
-        _error = result.failure.message;
+        _error = result.failure.message.localize(context);
       });
     } else {
       debugPrint('[BSSCREEN][${DateTime.now().toIso8601String()}] bootstrap succeeded → waiting for router to navigate (no manual navigation)');

@@ -671,7 +671,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String invoicesAndPaid(String count, String amount, String currency) {
-    return 'Invoices: $count • Paid: $amount $currency';
+    return 'Invoices: $count â€¢ Paid: $amount $currency';
   }
 
   @override
@@ -736,10 +736,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get english => 'English';
 
   @override
-  String get french => 'Français';
+  String get french => 'FranÃ§ais';
 
   @override
-  String get arabic => 'العربية';
+  String get arabic => 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©';
 
   @override
   String get saveSettings => 'Save Settings';
@@ -896,4 +896,265 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get art => 'ART';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get roles => 'Roles';
+
+  @override
+  String get hideInactiveUsers => 'Hide Inactive Users';
+
+  @override
+  String get showInactiveUsers => 'Show Inactive Users';
+
+  @override
+  String get searchUsers => 'Search Users...';
+
+  @override
+  String get noUsersFound => 'No users found.';
+
+  @override
+  String get unknownRole => 'Unknown Role';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get administration => 'Administration';
+
+  @override
+  String get userDetails => 'User Details';
+
+  @override
+  String get changeRole => 'Change Role';
+
+  @override
+  String get activateUser => 'Activate User';
+
+  @override
+  String get deactivateUser => 'Deactivate User';
+
+  @override
+  String get deleteUser => 'Delete User';
+
+  @override
+  String get systemOwnerProtection =>
+      'System Owner protection: Action not allowed.';
+
+  @override
+  String get userDeletedSuccess => 'User deleted successfully';
+
+  @override
+  String get userUpdatedSuccess => 'User updated successfully';
+
+  @override
+  String get roleId => 'Role';
+
+  @override
+  String get deactivateWarning =>
+      'Are you sure you want to deactivate this user? They will not be able to log in.';
+
+  @override
+  String get deleteUserWarning =>
+      'Are you sure you want to permanently delete this user?';
+
+  @override
+  String get rolesListTitle => 'Role Management';
+
+  @override
+  String get editRole => 'Edit Role';
+
+  @override
+  String get roleName => 'Role Name';
+
+  @override
+  String get roleDescription => 'Description';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get permissionsGroup => 'Permissions';
+
+  @override
+  String get systemRoleWarning =>
+      'This is a System Role. Some properties cannot be modified.';
+
+  @override
+  String get roleColor => 'Role Color';
+
+  @override
+  String get noRolesFound => 'No roles found.';
+
+  @override
+  String get roleUpdatedSuccess => 'Role updated successfully';
+
+  @override
+  String get permissions_clients => 'Clients';
+
+  @override
+  String get permissions_invoices => 'Invoices';
+
+  @override
+  String get permissions_payments => 'Payments';
+
+  @override
+  String get permissions_accounting => 'Accounting Years';
+
+  @override
+  String get permissions_reporting => 'Reporting & Exports';
+
+  @override
+  String get permissions_system => 'System & Administration';
+
+  @override
+  String get priorityDescription =>
+      'Higher number means higher authority. You cannot assign a priority equal to or higher than your own.';
+
+  @override
+  String get createRole => 'Create Role';
+
+  @override
+  String get deleteRole => 'Delete Role';
+
+  @override
+  String get deleteRoleConfirmation =>
+      'Are you sure you want to delete this role?';
+
+  @override
+  String get errorInsufficientPermissionsRepo =>
+      'Insufficient permissions to access this repository.';
+
+  @override
+  String get errorSettingsNotFound => 'Settings not found.';
+
+  @override
+  String get errorInvalidRoleAssigned => 'Invalid role assigned.';
+
+  @override
+  String get errorCannotAssignHigherRole =>
+      'Cannot assign a role with priority equal or higher than your own.';
+
+  @override
+  String get errorUserNotFound => 'User not found.';
+
+  @override
+  String get errorTargetUserNoValidRole => 'Target user has no valid role.';
+
+  @override
+  String get errorRoleNameExists => 'A role with this name already exists.';
+
+  @override
+  String get errorCannotCreateHigherRole =>
+      'Cannot create a role with priority equal or higher than your own.';
+
+  @override
+  String get errorCannotAssignUnpossessedPermissions =>
+      'Cannot assign permissions that you do not possess.';
+
+  @override
+  String get errorRoleNotFound => 'Role not found.';
+
+  @override
+  String get errorSystemRoleModification =>
+      'This role is a system role and its structure cannot be modified.';
+
+  @override
+  String get errorCannotElevateRolePriority =>
+      'Cannot elevate role priority to be equal or higher than your own.';
+
+  @override
+  String get errorRoleCannotBeDeleted => 'This role cannot be deleted.';
+
+  @override
+  String get errorRoleHasUsers =>
+      'Cannot delete this role because users are currently assigned to it.';
+
+  @override
+  String get errorPaymentNotFound => 'Payment not found.';
+
+  @override
+  String get errorInvoiceNotFoundMsg => 'Invoice not found.';
+
+  @override
+  String get errorClientNotFoundMsg => 'Client not found.';
+
+  @override
+  String get errorDatabaseNotInitialized => 'Database not initialized';
+
+  @override
+  String get errorNoActiveAccountingYear => 'No active accounting year.';
+
+  @override
+  String get errorBusinessSettingsNotLoaded => 'Business settings not loaded';
+
+  @override
+  String get errorSourceFileNotFound => 'Source file does not exist.';
+
+  @override
+  String get errorSyncPullFailed =>
+      'Pull failed. Aborting sync cycle to preserve referential integrity.';
+
+  @override
+  String get errorDatabaseClosed =>
+      'Database is closed. It must be reopened first.';
+
+  @override
+  String get errorDatabaseSchemaTooNew =>
+      'Database schema version is newer than the app supports. Please update the app.';
+
+  @override
+  String get userCreatedSuccess => 'User created successfully';
+
+  @override
+  String get saveProfile => 'Save Profile';
+
+  @override
+  String pageNotFound(String uri) {
+    return 'Page not found: $uri';
+  }
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get visibilityEveryone => 'Everyone';
+
+  @override
+  String get visibilitySpecificUsers => 'Specific Users';
+
+  @override
+  String get selectUsers => 'Select Users';
+
+  @override
+  String get deleteAccountingYearConfirm =>
+      'Are you sure you want to delete this accounting year?';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get createUser => 'Create User';
+
+  @override
+  String get clientVisibility => 'Client Visibility';
+
+  @override
+  String get noUsersSelected => 'No users selected.';
+
+  @override
+  String get systemOwnerDescription => 'Business owner with full permissions';
+
+  @override
+  String priorityPrefix(int priority) {
+    return 'Priority: $priority';
+  }
 }

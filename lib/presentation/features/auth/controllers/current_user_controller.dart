@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import '../../../../core/sync/sync_domain.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/error/result.dart';
@@ -39,57 +41,104 @@ final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
   final userRepository = ref.watch(internalUserRepositoryProvider);
   final roleRepository = ref.watch(internalRoleRepositoryProvider);
 
-  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] StreamProvider build — starting authStateChanges() listen loop');
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] StreamProvider build — initializing unified trigger');
 
-  await for (final user in authService.authStateChanges()) {
+  final triggerController = StreamController<AppUser?>();
+  AppUser? lastKnownAuthUser;
+
+  final authSub = authService.authStateChanges().listen((user) {
     debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] authStateChanges() emitted: uid=${user?.uid} email=${user?.email}');
+    lastKnownAuthUser = user;
+    triggerController.add(user);
+  });
 
+  final userSub = userRepository.watchEvents().listen((event) {
+    if (event.domain == SyncDomain.users) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] userRepository event — triggering refresh check');
+      triggerController.add(lastKnownAuthUser);
+    }
+  });
+
+  final roleSub = roleRepository.watchEvents().listen((event) {
+    if (event.domain == SyncDomain.roles) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] roleRepository event — triggering refresh check');
+      triggerController.add(lastKnownAuthUser);
+    }
+  });
+
+  ref.onDispose(() {
+    authSub.cancel();
+    userSub.cancel();
+    roleSub.cancel();
+    triggerController.close();
+  });
+
+  CurrentAppUser? lastYielded;
+
+  await for (final user in triggerController.stream) {
     if (user == null) {
       // No Firebase session → unauthenticated
       debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] user=null → yielding null (unauthenticated)');
+      if (lastYielded != null) {
+        lastYielded = null;
+        yield null;
+      } else if (!triggerController.isClosed) {
+        yield null;
+      }
+      continue;
+    }
+    
+    // Attempt to resolve the user from SQLite only.
+    final userResult = await userRepository.getUserById(user.uid);
+
+    if (userResult is! Success || (userResult as Success<AppUser?>).value == null) {
+      // User is authenticated with Firebase but has no local SQLite record.
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] no SQLite record → yielding bootstrap sentinel for uid=${user.uid}');
+      final sentinel = _bootstrapSentinel(uid: user.uid, email: user.email);
+      lastYielded = sentinel;
+      yield sentinel;
+      continue;
+    }
+
+    final appUser = (userResult as Success<AppUser?>).value!;
+
+    if (appUser.roleId == null) {
+      // User record exists but roleId is missing — corrupted authorization state.
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] roleId=null → FAIL CLOSED: signing out');
+      await fb.FirebaseAuth.instance.signOut();
+      lastYielded = null;
       yield null;
+      continue;
+    }
+
+    // Resolve the role from SQLite.
+    final roleResult = await roleRepository.getRoleById(appUser.roleId!);
+
+    if (roleResult is! Success || (roleResult as Success<UserRole?>).value == null) {
+      // Role referenced by user does not exist locally — referential integrity failure.
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] role not found in SQLite → FAIL CLOSED: signing out');
+      await fb.FirebaseAuth.instance.signOut();
+      lastYielded = null;
+      yield null;
+      continue;
+    }
+
+    final userRole = (roleResult as Success<UserRole?>).value!;
+    final nextUser = CurrentAppUser(user: appUser, role: userRole);
+
+    // Only yield if there's a meaningful change (we use updatedAt as a reliable signal)
+    if (lastYielded == null || 
+        lastYielded.user.updatedAt != nextUser.user.updatedAt || 
+        lastYielded.role.updatedAt != nextUser.role.updatedAt) {
+      
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] resolved uid=${appUser.uid} businessId=${appUser.businessId} roleId=${userRole.id} → yielding updated CurrentAppUser');
+      lastYielded = nextUser;
+      yield nextUser;
     } else {
-      // Attempt to resolve the user from SQLite only.
-      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] BEFORE userRepository.getUserById(${user.uid})');
-      final userResult = await userRepository.getUserById(user.uid);
-      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] AFTER  userRepository.getUserById() → ${userResult.runtimeType} value=${userResult is Success ? (userResult as Success).value : (userResult as Failure).failure.message}');
-
-      if (userResult is! Success || (userResult as Success<AppUser?>).value == null) {
-        // User is authenticated with Firebase but has no local SQLite record.
-        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] no SQLite record → yielding bootstrap sentinel for uid=${user.uid}');
-        yield _bootstrapSentinel(uid: user.uid, email: user.email);
-        continue;
-      }
-
-      final appUser = (userResult as Success<AppUser?>).value!;
-
-      if (appUser.roleId == null) {
-        // User record exists but roleId is missing — corrupted authorization state.
-        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] roleId=null → FAIL CLOSED: signing out');
-        await fb.FirebaseAuth.instance.signOut();
-        yield null;
-        continue;
-      }
-
-      // Resolve the role from SQLite.
-      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] BEFORE roleRepository.getRoleById(${appUser.roleId})');
-      final roleResult = await roleRepository.getRoleById(appUser.roleId!);
-      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] AFTER  roleRepository.getRoleById() → ${roleResult.runtimeType} value=${roleResult is Success ? (roleResult as Success).value : (roleResult as Failure).failure.message}');
-
-      if (roleResult is! Success || (roleResult as Success<UserRole?>).value == null) {
-        // Role referenced by user does not exist locally — referential integrity failure.
-        debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] role not found in SQLite → FAIL CLOSED: signing out');
-        await fb.FirebaseAuth.instance.signOut();
-        yield null;
-        continue;
-      }
-
-      final userRole = (roleResult as Success<UserRole?>).value!;
-      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] resolved uid=${appUser.uid} businessId=${appUser.businessId} roleId=${userRole.id} → yielding CurrentAppUser (authenticated)');
-      yield CurrentAppUser(user: appUser, role: userRole);
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] state unchanged for uid=${appUser.uid}, skipping rebuild');
     }
   }
-  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] authStateChanges() stream closed — StreamProvider ending');
+  debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] unified trigger stream closed — StreamProvider ending');
 });
 
 /// A sentinel [CurrentAppUser] that represents a Firebase-authenticated user

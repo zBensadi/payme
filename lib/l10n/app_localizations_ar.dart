@@ -893,4 +893,262 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get art => 'المادة الضريبية (ART)';
+
+  @override
+  String get users => 'المستخدمون';
+
+  @override
+  String get roles => 'الأدوار';
+
+  @override
+  String get hideInactiveUsers => 'إخفاء المستخدمين غير النشطين';
+
+  @override
+  String get showInactiveUsers => 'إظهار المستخدمين غير النشطين';
+
+  @override
+  String get searchUsers => 'بحث عن مستخدمين...';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين.';
+
+  @override
+  String get unknownRole => 'دور غير معروف';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get administration => 'الإدارة';
+
+  @override
+  String get userDetails => 'تفاصيل المستخدم';
+
+  @override
+  String get changeRole => 'تغيير الدور';
+
+  @override
+  String get activateUser => 'تفعيل المستخدم';
+
+  @override
+  String get deactivateUser => 'تعطيل المستخدم';
+
+  @override
+  String get deleteUser => 'حذف المستخدم';
+
+  @override
+  String get systemOwnerProtection => 'حماية مالك النظام: إجراء غير مسموح به.';
+
+  @override
+  String get userDeletedSuccess => 'تم حذف المستخدم بنجاح';
+
+  @override
+  String get userUpdatedSuccess => 'تم تحديث المستخدم بنجاح';
+
+  @override
+  String get roleId => 'الدور';
+
+  @override
+  String get deactivateWarning =>
+      'هل أنت متأكد من تعطيل هذا المستخدم؟ لن يتمكن من تسجيل الدخول.';
+
+  @override
+  String get deleteUserWarning => 'هل أنت متأكد من حذف هذا المستخدم نهائيًا؟';
+
+  @override
+  String get rolesListTitle => 'إدارة الأدوار';
+
+  @override
+  String get editRole => 'تعديل الدور';
+
+  @override
+  String get roleName => 'اسم الدور';
+
+  @override
+  String get roleDescription => 'الوصف';
+
+  @override
+  String get priority => 'الأولوية';
+
+  @override
+  String get permissionsGroup => 'الصلاحيات';
+
+  @override
+  String get systemRoleWarning => 'هذا دور نظام. بعض الخصائص لا يمكن تعديلها.';
+
+  @override
+  String get roleColor => 'لون الدور';
+
+  @override
+  String get noRolesFound => 'لم يتم العثور على أدوار.';
+
+  @override
+  String get roleUpdatedSuccess => 'تم تحديث الدور بنجاح';
+
+  @override
+  String get permissions_clients => 'العملاء';
+
+  @override
+  String get permissions_invoices => 'الفواتير';
+
+  @override
+  String get permissions_payments => 'المدفوعات';
+
+  @override
+  String get permissions_accounting => 'السنوات المالية';
+
+  @override
+  String get permissions_reporting => 'التقارير والتصدير';
+
+  @override
+  String get permissions_system => 'النظام والإدارة';
+
+  @override
+  String get priorityDescription =>
+      'الرقم الأعلى يعني أولوية أعلى. لا يمكنك تعيين أولوية تساوي أو تتجاوز أولويتك.';
+
+  @override
+  String get createRole => 'إنشاء دور';
+
+  @override
+  String get deleteRole => 'حذف الدور';
+
+  @override
+  String get deleteRoleConfirmation => 'هل أنت متأكد أنك تريد حذف هذا الدور؟';
+
+  @override
+  String get errorInsufficientPermissionsRepo =>
+      'صلاحيات غير كافية للوصول إلى هذا السجل.';
+
+  @override
+  String get errorSettingsNotFound => 'لم يتم العثور على الإعدادات.';
+
+  @override
+  String get errorInvalidRoleAssigned => 'تم تعيين دور غير صالح.';
+
+  @override
+  String get errorCannotAssignHigherRole =>
+      'لا يمكنك تعيين دور بأولوية تساوي أو تزيد عن أولويتك.';
+
+  @override
+  String get errorUserNotFound => 'المستخدم غير موجود.';
+
+  @override
+  String get errorTargetUserNoValidRole =>
+      'المستخدم المستهدف ليس لديه دور صالح.';
+
+  @override
+  String get errorRoleNameExists => 'يوجد دور بهذا الاسم بالفعل.';
+
+  @override
+  String get errorCannotCreateHigherRole =>
+      'لا يمكنك إنشاء دور بأولوية تساوي أو تزيد عن أولويتك.';
+
+  @override
+  String get errorCannotAssignUnpossessedPermissions =>
+      'لا يمكنك تعيين صلاحيات لا تملكها.';
+
+  @override
+  String get errorRoleNotFound => 'الدور غير موجود.';
+
+  @override
+  String get errorSystemRoleModification =>
+      'هذا دور نظام ولا يمكن تعديل هيكله.';
+
+  @override
+  String get errorCannotElevateRolePriority =>
+      'لا يمكن رفع أولوية الدور لتكون مساوية أو أعلى من أولويتك.';
+
+  @override
+  String get errorRoleCannotBeDeleted => 'لا يمكن حذف هذا الدور.';
+
+  @override
+  String get errorRoleHasUsers =>
+      'لا يمكن حذف هذا الدور لأن هناك مستخدمين معينين له حاليا.';
+
+  @override
+  String get errorPaymentNotFound => 'الدفع غير موجود.';
+
+  @override
+  String get errorInvoiceNotFoundMsg => 'الفاتورة غير موجودة.';
+
+  @override
+  String get errorClientNotFoundMsg => 'العميل غير موجود.';
+
+  @override
+  String get errorDatabaseNotInitialized => 'قاعدة البيانات غير مهيأة';
+
+  @override
+  String get errorNoActiveAccountingYear => 'لا توجد سنة مالية نشطة.';
+
+  @override
+  String get errorBusinessSettingsNotLoaded => 'لم يتم تحميل إعدادات العمل';
+
+  @override
+  String get errorSourceFileNotFound => 'الملف المصدر غير موجود.';
+
+  @override
+  String get errorSyncPullFailed =>
+      'فشل السحب. تم إلغاء دورة المزامنة للحفاظ على السلامة المرجعية.';
+
+  @override
+  String get errorDatabaseClosed =>
+      'قاعدة البيانات مغلقة. يجب إعادة فتحها أولا.';
+
+  @override
+  String get errorDatabaseSchemaTooNew =>
+      'إصدار مخطط قاعدة البيانات أحدث مما يدعمه التطبيق. يرجى تحديث التطبيق.';
+
+  @override
+  String get userCreatedSuccess => 'تم إنشاء المستخدم بنجاح';
+
+  @override
+  String get saveProfile => 'حفظ الملف الشخصي';
+
+  @override
+  String pageNotFound(String uri) {
+    return 'الصفحة غير موجودة: $uri';
+  }
+
+  @override
+  String get errorTitle => 'خطأ';
+
+  @override
+  String get visibilityEveryone => 'الجميع';
+
+  @override
+  String get visibilitySpecificUsers => 'مستخدمون محددون';
+
+  @override
+  String get selectUsers => 'تحديد المستخدمين';
+
+  @override
+  String get deleteAccountingYearConfirm =>
+      'هل أنت متأكد من أنك تريد حذف هذه السنة المالية؟';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get createUser => 'إنشاء مستخدم';
+
+  @override
+  String get clientVisibility => 'رؤية العميل';
+
+  @override
+  String get noUsersSelected => 'لم يتم تحديد مستخدمين.';
+
+  @override
+  String get systemOwnerDescription => 'مالك العمل بكامل الصلاحيات';
+
+  @override
+  String priorityPrefix(int priority) {
+    return 'الأولوية: $priority';
+  }
 }

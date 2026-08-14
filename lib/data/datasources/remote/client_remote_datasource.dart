@@ -8,6 +8,7 @@ class ClientRemoteDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<void> pushClients(String businessId, List<Client> clients) async {
+    print('[TRACE-VISIBILITY] ClientRemoteDataSource.pushClients: ${clients.map((c) => c.id).toList()}');
     if (clients.isEmpty) return;
 
     // Process in batches of 500 (Firestore limit)
@@ -33,6 +34,7 @@ class ClientRemoteDataSource {
           'nif': client.nif,
           'nis': client.nis,
           'art': client.art,
+          'visibilityType': client.visibilityType,
           'isDeleted': client.isDeleted,
           'createdAt': client.createdAt.toUtc().toIso8601String(),
           'updatedAt': client.updatedAt.toUtc().toIso8601String(),
@@ -49,6 +51,7 @@ class ClientRemoteDataSource {
   }
 
   Future<List<Client>> pullClients(String businessId, DateTime? lastSyncTime) async {
+    print('[TRACE-VISIBILITY] ClientRemoteDataSource.pullClients($lastSyncTime)');
     Query<Map<String, dynamic>> query = _firestore
         .collection('businesses')
         .doc(businessId)
@@ -80,6 +83,7 @@ class ClientRemoteDataSource {
         nif: data['nif'],
         nis: data['nis'],
         art: data['art'],
+        visibilityType: data['visibilityType'] ?? 'everyone',
         isDeleted: data['isDeleted'] ?? false,
         createdAt: parseDate(data['createdAt']),
         updatedAt: parseDate(data['updatedAt']),

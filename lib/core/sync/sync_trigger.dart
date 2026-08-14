@@ -9,6 +9,7 @@ class SyncTrigger {
 
   /// Requests a synchronization cycle for a specific domain.
   void requestSync(SyncDomain domain) {
+    print('[TRACE-VISIBILITY] SyncTrigger.requestSync: $domain');
     if (!_controller.isClosed) {
       _controller.add(domain);
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -120,15 +121,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.settings),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await ref.read(firebaseAuthControllerProvider.notifier).logout();
-            },
-          ),
-        ],
       ),
       body: settingsState.when(
         data: (settings) {
@@ -299,7 +291,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         },
         loading: () => LoadingView(message: context.l10n.loadingSettings),
         error: (error, _) => ErrorView(
-          message: error.toString(),
+          message: error.toString().localize(context),
           onRetry: () => ref.invalidate(settingsControllerProvider),
         ),
       ),

@@ -1,5 +1,6 @@
 import '../../../../core/formatters/formatters.dart';
 import 'package:flutter/material.dart';
+import 'package:payme/presentation/utils/failure_localizer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/empty_state_view.dart';
@@ -12,6 +13,7 @@ import '../widgets/invoice_status_badge.dart';
 import '../../settings/controllers/settings_controller.dart';
 import '../utils/pdf_preview_helper.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../../../../presentation/utils/sync_refresh_helper.dart';
 
 class GlobalInvoiceListScreen extends ConsumerStatefulWidget {
   const GlobalInvoiceListScreen({super.key});
@@ -111,7 +113,7 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
           }
 
           return RefreshIndicator(
-            onRefresh: () async => ref.read(globalInvoiceListControllerProvider.notifier).refresh(),
+            onRefresh: () => SyncRefreshHelper.refresh(ref),
             child: ListView.separated(
               itemCount: items.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
@@ -153,7 +155,7 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
         },
         loading: () => LoadingView(message: AppLocalizations.of(context)!.loadingInvoices),
         error: (error, _) => ErrorView(
-          message: error.toString(),
+          message: error.toString().localize(context),
           onRetry: () => ref.read(globalInvoiceListControllerProvider.notifier).refresh(),
         ),
       ),

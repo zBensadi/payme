@@ -123,6 +123,7 @@ class SyncService {
   }
 
   Future<void> _executeSyncCycle(Set<SyncDomain> domains) async {
+    print('[TRACE-VISIBILITY] SyncService._executeSyncCycle processing domains: $domains');
     _isSyncing = true;
     _updateStatus(SyncStatus.syncing);
     _logger.logInfo('Starting sync cycle for business: $_businessId, domains: $domains');

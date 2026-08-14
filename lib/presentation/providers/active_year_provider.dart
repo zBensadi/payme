@@ -5,7 +5,11 @@ import 'repository_providers.dart';
 import '../utils/riverpod_invalidation_helper.dart';
 
 final activeYearProvider = FutureProvider<AccountingYear?>((ref) async {
-  final repo = ref.watch(accountingYearRepositoryProvider);
+  // Use the internal repository to bypass feature-level authorization guards.
+  // The active year is a foundational application context required for dashboard
+  // and other queries. Lack of 'accounting_years.view' permission should not
+  // block the application from loading its foundational context.
+  final repo = ref.watch(internalAccountingYearRepositoryProvider);
   ref.invalidateOnRepositoryChange(repo);
   final result = await repo.getActive();
   
