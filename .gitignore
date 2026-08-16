@@ -63,3 +63,7 @@ test_output*.log
 
 # Build output artifacts (installers, APKs — not committed)
 /Output/
+
+# Firebase Functions generated files and dependencies
+functions/node_modules/
+functions/lib/
