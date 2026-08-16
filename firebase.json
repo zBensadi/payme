@@ -34,25 +34,5 @@
       "enabled": true
     },
     "singleProjectMode": true
-  },
-  "flutter": {
-    "platforms": {
-      "android": {
-        "default": {
-          "projectId": "payme-dev-967bb",
-          "appId": "1:935426834457:android:2f56ef714bff503f9bea88",
-          "fileOutput": "android/app/google-services.json"
-        }
-      },
-      "dart": {
-        "lib/firebase_options.dart": {
-          "projectId": "payme-dev-967bb",
-          "configurations": {
-            "android": "1:935426834457:android:2f56ef714bff503f9bea88",
-            "windows": "1:935426834457:web:8d24076040f386a39bea88"
-          }
-        }
-      }
-    }
   }
 }

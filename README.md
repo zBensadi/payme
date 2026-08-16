@@ -1,35 +1,130 @@
-# PayMe
+# PayMe — Client Receivables Manager
 
-Offline-First Client Receivables Manager for Windows Desktop and Android.
+A cross-platform (Windows + Android) offline-first client receivables management application built with Flutter and Firebase.
 
-## Project Overview
+> **Status:** v2.0.0-alpha.16 — Alpha/Testing release. Not production-ready.
 
-PayMe is a local, offline-first application designed for accountants and small businesses to track client invoices, payments, and outstanding balances. It runs entirely on local SQLite with no backend and is scoped to a single admin user, a single currency, and one active accounting year at a time. It uses a Clean Architecture approach with a focus on simplicity, maintainability, and data security.
+---
+
+## Features
+
+- **Offline-first architecture** — Full local SQLite database with bi-directional Firestore sync
+- **Multi-tenant** — Each business operates in its own isolated namespace
+- **Role-based access control** — Configurable roles and permissions per business
+- **Client management** — Client visibility controls per user
+- **Invoice & payment tracking** — Full lifecycle management
+- **Accounting years** — Multi-year book management
+- **Localization** — English, French, and Arabic (RTL) support
+- **Platforms** — Windows desktop + Android
+
+---
 
 ## Prerequisites
 
-- Flutter SDK (see version below)
-- Android Studio (for Android build)
-- Visual Studio (for Windows desktop build)
-- Git
+| Requirement | Version |
+|-------------|---------|
+| Flutter | ≥ 3.32 (`sdk: ^3.12.2`) |
+| Dart | ≥ 3.12.2 |
+| Firebase CLI | Latest |
+| FlutterFire CLI | Latest |
+| Android SDK | API 21+ |
+| Windows | Windows 10+ (for desktop build) |
 
-## Flutter Version
+---
 
-Ensure you are using the latest stable Flutter SDK version 3.29.x (or as defined in `pubspec.yaml` environment constraints `^3.12.2`).
+## Setup
 
-## Supported Platforms
+### 1. Clone the repository
 
-- Windows Desktop
-- Android
+```bash
+git clone https://github.com/YOUR_USERNAME/payme.git
+cd payme
+```
 
-## How to Run the Project
+### 2. Install Flutter dependencies
 
-1. Clone the repository.
-2. Ensure you have the required prerequisites for your target platform (Windows or Android).
-3. Fetch dependencies:
-   ```bash
-   flutter pub get
-   ```
-4. Run the application:
-   - For Windows: `flutter run -d windows`
-   - For Android: `flutter run -d android` (requires an attached device or running emulator)
+```bash
+flutter pub get
+```
+
+### 3. Configure Firebase
+
+PayMe requires your **own Firebase project**. See [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md) for the complete step-by-step guide.
+
+> The `lib/firebase_options.dart` and `android/app/google-services.json` files are intentionally excluded from this repository (`.gitignore`). You must generate them for your own Firebase project using the FlutterFire CLI.
+
+A reference template is available at: [`lib/firebase_options.example.dart`](lib/firebase_options.example.dart)
+
+### 4. Generate localization files
+
+```bash
+flutter gen-l10n
+```
+
+### 5. Run the application
+
+```bash
+# Windows
+flutter run -d windows
+
+# Android (with device connected)
+flutter run -d android
+```
+
+---
+
+## Build
+
+### Windows installer (Inno Setup)
+
+```bash
+flutter build windows --release
+# Then compile installer.iss using Inno Setup
+```
+
+### Android APK
+
+```bash
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
+```
+
+---
+
+## Testing
+
+```bash
+flutter test
+flutter analyze
+```
+
+---
+
+## Project Structure
+
+```
+lib/
+  core/           # Database, sync engine, error handling
+  data/           # Data sources and repository implementations
+  domain/         # Entities, use cases, repository interfaces
+  l10n/           # Localization ARB files (en, fr, ar)
+  presentation/   # Flutter UI (screens, widgets, providers)
+  firebase_options.example.dart  # Reference config (see Firebase Setup)
+firestore.rules   # Firestore security rules
+firestore.indexes.json
+docs/             # Project documentation
+```
+
+---
+
+## Documentation
+
+- [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md) — Firebase project configuration guide
+- [`docs/CURRENT_STATUS.md`](docs/CURRENT_STATUS.md) — Alpha release status
+- [`CHANGELOG.md`](CHANGELOG.md) — Release history
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE).

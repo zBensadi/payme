@@ -43,3 +43,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase — local configuration (must be generated per developer)
+lib/firebase_options.dart
+.firebaserc
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+*.env
+*.env.*
+*-service-account*.json
+
+# Temporary development artifacts
+*_output.txt
+analyze_output*.txt
+build_output*.txt
+flutter_output*.txt
+test_output*.log
+
+# Build output artifacts (installers, APKs — not committed)
+/Output/

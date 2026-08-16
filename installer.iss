@@ -1,5 +1,5 @@
 #define MyAppName "Payme - Client Payments Manager"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0.0"
 #define MyAppPublisher "EraScript"
 #define MyAppExeName "payme.exe"
 
