@@ -14,7 +14,7 @@ Alpha 16 completes the **final UI localization pass** across all user-facing str
 
 ## Localization Completion
 
-Alpha 16 adds 30+ missing translation keys across English, French, and Arabic.
+Alpha 16 completes the final localization pass across English, French and Arabic and adds the missing translation keys.
 
 ### New ARB Keys (`app_en.arb`, `app_fr.arb`, `app_ar.arb`)
 
@@ -94,7 +94,7 @@ No Git history rewrite was performed. The complete audit confirmed **no real sec
 
 ## Upgrade from Alpha 15
 
-No data migration is required. Localization changes are purely UI-layer. All existing Firestore data and local SQLite databases from Alpha 15 are fully compatible.
+Alpha 16 includes automatic SQLite schema migration to version 14 for Accounting Year soft deletion. No manual database migration is required; existing Alpha 15 installations are upgraded automatically on startup. Localization changes are purely UI-layer. All existing Firestore data and local SQLite databases from Alpha 15 are fully compatible.
 
 ---
 

@@ -92,11 +92,12 @@ Follow the prompts:
 
 ---
 
-## Step 6 — Deploy Firestore Rules
+## Step 6 — (Optional) Deploy Development Firestore Rules
 
 The repository includes the current Firestore security rules at `firestore.rules`.
+These are permissive Alpha/development rules and are **NOT production-ready**.
 
-To deploy them to your project:
+If you are setting up a development or testing environment, you can deploy them to your project:
 
 ```bash
 firebase use --add          # Link your project to the Firebase CLI
@@ -159,9 +160,10 @@ PayMe uses the following top-level collection structure:
         ...
     /accounting_years/{yearId}
         ...
-    /client_visibility/{userId}
-        visibilityType: 'everyone' | 'specific_users'
-        visibleClientIds: List<String>
+    /client_visibility/{clientId_userId}
+        clientId: String
+        userId: String
+        syncedAt: String (ISO8601)
 ```
 
 > No manual seed data or migration scripts are required. PayMe bootstraps the initial business, owner role, and user pointer automatically on first login via `FirebaseBootstrapRepository`.
