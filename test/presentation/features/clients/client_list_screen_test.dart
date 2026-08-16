@@ -4,12 +4,17 @@ import 'package:payme/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payme/core/error/result.dart';
 import 'package:payme/domain/entities/client.dart';
+import 'package:payme/domain/entities/client_visibility.dart';
 import 'package:payme/domain/repositories/client_repository.dart';
+import 'package:payme/domain/repositories/client_visibility_repository.dart';
 import 'package:payme/presentation/features/clients/screens/client_list_screen.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 import 'package:payme/core/events/repository_event.dart';
-
 import 'package:payme/domain/entities/client_visibility_context.dart';
+import 'package:payme/presentation/widgets/empty_state_view.dart';
+import 'package:payme/core/sync/sync_priority.dart';
+import 'package:payme/core/sync/sync_result.dart';
+import 'package:payme/core/sync/sync_domain.dart';
 
 class FakeClientRepository implements ClientRepository {
   List<Client> clients = [];
@@ -77,14 +82,39 @@ class FakeClientRepository implements ClientRepository {
   void dispose() {}
 }
 
+class FakeClientVisibilityRepository implements ClientVisibilityRepository {
+  @override
+  Future<Result<void>> addVisibility(ClientVisibility visibility) async => const Success(null);
+  @override
+  Future<Result<void>> removeVisibility(String clientId, String userId) async => const Success(null);
+  @override
+  Future<Result<List<ClientVisibility>>> getVisibilityForClient(String clientId) async => const Success([]);
+  @override
+  Stream<RepositoryEvent> watchEvents() => const Stream.empty();
+  @override
+  void dispose() {}
+
+  @override
+  SyncDomain get syncDomain => SyncDomain.clientVisibility;
+  @override
+  SyncPriority get syncPriority => SyncPriority.level4ClientVisibility;
+
+  @override
+  Future<SyncResult> pushChanges(String businessId) async => const SyncResult();
+  @override
+  Future<SyncResult> pullChanges(String businessId, DateTime? lastSyncTime) async => const SyncResult();
+}
+
 void main() {
   testWidgets('ClientListScreen displays empty state when no clients', (WidgetTester tester) async {
     final fakeRepo = FakeClientRepository();
+    final fakeVisibilityRepo = FakeClientVisibilityRepository();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           clientRepositoryProvider.overrideWithValue(fakeRepo),
+          clientVisibilityRepositoryProvider.overrideWithValue(fakeVisibilityRepo),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -96,11 +126,12 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('No clients found.'), findsOneWidget);
+    expect(find.byType(EmptyStateView), findsOneWidget);
   });
 
   testWidgets('ClientListScreen displays visible clients', (WidgetTester tester) async {
     final fakeRepo = FakeClientRepository();
+    final fakeVisibilityRepo = FakeClientVisibilityRepository();
     await fakeRepo.create(Client(id: '1', name: 'Alice', createdAt: DateTime.now(), updatedAt: DateTime.now()));
     await fakeRepo.create(Client(id: '2', name: 'Bob', isDeleted: true, createdAt: DateTime.now(), updatedAt: DateTime.now()));
 
@@ -108,6 +139,7 @@ void main() {
       ProviderScope(
         overrides: [
           clientRepositoryProvider.overrideWithValue(fakeRepo),
+          clientVisibilityRepositoryProvider.overrideWithValue(fakeVisibilityRepo),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
