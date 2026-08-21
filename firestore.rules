@@ -1,9 +1,134 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    
+    // -------------------------------------------------------------------------
+    // A. HELPER FUNCTIONS
+    // -------------------------------------------------------------------------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isSuperAdmin() {
+      return request.auth.token.isSuperAdmin == true;
+    }
+    
+    function hasBusinessClaim(businessId) {
+      return isSuperAdmin() || request.auth.token.businessId == businessId;
+    }
+    
+    function isOwner() {
+      return isSuperAdmin() || request.auth.token.isOwner == true;
+    }
+    
+    function hasRolePermission(businessId, permission) {
+      let userDoc = get(/databases/$(database)/documents/businesses/$(businessId)/users/$(request.auth.uid));
+      let roleDoc = userDoc != null && 'roleId' in userDoc.data ? get(/databases/$(database)/documents/businesses/$(businessId)/roles/$(userDoc.data.roleId)) : null;
+      return isOwner() || (roleDoc != null && 'permissions' in roleDoc.data && permission in roleDoc.data.permissions);
+    }
+    
+    // -------------------------------------------------------------------------
+    // B. GLOBAL USERS POINTER
+    // -------------------------------------------------------------------------
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      
+      allow create: if isAuthenticated() && request.auth.uid == userId
+                    && request.resource.data.isOwner == false
+                    && request.resource.data.isSuperAdmin == false
+                    && (!('businessId' in request.resource.data) || request.resource.data.businessId == null)
+                    && (!('roleId' in request.resource.data) || request.resource.data.roleId == null);
+                    
+      allow update: if isAuthenticated() && request.auth.uid == userId
+                    && request.resource.data.businessId == resource.data.businessId
+                    && request.resource.data.roleId == resource.data.roleId
+                    && request.resource.data.isOwner == resource.data.isOwner
+                    && request.resource.data.isSuperAdmin == resource.data.isSuperAdmin;
+                    
+      allow delete: if false; 
+    }
+    
+    // -------------------------------------------------------------------------
+    // C. BUSINESS-SCOPED DATA
+    // -------------------------------------------------------------------------
+    match /businesses/{businessId} {
+      
+      allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+      allow update: if isAuthenticated() && hasBusinessClaim(businessId) && isOwner()
+                    && request.resource.data.businessId == resource.data.businessId; 
+      allow create, delete: if false; 
+      
+      match /users/{userId} {
+        // Broad intra-tenant read for sync compatibility
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        
+        allow create: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'users.create')
+                      && request.resource.data.businessId == businessId
+                      && request.resource.data.isOwner == false
+                      && request.resource.data.isSuperAdmin == false
+                      && (isOwner() || request.resource.data.roleId != 'role-owner');
+                      
+        allow update: if isAuthenticated() && hasBusinessClaim(businessId) && (
+            (request.auth.uid == userId && 
+             request.resource.data.isOwner == resource.data.isOwner &&
+             request.resource.data.isSuperAdmin == resource.data.isSuperAdmin &&
+             request.resource.data.businessId == resource.data.businessId &&
+             request.resource.data.roleId == resource.data.roleId
+            )
+            ||
+            (hasRolePermission(businessId, 'users.edit') &&
+             request.resource.data.isOwner == resource.data.isOwner &&
+             request.resource.data.isSuperAdmin == resource.data.isSuperAdmin &&
+             request.resource.data.businessId == resource.data.businessId &&
+             (isOwner() || request.resource.data.roleId != 'role-owner') &&
+             (isOwner() || request.resource.data.roleId == resource.data.roleId)
+            )
+            ||
+            isOwner() 
+        );
+        allow delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'users.delete');
+      }
+      
+      match /roles/{roleId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow create, update, delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'roles.manage');
+      }
+      
+      match /clients/{clientId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow create: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'clients.create');
+        allow update: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'clients.edit');
+        allow delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'clients.delete');
+      }
+      
+      match /invoices/{invoiceId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow create: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'invoices.create');
+        allow update: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'invoices.edit');
+        allow delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'invoices.delete');
+      }
+      
+      match /payments/{paymentId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow create: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'payments.create');
+        allow update: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'payments.edit');
+        allow delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'payments.delete');
+      }
+      
+      match /accounting_years/{yearId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow create, update, delete: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'accounting_years.manage');
+      }
+      
+      match /client_visibility/{docId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow write: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'users.edit');
+      }
+      
+      match /settings/{docId} {
+        allow read: if isAuthenticated() && hasBusinessClaim(businessId);
+        allow write: if isAuthenticated() && hasBusinessClaim(businessId) && hasRolePermission(businessId, 'settings.edit');
+      }
     }
   }
 }

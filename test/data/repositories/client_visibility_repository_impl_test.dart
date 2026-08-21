@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:payme/core/error/result.dart';
 import 'package:payme/core/sync/sync_domain.dart';
 import 'package:payme/core/sync/sync_trigger.dart';
 import 'package:payme/data/datasources/local/client_visibility_local_datasource.dart';
@@ -35,7 +34,7 @@ class MockClientVisibilityLocalDataSource implements ClientVisibilityLocalDataSo
 
   @override
   Future<void> removeVisibility(String clientId, String userId) async {
-    removedVisibilities.add('${clientId}_${userId}');
+    removedVisibilities.add('${clientId}_$userId');
   }
 
   @override

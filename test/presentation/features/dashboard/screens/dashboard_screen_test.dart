@@ -21,6 +21,12 @@ class MockSyncService implements SyncService {
   bool get hasCompletedInitialSync => true;
 
   @override
+  Future<void> pause() async {}
+
+  @override
+  void resume() {}
+
+  @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

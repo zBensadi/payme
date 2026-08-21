@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/client_visibility_model.dart';
 
@@ -17,7 +18,7 @@ class ClientVisibilityRemoteDataSource {
   }
 
   Future<List<ClientVisibilityModel>> getModifiedSince(String businessId, DateTime? since) async {
-    print('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.getModifiedSince($since)');
+    debugPrint('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.getModifiedSince($since)');
     Query<Map<String, dynamic>> query = _collection(businessId);
     
     if (since != null) {
@@ -37,11 +38,11 @@ class ClientVisibilityRemoteDataSource {
   }
 
   Future<void> pushVisibilities(String businessId, List<ClientVisibilityModel> visibilities) async {
-    print('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => e.clientId + "_" + e.userId).toList()}');
+    debugPrint('[TRACE-VISIBILITY] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => "${e.clientId}_${e.userId}").toList()}');
     for (var v in visibilities) {
-      print('[TRACE-VISIBILITY] Firestore path: businesses/$businessId/client_visibility/${v.clientId}_${v.userId}');
+      debugPrint('[TRACE-VISIBILITY] Firestore path: businesses/$businessId/client_visibility/${v.clientId}_${v.userId}');
     }
-    print('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => e.clientId + "_" + e.userId).toList()}');
+    debugPrint('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityRemoteDataSource.pushVisibilities: ${visibilities.map((e) => "${e.clientId}_${e.userId}").toList()}');
     if (visibilities.isEmpty) return;
 
     final batch = _firestore.batch();

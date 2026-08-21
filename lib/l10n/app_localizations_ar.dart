@@ -1151,4 +1151,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String priorityPrefix(int priority) {
     return 'الأولوية: $priority';
   }
+
+  @override
+  String get deleteUserWarningInactive =>
+      'سيفقد هذا المستخدم الوصول إلى PayMe. سيظل الحساب وعنوان البريد الإلكتروني محجوزين ولا يمكن استخدامهما لإنشاء حساب جديد. يمكن إعادة تنشيط المستخدم لاحقًا بواسطة مسؤول مفوض.';
+
+  @override
+  String get reactivateUser => 'إعادة تنشيط المستخدم';
+
+  @override
+  String get displayNameRequired => 'اسم العرض مطلوب';
+
+  @override
+  String get initialPassword => 'كلمة المرور الأولية';
+
+  @override
+  String get passwordTooShort => 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
+
+  @override
+  String get roleRequired => 'الدور مطلوب';
 }

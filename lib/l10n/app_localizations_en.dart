@@ -1157,4 +1157,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String priorityPrefix(int priority) {
     return 'Priority: $priority';
   }
+
+  @override
+  String get deleteUserWarningInactive =>
+      'This user will lose access to PayMe. The account and email address will remain reserved and cannot be used to create a new account. The user can be reactivated later by an authorized administrator.';
+
+  @override
+  String get reactivateUser => 'Reactivate User';
+
+  @override
+  String get displayNameRequired => 'Display Name is required';
+
+  @override
+  String get initialPassword => 'Initial Password';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get roleRequired => 'Role is required';
 }

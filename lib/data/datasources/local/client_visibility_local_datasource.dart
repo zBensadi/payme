@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/database_service.dart';
 import '../../models/client_visibility_model.dart';
@@ -8,8 +9,8 @@ class ClientVisibilityLocalDataSource {
   ClientVisibilityLocalDataSource(this._dbService);
 
   Future<void> addVisibility(ClientVisibilityModel visibility) async {
-    print('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
-    print('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
+    debugPrint('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
+    debugPrint('TRACE [${DateTime.now().toIso8601String()}] ClientVisibilityLocalDataSource.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
     final db = _dbService.db;
     await db.transaction((txn) async {
       await txn.insert(
@@ -30,7 +31,7 @@ class ClientVisibilityLocalDataSource {
       );
     });
     final postInsert = await db.rawQuery('SELECT * FROM client_user_visibility WHERE client_id = ? AND user_id = ?', [visibility.clientId, visibility.userId]);
-    print('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility resulting SQLite row: $postInsert');
+    debugPrint('[TRACE-VISIBILITY] ClientVisibilityLocalDataSource.addVisibility resulting SQLite row: $postInsert');
   }
 
   Future<void> removeVisibility(String clientId, String userId) async {

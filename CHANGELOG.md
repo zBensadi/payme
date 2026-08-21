@@ -4,6 +4,31 @@ All notable changes to PayMe are documented in this file.
 
 ---
 
+## [v2.0.0-alpha.17] — 2026-08-21
+
+### Summary
+Alpha 17 focuses on transitioning PayMe V2 from a permissive, client-enforced authorization model to a robust, server-authoritative Firestore backend, along with final analyzer cleanup and test stabilization.
+
+### Security & Architecture
+- **Firestore Rules**: Implemented strict RBAC via `hasRolePermission()` and business isolation via Custom Claims.
+- **Cloud Functions**: Moved business bootstrap and user provisioning/deactivation to trusted Cloud Functions (`bootstrapBusiness`, `provisionUser`, `deactivateUser`, `reactivateUser`).
+- **Custom Claims**: Replaced client-authoritative `businessId` fields with Firebase Auth Custom Claims to ensure zero-cost tenant isolation.
+- **Storage Rules**: Enforced that only the business Owner can upload/modify the business logo, while allowing any authorized user within the same business to read it.
+
+### Features & Polish
+- **Logo Synchronization**: Business logos are now synchronized via Firebase Storage with a strict 2 MB limit. PDF generation correctly utilizes authenticated fallback downloads.
+- **Dashboard Synchronization**: Dashboard now listens to `localMutation` events for immediate UI updates when clients or invoices are created.
+- **Client Visibility**: `SecuredClientRepository` automatically bypasses visibility restrictions for the business Owner.
+- **Audit Metadata**: Implemented `user_lookup_provider` to resolve UIDs into human-readable Display Names (or Emails) for audit trails.
+- **Analyzer Cleanup**: Achieved 0 analyzer errors and 0 production-code warnings (`dart fix`, removed dead code, migrated `RadioListTile` to `RadioGroup`).
+
+### Test Baseline
+- **172 Flutter tests passing**
+- **68 automated security tests passing**
+- **1 intentionally pending security test**
+
+---
+
 ## [v2.0.0-alpha.16] — 2026-08-16
 
 ### Summary

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:crypto/crypto.dart' as crypto;
 
 import '../../../core/error/failures.dart';
 import '../../../core/error/result.dart';
@@ -10,7 +12,6 @@ import '../../../core/sync/sync_result.dart';
 import '../../../core/sync/synchronizable_repository.dart';
 import '../../../core/sync/sync_domain.dart';
 import '../../../core/sync/sync_trigger.dart';
-import '../../../core/utils/id_generator.dart';
 import '../../../domain/entities/business_settings.dart';
 import '../../../domain/repositories/settings_repository.dart';
 import '../datasources/file/logo_file_datasource.dart';
@@ -70,19 +71,37 @@ class SettingsRepositoryImpl implements SettingsRepository, SynchronizableReposi
       BusinessSettings updatedSettings = settings;
 
       if (newLogoSourcePath != null) {
-        if (settings.logoPath != null) {
-          await _fileDataSource.deleteLogo(settings.logoPath!);
-        }
+        final file = File(newLogoSourcePath);
+        final bytes = await file.readAsBytes();
+        final sha256Digest = crypto.sha256.convert(bytes).toString();
 
-        final extension = p.extension(newLogoSourcePath).toLowerCase().replaceAll('.', '');
-        final type = ['jpg', 'jpeg', 'png'].contains(extension) ? (extension == 'jpeg' ? 'jpg' : extension) : 'png';
-        final newFileName = 'logo_${IdGenerator.generateUniqueId()}.$type';
-        
-        final relativePath = await _fileDataSource.saveLogo(newLogoSourcePath, newFileName);
-        updatedSettings = updatedSettings.copyWith(logoPath: relativePath);
+        if (settings.logoSha256 != sha256Digest) {
+          final extension = p.extension(newLogoSourcePath).toLowerCase().replaceAll('.', '');
+          final type = ['jpg', 'jpeg', 'png'].contains(extension) ? (extension == 'jpeg' ? 'jpg' : extension) : 'png';
+          final newFileName = '$sha256Digest.$type';
+          
+          final relativePath = await _fileDataSource.saveLogo(newLogoSourcePath, newFileName);
+          final oldLogoPath = settings.logoPath;
+
+          updatedSettings = updatedSettings.copyWith(
+            logoPath: relativePath,
+            logoSha256: sha256Digest,
+          );
+
+          await _localDataSource.updateSettings(updatedSettings);
+
+          if (oldLogoPath != null) {
+            try {
+              await _fileDataSource.deleteLogo(oldLogoPath);
+            } catch (_) {
+              // Ignore old logo deletion failure to avoid rolling back successful save
+            }
+          }
+        }
+      } else {
+        await _localDataSource.updateSettings(updatedSettings);
       }
 
-      await _localDataSource.updateSettings(updatedSettings);
       _syncTrigger.requestSync(syncDomain);
       return Success(updatedSettings);
     } catch (e) {

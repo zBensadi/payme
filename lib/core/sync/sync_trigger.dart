@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'sync_domain.dart';
 
@@ -9,7 +10,7 @@ class SyncTrigger {
 
   /// Requests a synchronization cycle for a specific domain.
   void requestSync(SyncDomain domain) {
-    print('[TRACE-VISIBILITY] SyncTrigger.requestSync: $domain');
+    debugPrint('[TRACE-VISIBILITY] SyncTrigger.requestSync: $domain');
     if (!_controller.isClosed) {
       _controller.add(domain);
     }

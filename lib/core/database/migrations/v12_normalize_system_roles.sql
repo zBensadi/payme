@@ -17,7 +17,7 @@ INSERT OR IGNORE INTO roles (
     '[]', 
     datetime('now'), 
     datetime('now'), 
-    1
+    0
 );
 
 -- 2. Enforce priority and immutability for the canonical Owner role

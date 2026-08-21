@@ -43,7 +43,7 @@ class SecuredRoleRepository implements RoleRepository, RepositoryChangePublisher
   @override
   Future<Result<UserRole?>> getRoleById(String id) async {
     // Current user's own role is always viewable
-    if (_currentUser != null && _currentUser!.role.id == id) {
+    if (_currentUser != null && _currentUser.role.id == id) {
       return await _inner.getRoleById(id);
     }
 
@@ -74,8 +74,8 @@ class SecuredRoleRepository implements RoleRepository, RepositoryChangePublisher
     }
 
     // Privilege validation
-    if (_currentUser != null && !_currentUser!.user.isOwner) {
-      final unauthorizedPermissions = role.permissions.where((p) => !_currentUser!.role.permissions.contains(p));
+    if (_currentUser != null && !_currentUser.user.isOwner) {
+      final unauthorizedPermissions = role.permissions.where((p) => !_currentUser.role.permissions.contains(p));
       if (unauthorizedPermissions.isNotEmpty) {
         return Failure(const DatabaseFailure('Cannot assign permissions that you do not possess.'));
       }
@@ -94,10 +94,10 @@ class SecuredRoleRepository implements RoleRepository, RepositoryChangePublisher
   @override
   Future<Result<void>> updateRole(UserRole role) async {
     final existingResult = await _inner.getRoleById(role.id);
-    if (existingResult is! Success<UserRole?> || (existingResult as Success<UserRole?>).value == null) {
+    if (existingResult is! Success<UserRole?> || (existingResult).value == null) {
       return Failure(const DatabaseFailure('Role not found.'));
     }
-    final existingRole = (existingResult as Success<UserRole?>).value!;
+    final existingRole = (existingResult).value!;
 
     if (!_permissionService.canManageRole(_currentUser, existingRole)) {
       return Failure(_unauthorized());
@@ -122,8 +122,8 @@ class SecuredRoleRepository implements RoleRepository, RepositoryChangePublisher
     }
     
     // Privilege validation
-    if (_currentUser != null && !_currentUser!.user.isOwner) {
-      final unauthorizedPermissions = role.permissions.where((p) => !_currentUser!.role.permissions.contains(p));
+    if (_currentUser != null && !_currentUser.user.isOwner) {
+      final unauthorizedPermissions = role.permissions.where((p) => !_currentUser.role.permissions.contains(p));
       if (unauthorizedPermissions.isNotEmpty) {
         return Failure(const DatabaseFailure('Cannot assign permissions that you do not possess.'));
       }
@@ -141,10 +141,10 @@ class SecuredRoleRepository implements RoleRepository, RepositoryChangePublisher
   @override
   Future<Result<void>> deleteRole(String id) async {
     final existingResult = await _inner.getRoleById(id);
-    if (existingResult is! Success<UserRole?> || (existingResult as Success<UserRole?>).value == null) {
+    if (existingResult is! Success<UserRole?> || (existingResult).value == null) {
       return Failure(const DatabaseFailure('Role not found.'));
     }
-    final existingRole = (existingResult as Success<UserRole?>).value!;
+    final existingRole = (existingResult).value!;
 
     if (!_permissionService.canManageRole(_currentUser, existingRole)) {
       return Failure(_unauthorized());

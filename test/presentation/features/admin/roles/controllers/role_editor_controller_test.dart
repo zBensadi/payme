@@ -135,7 +135,7 @@ void main() {
 
   group('RoleEditorController Priority Enforcement', () {
     setUp(() async {
-      container.listen(currentUserProvider, (_, __) {});
+      container.listen(currentUserProvider, (_, _) {});
       await Future.delayed(const Duration(milliseconds: 50));
     });
     

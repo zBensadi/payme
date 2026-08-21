@@ -9,6 +9,7 @@ import '../../../../domain/entities/app_user.dart';
 import '../../../../domain/entities/user_role.dart';
 import '../../../providers/repository_providers.dart';
 import 'firebase_auth_controller.dart';
+import 'context_resolution_controller.dart';
 
 /// Resolves the Firebase-authenticated user to a [CurrentAppUser] using
 /// ONLY the local SQLite database.
@@ -37,7 +38,7 @@ import 'firebase_auth_controller.dart';
 /// SyncService will have a valid businessId and can begin pulling all
 /// remaining data from Firestore.
 final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
-  final authService = ref.watch(firebaseAuthServiceProvider);
+
   final userRepository = ref.watch(internalUserRepositoryProvider);
   final roleRepository = ref.watch(internalRoleRepositoryProvider);
 
@@ -46,11 +47,17 @@ final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
   final triggerController = StreamController<AppUser?>();
   AppUser? lastKnownAuthUser;
 
-  final authSub = authService.authStateChanges().listen((user) {
-    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] authStateChanges() emitted: uid=${user?.uid} email=${user?.email}');
-    lastKnownAuthUser = user;
-    triggerController.add(user);
-  });
+  ref.listen<ContextResolutionData>(contextResolutionProvider, (previous, next) {
+    if (next.state == ContextResolutionState.approved) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] context approved: uid=${next.user?.uid}');
+      lastKnownAuthUser = next.user;
+      triggerController.add(next.user);
+    } else if (next.state == ContextResolutionState.unauthenticated) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][currentUserProvider] context unauthenticated');
+      lastKnownAuthUser = null;
+      triggerController.add(null);
+    }
+  }, fireImmediately: true);
 
   final userSub = userRepository.watchEvents().listen((event) {
     if (event.domain == SyncDomain.users) {
@@ -67,7 +74,6 @@ final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
   });
 
   ref.onDispose(() {
-    authSub.cancel();
     userSub.cancel();
     roleSub.cancel();
     triggerController.close();
@@ -100,7 +106,7 @@ final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
       continue;
     }
 
-    final appUser = (userResult as Success<AppUser?>).value!;
+    final appUser = (userResult).value!;
 
     if (appUser.roleId == null) {
       // User record exists but roleId is missing — corrupted authorization state.
@@ -123,7 +129,7 @@ final currentUserProvider = StreamProvider<CurrentAppUser?>((ref) async* {
       continue;
     }
 
-    final userRole = (roleResult as Success<UserRole?>).value!;
+    final userRole = (roleResult).value!;
     final nextUser = CurrentAppUser(user: appUser, role: userRole);
 
     // Only yield if there's a meaningful change (we use updatedAt as a reliable signal)

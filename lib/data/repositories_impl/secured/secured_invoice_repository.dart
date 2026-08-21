@@ -39,7 +39,7 @@ class SecuredInvoiceRepository implements InvoiceRepository, RepositoryChangePub
 
     final securedInvoice = invoice.copyWith(
       createdBy: _currentUser!.user.uid,
-      updatedBy: _currentUser!.user.uid,
+      updatedBy: _currentUser.user.uid,
     );
 
     return await _inner.create(securedInvoice);

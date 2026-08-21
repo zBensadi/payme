@@ -172,7 +172,7 @@ class PaymentsByPeriodReportScreen extends ConsumerWidget {
                           final payment = payments[index];
                           return ListTile(
                             title: Text('${NumberFormatter.formatAmount(payment.amount)} $currency'),
-                            subtitle: Text('${DateFormatter.formatDate(payment.date)}'), // Removed displayName as we can just show the badge below if needed, or translate it
+                            subtitle: Text(DateFormatter.formatDate(payment.date)), // Removed displayName as we can just show the badge below if needed, or translate it
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

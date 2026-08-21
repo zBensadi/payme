@@ -45,6 +45,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
 
     if (count == 0) {
       // Normal soft delete
+      if (!mounted) return;
       final proceed = await ConfirmDialog.show(
         context,
         title: AppLocalizations.of(context)!.deleteClientDialogTitle,

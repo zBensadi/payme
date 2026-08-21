@@ -16,7 +16,6 @@ import 'package:payme/presentation/features/auth/controllers/current_user_contro
 import 'package:payme/presentation/providers/permission_service_provider.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 import 'package:payme/core/sync/sync_trigger.dart';
-import 'package:payme/core/sync/sync_trigger.dart';
 import 'package:payme/core/sync/sync_service.dart';
 import 'package:payme/core/sync/sync_domain.dart';
 import 'package:payme/core/sync/sync_status.dart';
@@ -374,6 +373,12 @@ class _FakeSyncService implements SyncService {
 
   @override
   void setBusinessId(String? businessId) {}
+  
+  @override
+  Future<void> pause() async {}
+  
+  @override
+  void resume() {}
 
   @override
   void dispose() {

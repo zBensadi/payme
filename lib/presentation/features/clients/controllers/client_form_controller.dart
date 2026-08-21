@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/client.dart';
 import '../../../../domain/entities/client_visibility.dart';
@@ -5,6 +6,7 @@ import '../../../../core/error/result.dart';
 import '../../../../core/utils/id_generator.dart';
 import '../../../providers/repository_providers.dart';
 import 'client_list_controller.dart';
+import 'client_ledger_controller.dart';
 
 class ClientFormState {
   final String visibilityType;
@@ -103,8 +105,8 @@ class ClientFormController extends AsyncNotifier<ClientFormState> {
   }
 
   Future<bool> _executeSave(Client client, ClientFormState formState) async {
-    print('[TRACE-VISIBILITY-TEST] ===== SAVE START =====');
-    print('[TRACE-VISIBILITY] ClientFormController._executeSave: clientId=${client.id.isEmpty ? "NEW" : client.id}, clientName=${client.name}, visibilityType=${formState.visibilityType}, selectedUserIds=${formState.selectedUserIds}');
+    debugPrint('[TRACE-VISIBILITY-TEST] ===== SAVE START =====');
+    debugPrint('[TRACE-VISIBILITY] ClientFormController._executeSave: clientId=${client.id.isEmpty ? "NEW" : client.id}, clientName=${client.name}, visibilityType=${formState.visibilityType}, selectedUserIds=${formState.selectedUserIds}');
     final repo = ref.read(clientRepositoryProvider);
     final visibilityRepo = ref.read(clientVisibilityRepositoryProvider);
     
@@ -125,7 +127,7 @@ class ClientFormController extends AsyncNotifier<ClientFormState> {
     } else {
       result = await repo.update(finalClient);
     }
-    print('[TRACE-VISIBILITY] ClientRepository create/update result: ${result is Success}');
+    debugPrint('[TRACE-VISIBILITY] ClientRepository create/update result: ${result is Success}');
 
     return switch (result) {
       Success(value: final savedClient) => await () async {
@@ -153,7 +155,8 @@ class ClientFormController extends AsyncNotifier<ClientFormState> {
 
           state = AsyncData(formState);
           ref.invalidate(clientListControllerProvider);
-          print('[TRACE-VISIBILITY-TEST] ===== SAVE END =====');
+          ref.invalidate(clientLedgerControllerProvider(savedClient.id));
+          debugPrint('[TRACE-VISIBILITY-TEST] ===== SAVE END =====');
           return true;
         }(),
       Failure(failure: final f) => () {

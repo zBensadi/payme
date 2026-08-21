@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../utils/failure_localizer.dart';
 
+import '../../../../../domain/entities/app_user.dart';
 import '../controllers/user_editor_controller.dart';
 import '../../../../widgets/loading_view.dart';
 import '../../../../widgets/error_view.dart';
@@ -25,7 +26,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
   String? _selectedRoleId;
   String? _populatedUserId;
 
-  void _populateForm(user) {
+  void _populateForm(AppUser user) {
     if (_populatedUserId != user.uid) {
       _populatedUserId = user.uid;
       _emailController.text = user.email;
@@ -89,7 +90,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text(l10n.deleteUser),
-                    content: Text(l10n.deleteUserWarning),
+                    content: Text(l10n.deleteUserWarningInactive),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
@@ -139,46 +140,46 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
             Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
               child: Text(state.error!.localize(context), style: const TextStyle(color: Colors.red)),
             ),
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.email, border: const OutlineInputBorder()),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Email is required';
-              if (!value.contains('@')) return 'Enter a valid email';
+              if (value == null || value.trim().isEmpty) return l10n.emailRequired;
+              if (!value.contains('@')) return l10n.invalidEmailFormat;
               return null;
             },
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Display Name', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.businessName, border: const OutlineInputBorder()),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return 'Display Name is required';
+              if (value == null || value.trim().isEmpty) return l10n.displayNameRequired;
               return null;
             },
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Initial Password', border: OutlineInputBorder()),
+            decoration: InputDecoration(labelText: l10n.initialPassword, border: const OutlineInputBorder()),
             obscureText: true,
             validator: (value) {
-              if (value == null || value.length < 6) return 'Password must be at least 6 characters';
+              if (value == null || value.length < 6) return l10n.passwordTooShort;
               return null;
             },
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedRoleId,
-            decoration: const InputDecoration(labelText: 'Role', border: OutlineInputBorder()),
+            initialValue: _selectedRoleId,
+            decoration: InputDecoration(labelText: l10n.roleId, border: const OutlineInputBorder()),
             items: state.availableRoles.map((r) {
               return DropdownMenuItem(value: r.id, child: Text(r.name));
             }).toList(),
             validator: (value) {
-              if (value == null || value.isEmpty) return 'Role is required';
+              if (value == null || value.isEmpty) return l10n.roleRequired;
               return null;
             },
             onChanged: (val) {
@@ -219,6 +220,63 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
   }
 
   Widget _buildEditView(BuildContext context, UserEditorState state, UserEditorController notifier, AppLocalizations l10n, user, role) {
+    if (!user.isActive) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (state.error != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: Text(state.error!.localize(context), style: const TextStyle(color: Colors.red)),
+            ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const Icon(Icons.person_off, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${user.displayName ?? user.email} is inactive.',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.deleteUserWarningInactive,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  if (state.canEdit)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.restore),
+                        label: Text(l10n.reactivateUser),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        onPressed: () async {
+                          final success = await notifier.reactivateUser();
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.userUpdatedSuccess)),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Form(
       key: _formKey,
       child: Column(
@@ -229,7 +287,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
               margin: const EdgeInsets.only(bottom: 24),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.2),
+                color: Colors.amber.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.amber),
               ),
@@ -251,7 +309,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
             Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
               child: Text(state.error!.localize(context), style: const TextStyle(color: Colors.red)),
             ),
 
@@ -277,14 +335,14 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
                     decoration: InputDecoration(labelText: l10n.businessName, border: const OutlineInputBorder()),
                     readOnly: !state.canEdit,
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Display Name is required';
+                      if (value == null || value.trim().isEmpty) return l10n.displayNameRequired;
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
                   _buildDetailRow(l10n.roleId, role?.name ?? l10n.unknownRole),
                   const Divider(),
-                  _buildDetailRow(l10n.statusLabel, user.isActive ? 'Active' : 'Inactive'),
+                  _buildDetailRow(l10n.statusLabel, user.isActive ? l10n.active : l10n.inactive),
                 ],
               ),
             ),
@@ -308,7 +366,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
                     }
                   }
                 },
-                child: const Text('Save Profile'),
+                child: Text(l10n.saveProfile),
               ),
             ),
             
@@ -322,7 +380,7 @@ class _UserEditorScreenState extends ConsumerState<UserEditorScreen> {
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: state.availableRoles.any((r) => r.id == user.roleId) ? user.roleId : null,
+                      initialValue: state.availableRoles.any((r) => r.id == user.roleId) ? user.roleId : null,
                       decoration: InputDecoration(
                         labelText: l10n.changeRole,
                         border: const OutlineInputBorder(),

@@ -9,6 +9,7 @@ import '../../../../data/repositories_impl/firebase_bootstrap_repository.dart';
 import '../../../../domain/repositories/bootstrap_repository.dart';
 import '../../../providers/repository_providers.dart';
 import 'current_user_controller.dart';
+import 'context_resolution_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Providers
@@ -88,6 +89,11 @@ class BootstrapController extends Notifier<AsyncValue<void>> {
       await _seedSQLite(bootstrapData);
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  _seedSQLite() complete');
 
+      debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] BEFORE contextResolver.markBootstrapped()');
+      final contextResolver = ref.read(contextResolutionProvider.notifier);
+      await contextResolver.markBootstrapped(bootstrapData.user.businessId!);
+      debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  contextResolver.markBootstrapped()');
+
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] BEFORE ref.invalidate(currentUserProvider)');
       ref.invalidate(currentUserProvider);
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  ref.invalidate(currentUserProvider)');
@@ -139,6 +145,11 @@ class BootstrapController extends Notifier<AsyncValue<void>> {
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  _seedSQLite()');
 
       // Step 3: Refresh currentUserProvider
+      debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] BEFORE contextResolver.markBootstrapped()');
+      final contextResolver = ref.read(contextResolutionProvider.notifier);
+      await contextResolver.markBootstrapped(bootstrapData.user.businessId!);
+      debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  contextResolver.markBootstrapped()');
+
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] BEFORE ref.invalidate(currentUserProvider)');
       ref.invalidate(currentUserProvider);
       debugPrint('[BSCTRL][${DateTime.now().toIso8601String()}] AFTER  ref.invalidate(currentUserProvider)');

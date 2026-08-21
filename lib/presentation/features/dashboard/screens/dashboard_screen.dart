@@ -17,8 +17,6 @@ import '../widgets/onboarding_checklist.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'dart:io';
 import '../../../providers/sync_providers.dart';
-import '../../../providers/sync_trigger_provider.dart';
-import '../../../../core/sync/sync_status.dart';
 import '../../../../domain/entities/permissions.dart';
 import '../../../widgets/require_permission.dart';
 import '../../../utils/sync_refresh_helper.dart';

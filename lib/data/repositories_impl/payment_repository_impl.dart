@@ -224,7 +224,7 @@ class PaymentRepositoryImpl implements PaymentRepository, SynchronizableReposito
       final dirtyModels = await _localDataSource.getDirtyPayments();
       if (dirtyModels.isEmpty) return const SyncResult(skipped: 0);
 
-      final dirtyPayments = dirtyModels.map((m) => m as Payment).toList();
+      final dirtyPayments = dirtyModels.map((m) => m).toList();
       
       await _remoteDataSource.pushPayments(businessId, dirtyPayments);
       
@@ -254,7 +254,7 @@ class PaymentRepositoryImpl implements PaymentRepository, SynchronizableReposito
           await _localDataSource.overwritePayment(PaymentModel.fromMap(PaymentModel.toMap(remotePayment)));
           downloaded++;
         } else {
-          final localPayment = localModel as Payment;
+          final localPayment = localModel;
           
           if (remotePayment.updatedAt.compareTo(localPayment.updatedAt) <= 0) {
             continue;

@@ -26,8 +26,30 @@ void main() {
   });
 
 
-  test('AppConstants.schemaVersion equals 14', () {
-    expect(AppConstants.schemaVersion, 14);
+  test('AppConstants.schemaVersion equals 16', () {
+    expect(AppConstants.schemaVersion, 16);
+  });
+
+  test('V15 upgrades to V16 and adds logo_sha256 to business_settings', () async {
+    // Fake the database being at v15
+    await db.execute('''
+      CREATE TABLE app_meta (id INTEGER PRIMARY KEY, schema_version INTEGER);
+      CREATE TABLE business_settings (id INTEGER PRIMARY KEY);
+    ''');
+    await db.insert('app_meta', {'id': 1, 'schema_version': 15});
+    
+    // Apply V16
+    final scriptFile = File('lib/core/database/migrations/v16_logo_sha256.sql');
+    final scriptContent = await scriptFile.readAsString();
+    await runner.applyMigration(db, scriptContent, 16);
+    
+    final tableInfo = await db.rawQuery('PRAGMA table_info(business_settings)');
+    final columnNames = tableInfo.map((c) => c['name'] as String).toList();
+    
+    expect(columnNames, contains('logo_sha256'));
+    
+    final meta = await db.query('app_meta');
+    expect(meta.first['schema_version'], 16);
   });
 
   test('V12 upgrades to V13 and creates deleted_client_visibilities', () async {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:payme/domain/entities/app_user.dart';
-import 'package:payme/domain/entities/client.dart';
 import 'package:payme/core/error/result.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 import 'package:payme/presentation/features/clients/widgets/client_form.dart';

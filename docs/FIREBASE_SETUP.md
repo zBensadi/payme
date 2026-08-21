@@ -92,29 +92,18 @@ Follow the prompts:
 
 ---
 
-## Step 6 — (Optional) Deploy Development Firestore Rules
+## Step 6 — Deploy Firebase Resources (Rules & Functions)
 
-The repository includes the current Firestore security rules at `firestore.rules`.
-These are permissive Alpha/development rules and are **NOT production-ready**.
+PayMe Alpha 17 relies on Cloud Functions for secure business bootstrapping and user provisioning, and Firebase Storage for business logos.
 
-If you are setting up a development or testing environment, you can deploy them to your project:
+Deploy the security rules and cloud functions to your project:
 
 ```bash
 firebase use --add          # Link your project to the Firebase CLI
-firebase deploy --only firestore:rules
+firebase deploy --only firestore:rules,storage,functions
 ```
 
-> **⚠️ Alpha Warning — Rules are NOT production-ready**
->
-> The current rules are:
-> ```
-> allow read, write: if request.auth != null;
-> ```
-> This allows any authenticated user to read and write **any document** in your Firestore database, bypassing PayMe's multi-tenant business isolation at the backend layer.
->
-> PayMe enforces business-scoping **application-side** via its `SecuredRepository` layer, but this does not protect against direct Firestore API access by a malicious authenticated user.
->
-> **Do NOT deploy PayMe with these rules to a public or production environment.** Production-grade rules with proper tenant and role enforcement will be added in a future release.
+> **Note:** Deploying Cloud Functions requires your Firebase project to be on the Blaze (pay-as-you-go) plan.
 
 ---
 
@@ -176,6 +165,6 @@ PayMe uses the following top-level collection structure:
 |---------|----------|-------|
 | Authentication | ✅ Yes | Email/Password only |
 | Cloud Firestore | ✅ Yes | Default database, native mode |
-| Cloud Storage | ❌ No | Not used in Alpha 16 |
+| Cloud Storage | ✅ Yes | Used for Business Logos |
 | Cloud Messaging | ❌ No | Not used |
-| Functions | ❌ No | Not required for client usage |
+| Functions | ✅ Yes | Required for Business Bootstrap and User Provisioning |

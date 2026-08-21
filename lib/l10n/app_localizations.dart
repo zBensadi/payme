@@ -2217,6 +2217,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Priority: {priority}'**
   String priorityPrefix(int priority);
+
+  /// No description provided for @deleteUserWarningInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'This user will lose access to PayMe. The account and email address will remain reserved and cannot be used to create a new account. The user can be reactivated later by an authorized administrator.'**
+  String get deleteUserWarningInactive;
+
+  /// No description provided for @reactivateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate User'**
+  String get reactivateUser;
+
+  /// No description provided for @displayNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name is required'**
+  String get displayNameRequired;
+
+  /// No description provided for @initialPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Password'**
+  String get initialPassword;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @roleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Role is required'**
+  String get roleRequired;
 }
 
 class _AppLocalizationsDelegate

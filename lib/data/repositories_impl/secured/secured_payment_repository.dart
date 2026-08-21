@@ -39,7 +39,7 @@ class SecuredPaymentRepository implements PaymentRepository, RepositoryChangePub
 
     final securedPayment = payment.copyWith(
       createdBy: _currentUser!.user.uid,
-      updatedBy: _currentUser!.user.uid,
+      updatedBy: _currentUser.user.uid,
     );
 
     return await _inner.create(securedPayment, newAttachmentSourcePaths: newAttachmentSourcePaths);

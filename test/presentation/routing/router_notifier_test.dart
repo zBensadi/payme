@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:payme/domain/entities/app_user.dart';
@@ -20,7 +19,7 @@ void main() {
     );
 
     // Keep the notifier alive
-    final sub = container.listen(routerNotifierProvider, (_, __) {});
+    final sub = container.listen(routerNotifierProvider, (_, _) {});
     final notifier = container.read(routerNotifierProvider);
     
     int notifyCount = 0;

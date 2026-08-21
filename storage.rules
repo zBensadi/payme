@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Business logos
+    // Path: businesses/{businessId}/logos/logo.png
+    match /businesses/{businessId}/logos/{fileName} {
+      // Allow read if user belongs to this business
+      allow read: if request.auth != null && 
+                  request.auth.token.businessId == businessId;
+                  
+      // Allow create and update if user is the Owner of this business
+      // Require the file to be an image and less than 2MB
+      allow create, update: if request.auth != null && 
+                   request.auth.token.businessId == businessId && 
+                   request.auth.token.isOwner == true &&
+                   request.resource.size < 2 * 1024 * 1024 &&
+                   request.resource.contentType.matches('image/.*');
+                   
+      // Allow delete if user is the Owner of this business
+      // Note: request.resource is null during delete, so size/type checks are omitted.
+      allow delete: if request.auth != null && 
+                   request.auth.token.businessId == businessId && 
+                   request.auth.token.isOwner == true;
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/error/result.dart';
 import '../../../../domain/entities/business_settings.dart';
@@ -41,6 +42,17 @@ class SettingsController extends AsyncNotifier<BusinessSettings> {
     String? art,
     String? newLogoSourcePath,
   }) async {
+    if (newLogoSourcePath != null) {
+      final file = File(newLogoSourcePath);
+      if (await file.exists()) {
+        final sizeInBytes = await file.length();
+        if (sizeInBytes > 2 * 1024 * 1024) {
+          state = AsyncError('File is too large (Max 2MB)', StackTrace.current);
+          return;
+        }
+      }
+    }
+
     state = const AsyncLoading();
     
     final currentSettings = await _fetchSettings();

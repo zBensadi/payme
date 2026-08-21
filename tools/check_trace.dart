@@ -14,19 +14,27 @@ void main() async {
   
   print('--- accounting_years ---');
   final years = await db.rawQuery('SELECT * FROM accounting_years');
-  for (var row in years) print(row);
+  for (var row in years) {
+    print(row);
+  }
 
   print('--- clients ---');
   final clients = await db.rawQuery('SELECT * FROM clients');
-  for (var row in clients) print(row);
+  for (var row in clients) {
+    print(row);
+  }
 
   print('--- invoices ---');
   final invoices = await db.rawQuery('SELECT * FROM invoices');
-  for (var row in invoices) print(row);
+  for (var row in invoices) {
+    print(row);
+  }
 
   print('--- invoice_sequences ---');
   final seqs = await db.rawQuery('SELECT * FROM invoice_sequences');
-  for (var row in seqs) print(row);
+  for (var row in seqs) {
+    print(row);
+  }
   
   await db.close();
 }

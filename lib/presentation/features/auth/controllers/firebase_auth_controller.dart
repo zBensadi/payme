@@ -5,6 +5,7 @@ import '../../../../core/error/result.dart';
 import '../../../../data/repositories_impl/firebase_authentication_repository.dart';
 
 import 'current_user_controller.dart';
+import 'context_resolution_controller.dart';
 
 // Abstract Auth State for UI
 enum FirebaseAuthState {
@@ -13,6 +14,7 @@ enum FirebaseAuthState {
   unauthenticated,
   failure,
   bootstrapping,
+  contextSwitchPending,
 }
 
 // Providers
@@ -28,7 +30,29 @@ final firebaseAuthServiceProvider = Provider((ref) {
 class FirebaseAuthController extends Notifier<FirebaseAuthState> {
   @override
   FirebaseAuthState build() {
-    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] build() called — watching currentUserProvider');
+    debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] build() called');
+    final contextData = ref.watch(contextResolutionProvider);
+
+    if (contextData.state == ContextResolutionState.contextSwitchPending) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] contextResolutionProvider=contextSwitchPending');
+      return FirebaseAuthState.contextSwitchPending;
+    }
+    
+    if (contextData.state == ContextResolutionState.bootstrapping) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] contextResolutionProvider=bootstrapping');
+      return FirebaseAuthState.bootstrapping;
+    }
+
+    if (contextData.state == ContextResolutionState.failure) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] contextResolutionProvider=failure');
+      return FirebaseAuthState.failure;
+    }
+
+    if (contextData.state == ContextResolutionState.resolving) {
+      debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][FirebaseAuthController] contextResolutionProvider=resolving -> loading');
+      return FirebaseAuthState.loading;
+    }
+
     final currentUserAsync = ref.watch(currentUserProvider);
 
     final result = currentUserAsync.when(

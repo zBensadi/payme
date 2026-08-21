@@ -45,7 +45,7 @@ class SecuredUserRepository implements UserRepository, RepositoryChangePublisher
   Future<Result<AppUser?>> getUserById(String id) async {
     // Only users with users.view can retrieve arbitrary users
     // Exception: the user can always retrieve themselves
-    if (_currentUser != null && _currentUser!.user.uid == id) {
+    if (_currentUser != null && _currentUser.user.uid == id) {
       return await _inner.getUserById(id);
     }
 
@@ -93,10 +93,10 @@ class SecuredUserRepository implements UserRepository, RepositoryChangePublisher
   @override
   Future<Result<void>> updateUser(AppUser user) async {
     final existingResult = await _inner.getUserById(user.uid);
-    if (existingResult is! Success<AppUser?> || (existingResult as Success<AppUser?>).value == null) {
+    if (existingResult is! Success<AppUser?> || (existingResult).value == null) {
       return Failure(const DatabaseFailure('User not found.'));
     }
-    final existingUser = (existingResult as Success<AppUser?>).value!;
+    final existingUser = (existingResult).value!;
 
     // Cannot modify the owner unless you are the owner (enforced by permission service, but let's check correctly)
     final targetRoleResult = existingUser.roleId != null 
@@ -117,10 +117,10 @@ class SecuredUserRepository implements UserRepository, RepositoryChangePublisher
     // If changing role
     if (user.roleId != existingUser.roleId && user.roleId != null) {
       final newRoleResult = await _roleRepository.getRoleById(user.roleId!);
-      if (newRoleResult is! Success<UserRole?> || (newRoleResult as Success<UserRole?>).value == null) {
+      if (newRoleResult is! Success<UserRole?> || (newRoleResult).value == null) {
         return Failure(const DatabaseFailure('Invalid role assigned.'));
       }
-      final newRole = (newRoleResult as Success<UserRole?>).value!;
+      final newRole = (newRoleResult).value!;
       
       if (!_permissionService.canAssignRole(_currentUser, newRole)) {
         return Failure(const AuthFailure('Cannot assign a role with priority equal or higher than your own.'));
@@ -137,10 +137,10 @@ class SecuredUserRepository implements UserRepository, RepositoryChangePublisher
   @override
   Future<Result<void>> deleteUser(String id) async {
     final existingResult = await _inner.getUserById(id);
-    if (existingResult is! Success<AppUser?> || (existingResult as Success<AppUser?>).value == null) {
+    if (existingResult is! Success<AppUser?> || (existingResult).value == null) {
       return Failure(const DatabaseFailure('User not found.'));
     }
-    final existingUser = (existingResult as Success<AppUser?>).value!;
+    final existingUser = (existingResult).value!;
 
     final targetRoleResult = existingUser.roleId != null 
         ? await _roleRepository.getRoleById(existingUser.roleId!) 

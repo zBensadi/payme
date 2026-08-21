@@ -51,7 +51,6 @@ import '../../data/datasources/local/client_visibility_local_datasource.dart';
 import '../../data/datasources/remote/client_visibility_remote_datasource.dart';
 import '../../data/repositories_impl/client_visibility_repository_impl.dart';
 import '../../domain/repositories/client_visibility_repository.dart';
-import '../../data/repositories_impl/secured/secured_client_visibility_repository.dart';
 import '../../data/repositories_impl/client_repository_impl.dart';
 import '../../data/repositories_impl/invoice_repository_impl.dart';
 import '../../data/repositories_impl/payment_repository_impl.dart';
@@ -265,7 +264,9 @@ final logoFileDataSourceProvider = Provider<LogoFileDataSource>((ref) {
 });
 
 final settingsRemoteDataSourceProvider = Provider<SettingsRemoteDataSource>((ref) {
-  return SettingsRemoteDataSource();
+  return SettingsRemoteDataSource(
+    logoFileDataSource: ref.watch(logoFileDataSourceProvider),
+  );
 });
 
 final settingsConflictResolverProvider = Provider<ConflictResolver<BusinessSettings>>((ref) {

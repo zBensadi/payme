@@ -4,6 +4,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:payme/core/database/database_service.dart';
 import 'package:payme/core/error/result.dart';
 import 'package:payme/data/datasources/local/payment_local_datasource.dart';
+
 import 'package:payme/data/datasources/file/attachment_file_datasource.dart';
 import 'package:payme/data/repositories_impl/payment_repository_impl.dart';
 import 'package:payme/domain/entities/payment.dart';
@@ -38,6 +39,30 @@ class TestDatabaseService implements DatabaseService {
 
   @override
   Future<void> reopen(String dbPath) async {}
+  
+  @override
+  Future<AppMeta?> getAppMeta() async {
+    return null;
+  }
+
+  @override
+  Future<void> updateAppMeta({String? businessId, String? uid}) async {
+  }
+
+  @override
+  Future<int> getTotalDirtyCount() async {
+    return 0;
+  }
+
+  @override
+  Future<bool> hasAnyDomainData() async {
+    return false;
+  }
+
+  @override
+  Future<void> wipeAndClose() async {
+    await close();
+  }
 
   Future<void> initForTest() async {
     sqfliteFfiInit();

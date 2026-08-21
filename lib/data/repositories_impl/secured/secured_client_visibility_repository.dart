@@ -1,6 +1,5 @@
 import '../../../domain/entities/permissions.dart';
 import '../../../core/error/failures.dart';
-import '../../../core/error/failures.dart';
 import '../../../core/error/result.dart';
 import '../../../core/security/permission_service.dart';
 
@@ -10,8 +9,6 @@ import '../../../core/sync/sync_result.dart';
 import '../../../domain/entities/client_visibility.dart';
 import '../../../domain/entities/current_app_user.dart';
 import '../../../domain/repositories/client_visibility_repository.dart';
-import '../../../domain/entities/permissions.dart';
-import '../../../core/error/failures.dart';
 import '../../../core/events/repository_change_publisher.dart';
 import '../../../core/events/repository_event.dart';
 
@@ -28,10 +25,7 @@ class SecuredClientVisibilityRepository implements ClientVisibilityRepository, R
 
   @override
   Stream<RepositoryEvent> watchEvents() {
-    if (_inner is RepositoryChangePublisher) {
-      return (_inner as RepositoryChangePublisher).watchEvents();
-    }
-    return const Stream.empty();
+    return (_inner as RepositoryChangePublisher).watchEvents();
   }
 
   @override

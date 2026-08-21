@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:payme/core/error/result.dart';
 import 'package:payme/core/events/repository_event.dart';
 import 'package:payme/core/sync/sync_domain.dart';
@@ -10,10 +9,9 @@ import 'package:payme/domain/entities/user_role.dart';
 import 'package:payme/data/repositories_impl/user_repository_impl.dart';
 import 'package:payme/data/repositories_impl/role_repository_impl.dart';
 import 'package:payme/services/firebase_authentication_service.dart';
-import 'package:payme/domain/repositories/user_repository.dart';
-import 'package:payme/domain/repositories/role_repository.dart';
 import 'package:payme/presentation/features/auth/controllers/firebase_auth_controller.dart';
 import 'package:payme/presentation/features/auth/controllers/current_user_controller.dart';
+import 'package:payme/presentation/features/auth/controllers/context_resolution_controller.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 
 class FakeFirebaseAuthenticationService implements FirebaseAuthenticationService {
@@ -79,20 +77,24 @@ class FakeRoleRepository implements RoleRepositoryImpl {
 }
 
 
+class FakeContextResolutionController extends Notifier<ContextResolutionData> implements ContextResolutionController {
+  final AppUser? initialUser;
+  FakeContextResolutionController(this.initialUser);
+
+  @override
+  ContextResolutionData build() {
+    return ContextResolutionData(state: ContextResolutionState.approved, user: initialUser);
+  }
+  
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   test('current_user_controller rebuilds on role repository events without new auth state changes', () async {
     final fakeAuthService = FakeFirebaseAuthenticationService();
     final fakeUserRepository = FakeUserRepository();
     final fakeRoleRepository = FakeRoleRepository();
-
-    final container = ProviderContainer(
-      overrides: [
-        firebaseAuthServiceProvider.overrideWithValue(fakeAuthService),
-        internalUserRepositoryProvider.overrideWithValue(fakeUserRepository),
-        internalRoleRepositoryProvider.overrideWithValue(fakeRoleRepository),
-      ],
-    );
-    addTearDown(container.dispose);
 
     final initialDate = DateTime.now().toUtc();
     
@@ -106,7 +108,17 @@ void main() {
       createdAt: initialDate,
       updatedAt: initialDate,
     );
-    
+
+    final container = ProviderContainer(
+      overrides: [
+        firebaseAuthServiceProvider.overrideWithValue(fakeAuthService),
+        internalUserRepositoryProvider.overrideWithValue(fakeUserRepository),
+        internalRoleRepositoryProvider.overrideWithValue(fakeRoleRepository),
+        contextResolutionProvider.overrideWith(() => FakeContextResolutionController(appUser)),
+      ],
+    );
+    addTearDown(container.dispose);
+
     final initialRole = UserRole(
       id: 'role1',
       name: 'Admin',
@@ -121,7 +133,7 @@ void main() {
     fakeRoleRepository.roleToReturn = initialRole;
 
     // Listen to the provider to start the stream
-    final sub = container.listen(currentUserProvider, (_, __) {});
+    final sub = container.listen(currentUserProvider, (_, _) {});
 
     // Emit initial auth state
     fakeAuthService.emitUser(appUser);

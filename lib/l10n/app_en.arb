@@ -536,5 +536,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "deleteUserWarningInactive": "This user will lose access to PayMe. The account and email address will remain reserved and cannot be used to create a new account. The user can be reactivated later by an authorized administrator.",
+  "reactivateUser": "Reactivate User",
+  "displayNameRequired": "Display Name is required",
+  "initialPassword": "Initial Password",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "roleRequired": "Role is required"
 }

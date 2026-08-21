@@ -11,6 +11,7 @@ import '../features/auth/screens/recovery_key_display_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/firebase_forgot_password_screen.dart';
 import '../features/auth/screens/firebase_bootstrap_screen.dart';
+import '../features/auth/screens/context_switch_screen.dart';
 import '../features/auth/screens/fatal_auth_error_screen.dart';
 import '../features/bootstrap/screens/language_select_screen.dart';
 import '../providers/locale_controller.dart';
@@ -50,7 +51,6 @@ import '../../domain/entities/client.dart';
 
 import '../providers/sync_providers.dart';
 import '../../domain/entities/permissions.dart';
-import '../providers/repository_providers.dart';
 import '../providers/permission_service_provider.dart';
 import '../features/auth/controllers/current_user_controller.dart';
 import '../../domain/entities/current_app_user.dart';
@@ -151,6 +151,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
       }
 
+      if (authState == FirebaseAuthState.contextSwitchPending) {
+        if (state.uri.path != '/context-switch') {
+          debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] contextSwitchPending → /context-switch');
+          return '/context-switch';
+        }
+      }
+
       if (authState == FirebaseAuthState.authenticated) {
         if (isGoingToAuth || state.uri.path == '/splash' || state.uri.path == '/firebase-bootstrap') {
           debugPrint('[STARTUP][${DateTime.now().toIso8601String()}][GoRouter.redirect] authenticated + on splash/auth screen → /');
@@ -226,6 +233,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/firebase-bootstrap',
         builder: (context, state) => const FirebaseBootstrapScreen(),
+      ),
+      GoRoute(
+        path: '/context-switch',
+        builder: (context, state) => const ContextSwitchScreen(),
       ),
       GoRoute(
         path: '/login',

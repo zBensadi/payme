@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../domain/entities/client.dart';
 
@@ -8,7 +9,7 @@ class ClientRemoteDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<void> pushClients(String businessId, List<Client> clients) async {
-    print('[TRACE-VISIBILITY] ClientRemoteDataSource.pushClients: ${clients.map((c) => c.id).toList()}');
+    debugPrint('[TRACE-VISIBILITY] ClientRemoteDataSource.pushClients: ${clients.map((c) => c.id).toList()}');
     if (clients.isEmpty) return;
 
     // Process in batches of 500 (Firestore limit)
@@ -51,7 +52,7 @@ class ClientRemoteDataSource {
   }
 
   Future<List<Client>> pullClients(String businessId, DateTime? lastSyncTime) async {
-    print('[TRACE-VISIBILITY] ClientRemoteDataSource.pullClients($lastSyncTime)');
+    debugPrint('[TRACE-VISIBILITY] ClientRemoteDataSource.pullClients($lastSyncTime)');
     Query<Map<String, dynamic>> query = _firestore
         .collection('businesses')
         .doc(businessId)

@@ -7,7 +7,6 @@ import '../../../widgets/loading_view.dart';
 import '../../../widgets/error_view.dart';
 import '../../../../domain/entities/business_settings.dart';
 import '../controllers/settings_controller.dart';
-import '../../auth/controllers/firebase_auth_controller.dart';
 import '../widgets/logo_picker.dart';
 import '../../../../core/extensions/l10n_extension.dart';
 import '../../../providers/locale_controller.dart';

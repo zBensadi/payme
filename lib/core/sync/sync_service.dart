@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'connectivity_service.dart';
 import 'sync_logger.dart';
@@ -29,18 +30,16 @@ class SyncService {
   int _retryAttempt = 0;
   Timer? _retryTimer;
   bool _isSyncing = false;
+  bool _isPaused = false;
+  Future<void>? _activeSyncCycle;
 
   SyncService({
     required List<SynchronizableRepository> repositories,
-    required ConnectivityService connectivity,
-    required SyncLogger logger,
-    required SyncTrigger syncTrigger,
-    Duration debounceDuration = const Duration(seconds: 2),
-  })  : _repositories = List.from(repositories),
-        _connectivity = connectivity,
-        _logger = logger,
-        _syncTrigger = syncTrigger,
-        _debounceDuration = debounceDuration {
+    required this._connectivity,
+    required this._logger,
+    required this._syncTrigger,
+    this._debounceDuration = const Duration(seconds: 2),
+  })  : _repositories = List.from(repositories) {
     
     // Sort repositories by priority: high -> medium -> low
     _repositories.sort((a, b) => a.syncPriority.index.compareTo(b.syncPriority.index));
@@ -53,7 +52,7 @@ class SyncService {
       } else {
         // Connectivity restored
         _logger.logInfo('Connectivity restored. Triggering sync.');
-        if (_businessId != null) {
+        if (_businessId != null && !_isPaused) {
           _syncTrigger.requestFullSync();
         }
       }
@@ -61,6 +60,7 @@ class SyncService {
 
     // Listen to autonomous sync triggers
     _syncTriggerSub = _syncTrigger.syncRequested.listen((domain) {
+      if (_isPaused) return;
       _pendingDomains.add(domain);
       
       if (!hasCompletedInitialSync) {
@@ -94,7 +94,7 @@ class SyncService {
   /// Sets the current business context. Required before synchronization can occur.
   void setBusinessId(String? businessId) {
     _businessId = businessId;
-    if (_businessId != null) {
+    if (_businessId != null && !_isPaused) {
       _syncTrigger.requestFullSync();
     } else {
       _cancelRetry();
@@ -102,7 +102,28 @@ class SyncService {
     }
   }
 
+  Future<void> pause() async {
+    _isPaused = true;
+    _cancelRetry();
+    if (_activeSyncCycle != null) {
+      _logger.logInfo('SyncService pausing... awaiting active sync cycle to finish.');
+      await _activeSyncCycle;
+    }
+    _logger.logInfo('SyncService is fully paused.');
+  }
+
+  void resume() {
+    _isPaused = false;
+    if (_businessId != null) {
+      _syncTrigger.requestFullSync();
+    }
+  }
+
   Future<void> synchronizeDomains(Set<SyncDomain> domains) async {
+    if (_isPaused) {
+      _logger.logInfo('Cannot synchronize: service is paused');
+      return;
+    }
     if (_businessId == null) {
       _logger.logError('Cannot synchronize: businessId is null');
       return;
@@ -119,11 +140,20 @@ class SyncService {
     }
 
     _cancelRetry();
-    await _executeSyncCycle(domains);
+    final completer = Completer<void>();
+    _activeSyncCycle = completer.future;
+    
+    try {
+      await _executeSyncCycle(domains);
+    } finally {
+      completer.complete();
+      _activeSyncCycle = null;
+    }
   }
 
   Future<void> _executeSyncCycle(Set<SyncDomain> domains) async {
-    print('[TRACE-VISIBILITY] SyncService._executeSyncCycle processing domains: $domains');
+    if (_isPaused) return;
+    debugPrint('[TRACE-VISIBILITY] SyncService._executeSyncCycle processing domains: $domains');
     _isSyncing = true;
     _updateStatus(SyncStatus.syncing);
     _logger.logInfo('Starting sync cycle for business: $_businessId, domains: $domains');
@@ -133,6 +163,7 @@ class SyncService {
 
       // 1. PUSH phase
       for (final repo in targetedRepositories) {
+        if (_isPaused) break; // Check pause mid-cycle
         _logger.logInfo('Pushing changes for ${repo.runtimeType}');
         final result = await repo.pushChanges(_businessId!);
         _logger.logOperation(repo.runtimeType.toString(), 'PUSH', result.uploaded, 'SUCCESS');
@@ -140,6 +171,7 @@ class SyncService {
 
       // 2. PULL phase
       for (final repo in targetedRepositories) {
+        if (_isPaused) break; // Check pause mid-cycle
         _logger.logInfo('Pulling changes for ${repo.runtimeType}');
         // null lastSyncTime signifies a full pull, or let the repo manage it internally.
         final result = await repo.pullChanges(_businessId!, null);
@@ -157,7 +189,9 @@ class SyncService {
       _logger.logError('Sync cycle failed', e, stack);
       _updateStatus(SyncStatus.failed);
       hasCompletedInitialSync = true; // Even if it fails, the initial attempt is over
-      _scheduleRetry(domains);
+      if (!_isPaused) {
+        _scheduleRetry(domains);
+      }
     } finally {
       _isSyncing = false;
     }

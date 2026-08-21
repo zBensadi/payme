@@ -5,6 +5,7 @@ class BusinessSettings {
   final String? phone;
   final String? email;
   final String? logoPath;
+  final String? logoSha256;
   final String currencyCode;
   final String languageCode;
   final String defaultDocumentTitle;
@@ -31,6 +32,7 @@ class BusinessSettings {
     this.phone,
     this.email,
     this.logoPath,
+    this.logoSha256,
     this.currencyCode = 'USD',
     this.languageCode = 'en',
     this.defaultDocumentTitle = 'Invoice',
@@ -55,6 +57,7 @@ class BusinessSettings {
     String? phone,
     String? email,
     String? logoPath,
+    String? logoSha256,
     String? currencyCode,
     String? languageCode,
     String? defaultDocumentTitle,
@@ -78,6 +81,7 @@ class BusinessSettings {
       phone: phone ?? this.phone,
       email: email ?? this.email,
       logoPath: logoPath ?? this.logoPath,
+      logoSha256: logoSha256 ?? this.logoSha256,
       currencyCode: currencyCode ?? this.currencyCode,
       languageCode: languageCode ?? this.languageCode,
       defaultDocumentTitle: defaultDocumentTitle ?? this.defaultDocumentTitle,

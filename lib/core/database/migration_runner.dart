@@ -130,6 +130,18 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 14);
         currentVersion = 14;
       }
+      if (currentVersion == 14) {
+        _logger.info('Running migration: v15_business_context_marker.sql');
+        final scriptContent = await loadMigrationScript('v15_business_context_marker.sql');
+        await applyMigration(db, scriptContent, 15);
+        currentVersion = 15;
+      }
+      if (currentVersion == 15) {
+        _logger.info('Running migration: v16_logo_sha256.sql');
+        final scriptContent = await loadMigrationScript('v16_logo_sha256.sql');
+        await applyMigration(db, scriptContent, 16);
+        currentVersion = 16;
+      }
     }
 
     await db.update('app_meta', {'schema_version': currentVersion});

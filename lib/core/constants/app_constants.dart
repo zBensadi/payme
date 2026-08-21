@@ -3,7 +3,7 @@ class AppConstants {
 
   static const String appName = 'PayMe';
   static const String databaseName = 'payme.db';
-  static const int schemaVersion = 14;
+  static const int schemaVersion = 16;
 
   static const String attachmentsDirName = 'attachments';
   static const String logosDirName = 'logos';

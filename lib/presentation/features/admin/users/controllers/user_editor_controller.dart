@@ -320,6 +320,33 @@ class UserEditorController extends Notifier<UserEditorState> {
       return false;
     }
   }
+
+  Future<bool> reactivateUser() async {
+    if (state.user == null || !state.canEdit) return false;
+    state = state.copyWith(isSaving: true, error: null);
+    
+    final result = await _provisioningService.reactivateUser(state.user!.uid);
+    
+    if (result is Success) {
+      // The Cloud Function updated the Firestore document.
+      // We also update SQLite so the UI updates immediately, avoiding a sync delay.
+      final updatedUser = state.user!.copyWith(
+        isActive: true,
+        isDeleted: false,
+        isDirty: true, // Will push to Firestore, but the Cloud function already did it. No harm.
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await _userRepository.updateUser(updatedUser);
+      
+      await ref.read(userListControllerProvider.notifier).loadData();
+      await loadUser();
+      state = state.copyWith(isSaving: false);
+      return true;
+    } else {
+      state = state.copyWith(isSaving: false, error: (result as Failure).failure.message);
+      return false;
+    }
+  }
 }
 
 final userEditorControllerProvider = NotifierProvider.autoDispose<UserEditorController, UserEditorState>(UserEditorController.new);

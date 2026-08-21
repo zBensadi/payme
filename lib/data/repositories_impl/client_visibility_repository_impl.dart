@@ -31,6 +31,7 @@ class ClientVisibilityRepositoryImpl implements ClientVisibilityRepository {
   @override
   Stream<RepositoryEvent> watchEvents() => _eventController.stream;
 
+  @override
   void dispose() {
     _eventController.close();
   }
@@ -39,7 +40,7 @@ class ClientVisibilityRepositoryImpl implements ClientVisibilityRepository {
   Future<Result<void>> addVisibility(ClientVisibility visibility) async {
     try {
       await _localDataSource.addVisibility(ClientVisibilityModel.fromEntity(visibility));
-      print('[TRACE-VISIBILITY] ClientVisibilityRepositoryImpl.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
+      debugPrint('[TRACE-VISIBILITY] ClientVisibilityRepositoryImpl.addVisibility: ${visibility.clientId} -> ${visibility.userId}');
       _syncTrigger.requestSync(syncDomain);
       _eventController.add(RepositoryEvent(
         type: RepositoryEventType.localMutation,
@@ -98,7 +99,6 @@ class ClientVisibilityRepositoryImpl implements ClientVisibilityRepository {
       int downloaded = 0;
       final localVisibilities = await _localDataSource.getAllVisibility();
       final localSet = localVisibilities.map((e) => '${e.clientId}_${e.userId}').toSet();
-      final remoteSet = remoteVisibilities.map((e) => '${e.clientId}_${e.userId}').toSet();
 
       final allRemoteVisibilities = await _remoteDataSource.getModifiedSince(businessId, null); // Always full pull
       final allRemoteSet = allRemoteVisibilities.map((e) => '${e.clientId}_${e.userId}').toSet();

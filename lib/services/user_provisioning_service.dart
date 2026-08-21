@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
@@ -27,71 +27,61 @@ class UserProvisioningService {
   UserProvisioningService(this._localDataSource, this._syncTrigger);
 
   Future<Result<void>> provisionUser(AppUser user, String password) async {
-    FirebaseApp? secondaryApp;
     try {
-      secondaryApp = await Firebase.initializeApp(
-        name: 'provisioning_${DateTime.now().millisecondsSinceEpoch}',
-        options: Firebase.app().options,
+      final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (idToken == null) {
+        throw Exception('User is not authenticated.');
+      }
+
+      final response = await http.post(
+        Uri.parse('https://us-central1-payme-dev-967bb.cloudfunctions.net/provisionUser'),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'data': {
+            'email': user.email,
+            'password': password,
+            'displayName': user.displayName,
+            'roleId': user.roleId,
+            'isActive': user.isActive,
+          }
+        }),
       );
-      final secondaryAuth = FirebaseAuth.instanceFor(app: secondaryApp);
-      
-      final cred = await secondaryAuth.createUserWithEmailAndPassword(
-        email: user.email, 
-        password: password,
-      );
-      
-      if (cred.user == null) {
-        return const Failure(AuthFailure('Failed to create Firebase Auth user.'));
+
+      final resultBody = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        final error = resultBody['error'] ?? {};
+        final status = error['status'] ?? 'UNKNOWN';
+        final message = error['message'] ?? response.body;
+
+        if (status == 'ALREADY_EXISTS') {
+          return const Failure(AuthFailure('Email already in use.'));
+        } else if (status == 'PERMISSION_DENIED') {
+          return Failure(AuthFailure(message));
+        } else if (status == 'INVALID_ARGUMENT') {
+          return Failure(AuthFailure(message));
+        }
+        return Failure(AuthFailure('Server Error: $message'));
       }
       
-      final uid = cred.user!.uid;
+      final data = resultBody['result'] ?? resultBody['data'];
+      final targetUid = data['uid'] as String;
+      
       final finalUser = user.copyWith(
-        uid: uid, 
+        uid: targetUid, 
         isDirty: false,
         updatedAt: DateTime.now().toUtc(),
       );
 
-      final batch = FirebaseFirestore.instance.batch();
-      
-      // 1. Auth Routing Pointer
-      final pointerRef = FirebaseFirestore.instance.collection('users').doc(uid);
-      batch.set(pointerRef, {
-        'businessId': finalUser.businessId,
-        'roleId': finalUser.roleId,
-        'updatedAt': finalUser.updatedAt.toIso8601String(),
-        'schemaVersion': 1,
-      });
-
-      // 2. Canonical Business User
-      final userRef = FirebaseFirestore.instance
-          .collection('businesses')
-          .doc(finalUser.businessId)
-          .collection('users')
-          .doc(uid);
-      final model = AppUserModel.fromEntity(finalUser);
-      final map = model.toFirestore();
-      map.removeWhere((key, value) => value == null);
-      batch.set(userRef, map);
-
-      try {
-        await batch.commit();
-      } catch (e) {
-        // Recoverable state: Delete the orphaned Auth account
-        try {
-          await cred.user!.delete();
-          debugPrint('[PROVISIONING] Orphaned Auth account deleted successfully.');
-        } catch (deleteError) {
-          debugPrint('[PROVISIONING] Failed to delete orphaned Auth account: $deleteError');
-        }
-        return Failure(AuthFailure('Failed to provision remote records: $e'));
-      }
-
-      // 3. Local SQLite creation
+      // Local SQLite creation
       try {
         final localModel = AppUserModel.fromEntity(finalUser);
         await _localDataSource.create(localModel);
         
-        // 4. Trigger Sync integration
+        // Trigger Sync integration
         _syncTrigger.requestSync(SyncDomain.users);
       } catch (e) {
         // SQLite write failed. Remote provisioning already succeeded.
@@ -102,25 +92,49 @@ class UserProvisioningService {
       }
 
       return const Success(null);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        return const Failure(AuthFailure('Email already in use.'));
-      } else if (e.code == 'invalid-email') {
-        return const Failure(AuthFailure('Invalid email address.'));
-      } else if (e.code == 'weak-password') {
-        return const Failure(AuthFailure('Weak password.'));
-      } else if (e.code == 'network-request-failed') {
-        return const Failure(AuthFailure('Network error. Please check your connection.'));
-      }
-      return Failure(AuthFailure('Auth Error: ${e.message}'));
     } catch (e) {
-      return Failure(AuthFailure('Unexpected provisioning error: $e'));
-    } finally {
-      if (secondaryApp != null) {
-        try {
-          await secondaryApp.delete();
-        } catch (_) {}
+      return Failure(AuthFailure('Unexpected provisioning error (REST fallback): $e'));
+    }
+  }
+
+  Future<Result<void>> reactivateUser(String uid) async {
+    try {
+      final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (idToken == null) {
+        throw Exception('User is not authenticated.');
       }
+
+      final response = await http.post(
+        Uri.parse('https://us-central1-payme-dev-967bb.cloudfunctions.net/reactivateUser'),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'data': {
+            'uid': uid,
+          }
+        }),
+      );
+
+      final resultBody = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        final error = resultBody['error'] ?? {};
+        final status = error['status'] ?? 'UNKNOWN';
+        final message = error['message'] ?? response.body;
+
+        if (status == 'PERMISSION_DENIED') {
+          return Failure(AuthFailure(message));
+        } else if (status == 'INVALID_ARGUMENT') {
+          return Failure(AuthFailure(message));
+        }
+        return Failure(AuthFailure('Server Error: $message'));
+      }
+      
+      return const Success(null);
+    } catch (e) {
+      return Failure(AuthFailure('Unexpected reactivation error (REST fallback): $e'));
     }
   }
 }

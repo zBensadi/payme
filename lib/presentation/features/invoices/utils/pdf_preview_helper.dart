@@ -12,6 +12,8 @@ import '../../../../domain/entities/payment.dart';
 import '../../../../core/error/result.dart';
 import '../../../providers/repository_providers.dart';
 import '../../settings/controllers/settings_controller.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import '../../auth/controllers/current_user_controller.dart';
 
 class PdfPreviewHelper {
   static Future<void> openPreview(BuildContext context, WidgetRef ref, Invoice invoice) async {
@@ -32,6 +34,31 @@ class PdfPreviewHelper {
         try {
           final logosDir = await AppPaths.getLogosPath();
           final file = File(p.join(logosDir, settings.logoPath));
+          if (!await file.exists()) {
+            // Attempt fallback download from Firebase Storage
+            try {
+              final currentUser = ref.read(currentUserProvider).value;
+              if (currentUser != null && currentUser.user.businessId != null) {
+                try {
+                  // Fallback: Fetch logo bytes from Firebase Storage
+                  final storageRef = FirebaseStorage.instance.ref()
+                      .child(currentUser.user.businessId!)
+                      .child('business_logo.png');
+                  
+                  final maxSizeBytes = 5 * 1024 * 1024; // 5MB limit
+                  final data = await storageRef.getData(maxSizeBytes);
+                  if (data != null) {
+                    await file.writeAsBytes(data);
+                  }
+                } catch (e) {
+                  debugPrint('Fallback logo download failed: $e');
+                }
+              }
+            } catch (e) {
+              debugPrint('Fallback logo download failed: $e');
+            }
+          }
+          
           if (await file.exists()) {
             logoBytes = await file.readAsBytes();
           }

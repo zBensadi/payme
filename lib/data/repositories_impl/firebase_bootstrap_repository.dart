@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
+
 
 import '../../core/error/failures.dart';
 import '../../core/error/result.dart';
@@ -10,11 +13,8 @@ import '../../domain/repositories/bootstrap_repository.dart';
 
 class FirebaseBootstrapRepository implements BootstrapRepository {
   final FirebaseFirestore _firestore;
-  final Uuid _uuid;
-
-  FirebaseBootstrapRepository({FirebaseFirestore? firestore, Uuid? uuid})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
-        _uuid = uuid ?? const Uuid();
+  FirebaseBootstrapRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<Result<BootstrapResult?>> checkExistingBusiness({
@@ -124,105 +124,45 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
     required String businessName,
   }) async {
     try {
-      // 1. Business provisioning
-      final businessId = _uuid.v4();
-
-      final roleId = 'role-owner';
-      final now = DateTime.now().toUtc();
-      final nowIso = now.toIso8601String();
       final effectiveDisplayName = displayName ?? email.split('@').first;
+      
+      final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (idToken == null) {
+        throw Exception('User is not authenticated.');
+      }
 
-      final batch = _firestore.batch();
+      final response = await http.post(
+        Uri.parse('https://us-central1-payme-dev-967bb.cloudfunctions.net/bootstrapBusiness'),
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'data': {
+            'businessName': businessName,
+            'displayName': effectiveDisplayName,
+          }
+        }),
+      );
 
-      // 1. Business document
-      final businessRef = _firestore.collection('businesses').doc(businessId);
-      batch.set(businessRef, {
-        'businessId': businessId,
-        'name': businessName,
-        'createdAt': nowIso,
-        'createdBy': uid,
-        'isActive': true,
-      });
+      if (response.statusCode != 200) {
+        throw Exception('Server returned status code: ${response.statusCode} - ${response.body}');
+      }
 
-      // 2. Owner role
-      // CANONICAL PATH: businesses/{businessId}/roles/{roleId}
-      // This is the same path used by RoleRemoteDataSource.pullRoles()
-      final roleRef = _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('roles')
-          .doc(roleId);
-      batch.set(roleRef, {
-        'name': 'Owner',
-        'description': 'Business owner with full permissions',
-        'isSystemRole': true,
-        'isEditable': false,
-        'isDeletable': false,
-        'priority': 1000,
-        'permissions': <String>[], // Populated by PermissionService.isOwner
-        'isDeleted': false,
-        'createdAt': nowIso,
-        'createdBy': uid,
-        'updatedAt': nowIso,
-        'updatedBy': uid,
-      });
+      final result = jsonDecode(response.body);
+      final data = result['result'] ?? result['data'];
+      
+      if (data == null) {
+        throw Exception('Server returned empty data: ${response.body}');
+      }
 
-      // 3. User profile
-      // CANONICAL PATH: businesses/{businessId}/users/{uid}
-      // This is the same path used by UserRemoteDataSource.pullUsers()
-      final userRef = _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('users')
-          .doc(uid);
-      batch.set(userRef, {
-        'uid': uid,
-        'email': email,
-        'displayName': effectiveDisplayName,
-        'businessId': businessId,
-        'roleId': roleId,
-        'isSuperAdmin': true,
-        'isOwner': true,
-        'isActive': true,
-        'isDeleted': false,
-        'createdAt': nowIso,
-        'createdBy': uid,
-        'updatedAt': nowIso,
-        'updatedBy': uid,
-      });
+      final businessId = data['businessId'] as String;
+      final roleId = data['roleId'] as String;
+      
+      // Force token refresh after successful bootstrap (or if we hit the safe initialized state)
+      await FirebaseAuth.instance.currentUser?.getIdTokenResult(true);
 
-      // 4. Auth Routing Pointer
-      // CANONICAL PATH: users/{uid}
-      // This is solely for discovery when logging in on a new device.
-      // ARCHITECTURAL INVARIANT: This is an authentication routing layer, not a domain model.
-      // The canonical user data always lives under businesses/{businessId}/users/{uid}.
-      final pointerRef = _firestore.collection('users').doc(uid);
-      batch.set(pointerRef, {
-        'businessId': businessId,
-        'roleId': roleId,
-        'updatedAt': nowIso,
-        'schemaVersion': 1,
-      });
-
-      // 5. Business Settings
-      final settingsRef = _firestore
-          .collection('businesses')
-          .doc(businessId)
-          .collection('settings')
-          .doc('main');
-      batch.set(settingsRef, {
-        'businessId': businessId,
-        'businessName': businessName,
-        'currencyCode': 'DZD',
-        'appMode': 'cloud',
-        'firestoreSchemaVersion': 1,
-        'createdAt': nowIso,
-        'createdBy': uid,
-        'updatedAt': nowIso,
-        'updatedBy': uid,
-      });
-
-      await batch.commit();
+      final now = DateTime.now().toUtc();
 
       final appUser = AppUser(
         uid: uid,
@@ -252,12 +192,9 @@ class FirebaseBootstrapRepository implements BootstrapRepository {
 
       return Success(BootstrapResult(user: appUser, role: userRole));
 
-    } on FirebaseException catch (e, stack) {
-      debugPrint('FirebaseException during bootstrap: $e\n$stack');
-      return Failure(DatabaseFailure('Firebase error: ${e.code} - ${e.message}'));
     } catch (e, stack) {
-      debugPrint('Unexpected error during bootstrap: $e\n$stack');
-      return Failure(DatabaseFailure('Unexpected error: $e'));
+      debugPrint('Error during bootstrap (REST fallback): $e\n$stack');
+      return Failure(DatabaseFailure('Server error: $e'));
     }
   }
 

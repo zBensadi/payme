@@ -41,44 +41,44 @@ class _DeleteClientDialogState extends ConsumerState<DeleteClientDialog> {
     return AlertDialog(
       title: Text(context.l10n.deleteClientDialogTitle),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.l10n.deleteClientDialogContent(widget.invoiceCount)),
-            const SizedBox(height: 16),
-            Text(context.l10n.chooseWhatShouldHappen),
-            const SizedBox(height: 8),
-            
-            if (availableClients.isNotEmpty)
-              RadioListTile<DeleteClientAction>(
-                title: Text(context.l10n.deleteClientDialogTransfer),
-                value: DeleteClientAction.transfer,
-                groupValue: _action,
-                onChanged: (val) => setState(() => _action = val!),
-              ),
+        child: RadioGroup<DeleteClientAction>(
+          groupValue: _action,
+          onChanged: (val) => setState(() => _action = val!),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.l10n.deleteClientDialogContent(widget.invoiceCount)),
+              const SizedBox(height: 16),
+              Text(context.l10n.chooseWhatShouldHappen),
+              const SizedBox(height: 8),
               
-            if (_action == DeleteClientAction.transfer && availableClients.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: DropdownButtonFormField<String>(
-                  value: _selectedClientId,
-                  hint: Text(context.l10n.targetClient),
-                  items: availableClients.map((c) {
-                    return DropdownMenuItem(value: c.id, child: Text(c.name));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedClientId = val),
+              if (availableClients.isNotEmpty)
+                RadioListTile<DeleteClientAction>(
+                  title: Text(context.l10n.deleteClientDialogTransfer),
+                  value: DeleteClientAction.transfer,
                 ),
-              ),
+                
+              if (_action == DeleteClientAction.transfer && availableClients.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _selectedClientId,
+                    hint: Text(context.l10n.targetClient),
+                    items: availableClients.map((c) {
+                      return DropdownMenuItem(value: c.id, child: Text(c.name));
+                    }).toList(),
+                    onChanged: (val) => setState(() => _selectedClientId = val),
+                  ),
+                ),
 
-            RadioListTile<DeleteClientAction>(
-              title: Text(context.l10n.deleteClientDialogDelete),
-              subtitle: Text(context.l10n.deleteClientDialogDeleteWarning, style: const TextStyle(color: Colors.red)),
-              value: DeleteClientAction.delete,
-              groupValue: _action,
-              onChanged: (val) => setState(() => _action = val!),
-            ),
-          ],
+              RadioListTile<DeleteClientAction>(
+                title: Text(context.l10n.deleteClientDialogDelete),
+                subtitle: Text(context.l10n.deleteClientDialogDeleteWarning, style: const TextStyle(color: Colors.red)),
+                value: DeleteClientAction.delete,
+              ),
+            ],
+          ),
         ),
       ),
       actions: [

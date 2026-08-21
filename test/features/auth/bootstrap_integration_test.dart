@@ -5,17 +5,26 @@ import 'package:payme/core/error/result.dart';
 import 'package:payme/domain/entities/app_user.dart';
 import 'package:payme/domain/entities/user_role.dart';
 import 'package:payme/domain/repositories/bootstrap_repository.dart';
-import 'package:payme/data/datasources/local/user_local_datasource.dart';
-import 'package:payme/data/datasources/local/role_local_datasource.dart';
 import 'package:payme/data/models/app_user_model.dart';
-import 'package:payme/data/models/user_role_model.dart';
 import 'package:payme/presentation/features/auth/controllers/bootstrap_controller.dart';
 import 'package:payme/presentation/providers/repository_providers.dart';
 import 'package:payme/core/database/database_provider.dart';
 import 'package:payme/core/database/database_service.dart';
 import 'package:payme/core/database/migration_runner.dart';
 import 'package:payme/core/logging/logger_service.dart';
+import 'package:payme/presentation/features/auth/controllers/context_resolution_controller.dart';
 import 'package:logger/logger.dart';
+
+class MockContextResolutionController extends ContextResolutionController {
+  bool markBootstrappedCalled = false;
+  String? bootstrappedBusinessId;
+
+  @override
+  Future<void> markBootstrapped(String businessId) async {
+    markBootstrappedCalled = true;
+    bootstrappedBusinessId = businessId;
+  }
+}
 
 class MockBootstrapRepository implements BootstrapRepository {
   final DateTime fixedTime;
@@ -93,6 +102,7 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(dbService),
         bootstrapRepositoryProvider.overrideWithValue(MockBootstrapRepository(fixedTime)),
+        contextResolutionProvider.overrideWith(() => MockContextResolutionController()),
       ],
     );
   });

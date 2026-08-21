@@ -73,6 +73,12 @@ class FakeUserProvisioningService implements UserProvisioningService {
     provisionCalls++;
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> reactivateUser(String uid) async {
+    if (shouldFail) return const Failure(AuthFailure('Mock reactivation failure'));
+    return const Success(null);
+  }
 }
 
 class FakePermissionService implements PermissionService {
@@ -148,7 +154,7 @@ void main() {
         currentUserProvider.overrideWith((ref) async* { yield currentAppUser; }),
       ],
     );
-    container.listen(currentUserProvider, (_, __) {});
+    container.listen(currentUserProvider, (_, _) {});
     await Future.delayed(const Duration(milliseconds: 50));
   });
 

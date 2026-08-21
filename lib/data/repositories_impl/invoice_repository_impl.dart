@@ -168,7 +168,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository, SynchronizableReposito
   Future<Result<void>> deleteAllForClient(String clientId, {Object? txn}) async {
     try {
       // Find all invoices for this client first to delete files
-      final db = _localDataSource; // access via db to run queries, wait actually we can just get them all
+      // Find all invoices for this client first to delete files
       // We don't have getAllForClient across all years. Let's just query the DB for paths.
       // Since it's hard to get all paths cleanly without a new DB method, and files might be orphaned,
       // it's acceptable for now or we can let the OS clean temp/unlinked files, 

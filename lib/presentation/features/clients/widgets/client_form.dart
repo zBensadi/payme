@@ -189,10 +189,10 @@ class _ClientFormState extends ConsumerState<ClientForm> {
                           final user = usersAsync.value?.where((u) => u.uid == id).firstOrNull;
                           final displayName = (user?.displayName?.trim().isNotEmpty == true) 
                               ? user!.displayName! 
-                              : (user?.email?.trim().isNotEmpty == true) 
-                                  ? user!.email! 
+                              : (user?.email.trim().isNotEmpty == true) 
+                                  ? user!.email 
                                   : id;
-                          print('[TRACE-VISIBILITY] UI Chip mapping: selectedUserId=$id, totalUsers=${usersAsync.value?.length}, matchedUserUid=${user?.uid}, displayName=${user?.displayName}, email=${user?.email}, rendered=$displayName');
+                          debugPrint('[TRACE-VISIBILITY] UI Chip mapping: selectedUserId=$id, totalUsers=${usersAsync.value?.length}, matchedUserUid=${user?.uid}, displayName=${user?.displayName}, email=${user?.email}, rendered=$displayName');
                           return Chip(
                             label: Text(displayName),
                             onDeleted: () {
@@ -347,12 +347,16 @@ class _UserSelectionDialogState extends State<_UserSelectionDialog> {
           itemCount: widget.allUsers.length,
           itemBuilder: (context, index) {
             final user = widget.allUsers[index];
-            final isSelected = _selectedIds.contains(user.uid);
+            final isOwner = user.isOwner;
+            final isSelected = isOwner ? true : _selectedIds.contains(user.uid);
+            
             return CheckboxListTile(
               title: Text(user.displayName ?? user.email),
-              subtitle: Text(user.email),
+              subtitle: isOwner 
+                  ? Text('${user.email} (Always has access)') 
+                  : Text(user.email),
               value: isSelected,
-              onChanged: (bool? checked) {
+              onChanged: isOwner ? null : (bool? checked) {
                 setState(() {
                   if (checked == true) {
                     _selectedIds.add(user.uid);

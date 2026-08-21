@@ -40,7 +40,7 @@ class SecuredClientRepository implements ClientRepository, RepositoryChangePubli
     // Populate ownership metadata
     final securedClient = client.copyWith(
       createdBy: _currentUser!.user.uid,
-      updatedBy: _currentUser!.user.uid,
+      updatedBy: _currentUser.user.uid,
     );
 
     return await _inner.create(securedClient);
@@ -97,8 +97,11 @@ class SecuredClientRepository implements ClientRepository, RepositoryChangePubli
       return Failure(_unauthorized());
     }
     
-    // Pass the actual current user ID as the visibility context if no specific override is requested
-    final actualVisibleToUserId = visibilityContext?.visibleToUserId ?? _currentUser!.user.uid;
+    // Pass the actual current user ID as the visibility context if no specific override is requested.
+    // OWNER EXCEPTION: If the user is the owner, they bypass all visibility restrictions.
+    final String? actualVisibleToUserId = _currentUser!.user.isOwner 
+        ? null 
+        : (visibilityContext?.visibleToUserId ?? _currentUser.user.uid);
     
     // We inject the visibility context down to the inner repository
     return await _inner.getAllVisible(

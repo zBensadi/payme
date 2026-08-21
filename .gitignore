@@ -67,3 +67,13 @@ test_output*.log
 # Firebase Functions generated files and dependencies
 functions/node_modules/
 functions/lib/
+security-tests/node_modules/
+
+# Temporary artifacts
+tools/scratch/
+*.pdf
+dump.txt
+test_dump*.txt
+analyze.txt
+analyzer_output*.txt
+fix_prints.dart

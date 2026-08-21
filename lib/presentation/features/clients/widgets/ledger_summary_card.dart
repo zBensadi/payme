@@ -4,6 +4,7 @@ import '../../../../domain/services/client_ledger_calculator.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../../../providers/user_lookup_provider.dart';
 
 import '../../../../domain/entities/client.dart';
 
@@ -84,6 +85,24 @@ class LedgerSummaryCard extends ConsumerWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (client.createdBy != null)
+                    _MetadataRow(label: 'Created by', uid: client.createdBy!),
+                  if (client.updatedBy != null)
+                    _MetadataRow(label: 'Last edited by', uid: client.updatedBy!),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -127,6 +146,39 @@ class _SummaryStat extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _MetadataRow extends ConsumerWidget {
+  final String label;
+  final String uid;
+
+  const _MetadataRow({required this.label, required this.uid});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userLookupProvider(uid));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+          ),
+          userAsync.when(
+            data: (name) => Text(
+              name,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade800, fontWeight: FontWeight.w500),
+            ),
+            loading: () => SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey.shade400)),
+            error: (_, _) => Text('Unknown', style: TextStyle(fontSize: 12, color: Colors.grey.shade800)),
+          ),
+        ],
+      ),
     );
   }
 }
