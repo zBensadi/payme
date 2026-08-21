@@ -259,7 +259,14 @@
   "businessLogo": "شعار الشركة",
   "selectLogo": "اختيار شعار",
   "billTo": "فاتورة إلى",
-  "generatedBy": "تم الإنشاء بواسطة PayMe",
+  "generatedBy": "تم الإنشاء بواسطة: {name}",
+  "@generatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "page": "صفحة",
   "ofWord": "من",
   "documentTitle": "عنوان المستند",

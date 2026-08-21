@@ -259,7 +259,14 @@
   "businessLogo": "Logo de l'entreprise",
   "selectLogo": "Sélectionner un logo",
   "billTo": "FACTURER À",
-  "generatedBy": "Généré par PayMe",
+  "generatedBy": "Généré par : {name}",
+  "@generatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "page": "Page",
   "ofWord": "sur",
   "documentTitle": "Titre du document",

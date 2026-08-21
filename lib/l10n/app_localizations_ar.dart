@@ -831,7 +831,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get billTo => 'فاتورة إلى';
 
   @override
-  String get generatedBy => 'تم الإنشاء بواسطة PayMe';
+  String generatedBy(String name) {
+    return 'تم الإنشاء بواسطة: $name';
+  }
 
   @override
   String get page => 'صفحة';

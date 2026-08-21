@@ -9,7 +9,7 @@ class AppPdfLocalizations implements PdfLocalizations {
   @override String get billTo => _appLoc.billTo;
   @override String get description => _appLoc.descriptionLabel;
   @override String get notes => _appLoc.notesLabel;
-  @override String get generatedBy => _appLoc.generatedBy;
+  @override String generatedBy(String name) => _appLoc.generatedBy(name);
   @override String get page => _appLoc.page;
   @override String get of => _appLoc.ofWord; // 'of' is a reserved keyword or we can just map to something
   @override String get totalInvoiced => _appLoc.totalInvoiced;

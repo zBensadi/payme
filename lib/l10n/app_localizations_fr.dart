@@ -844,7 +844,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get billTo => 'FACTURER À';
 
   @override
-  String get generatedBy => 'Généré par PayMe';
+  String generatedBy(String name) {
+    return 'Généré par : $name';
+  }
 
   @override
   String get page => 'Page';
