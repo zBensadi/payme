@@ -17,6 +17,9 @@ import 'package:payme/l10n/app_localizations.dart';
 import '../../../../services/csv_export_service.dart';
 import 'package:intl/intl.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/widgets/sync_refresh_button.dart';
+import '../../../../presentation/utils/plus_action.dart';
+import '../../../../app.dart';
 
 class ClientListScreen extends ConsumerStatefulWidget {
   const ClientListScreen({super.key});
@@ -120,10 +123,15 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(clientListControllerProvider);
 
-    return Scaffold(
-      appBar: AppBar(
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        PlusIntent: PlusAction(() => context.push('/clients/new')),
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.clients),
         actions: [
+          const SyncRefreshButton(),
           state.maybeWhen(
             data: (clients) => clients.isEmpty
                 ? const SizedBox.shrink()
@@ -223,6 +231,6 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
         onPressed: () => context.push('/clients/new'),
         child: const Icon(Icons.add),
       ),
-    );
+    ));
   }
 }

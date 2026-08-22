@@ -14,6 +14,10 @@ import '../../settings/controllers/settings_controller.dart';
 import '../utils/pdf_preview_helper.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/widgets/sync_refresh_button.dart';
+import '../../../../presentation/utils/plus_action.dart';
+import '../../../../app.dart';
 
 class GlobalInvoiceListScreen extends ConsumerStatefulWidget {
   const GlobalInvoiceListScreen({super.key});
@@ -49,10 +53,15 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
     final filter = ref.watch(globalInvoiceFilterProvider);
     final currency = ref.watch(settingsControllerProvider).maybeWhen(data: (d) => d.currencyCode, orElse: () => '\$');
 
-    return Scaffold(
-      appBar: AppBar(
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        PlusIntent: PlusAction(() => context.push('/invoices/new')),
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.allInvoices),
         actions: [
+          const SyncRefreshButton(),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: DropdownButton<InvoiceStatus?>(
@@ -159,6 +168,10 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
           onRetry: () => ref.read(globalInvoiceListControllerProvider.notifier).refresh(),
         ),
       ),
-    );
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/invoices/new'),
+        child: const Icon(Icons.add),
+      ),
+    ));
   }
 }

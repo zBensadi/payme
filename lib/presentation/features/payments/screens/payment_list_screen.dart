@@ -13,7 +13,10 @@ import '../controllers/payment_list_controller.dart';
 import '../widgets/payment_tile.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/widgets/sync_refresh_button.dart';
 import '../../../providers/user_lookup_provider.dart';
+import '../../../../presentation/utils/plus_action.dart';
+import '../../../../app.dart';
 
 class PaymentListScreen extends ConsumerWidget {
   final String clientId;
@@ -36,9 +39,16 @@ class PaymentListScreen extends ConsumerWidget {
         final invoiceResult = snapshot.data;
         final invoiceNumber = ((invoiceResult is Success) ? (invoiceResult as Success).value?.invoiceNumber.toString() : null) ?? '...';
 
-        return Scaffold(
+        return Actions(
+          actions: <Type, Action<Intent>>{
+            PlusIntent: PlusAction(() => context.push('/clients/$clientId/invoices/$invoiceId/payments/new')),
+          },
+          child: Scaffold(
           appBar: AppBar(
             title: Text(AppLocalizations.of(context)!.paymentsInvoiceTitle(invoiceNumber)),
+            actions: [
+              const SyncRefreshButton(),
+            ],
           ),
           body: paymentState.when(
             data: (payments) {
@@ -146,7 +156,7 @@ class PaymentListScreen extends ConsumerWidget {
             onPressed: () => context.push('/clients/$clientId/invoices/$invoiceId/payments/new'),
             child: const Icon(Icons.add),
           ),
-        );
+        ));
       }
     );
   }

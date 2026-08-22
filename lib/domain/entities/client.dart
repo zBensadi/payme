@@ -9,6 +9,7 @@ class Client {
   final String? nif;
   final String? nis;
   final String? art;
+  final String? activity;
   final String visibilityType;
   final String? createdBy;
   final String? updatedBy;
@@ -30,6 +31,7 @@ class Client {
     this.nif,
     this.nis,
     this.art,
+    this.activity,
     this.visibilityType = 'everyone',
     this.createdBy,
     this.updatedBy,
@@ -52,6 +54,7 @@ class Client {
     String? nif,
     String? nis,
     String? art,
+    String? activity,
     String? visibilityType,
     String? createdBy,
     String? updatedBy,
@@ -73,6 +76,7 @@ class Client {
       nif: nif ?? this.nif,
       nis: nis ?? this.nis,
       art: art ?? this.art,
+      activity: activity ?? this.activity,
       visibilityType: visibilityType ?? this.visibilityType,
       createdBy: createdBy ?? this.createdBy,
       updatedBy: updatedBy ?? this.updatedBy,
@@ -96,6 +100,7 @@ class Client {
           email == other.email &&
           address == other.address &&
           notes == other.notes &&
+          activity == other.activity &&
           isDeleted == other.isDeleted;
 
   @override
@@ -106,5 +111,6 @@ class Client {
       email.hashCode ^
       address.hashCode ^
       notes.hashCode ^
+      activity.hashCode ^
       isDeleted.hashCode;
 }

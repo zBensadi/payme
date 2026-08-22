@@ -9,6 +9,8 @@ import 'package:payme/domain/entities/permissions.dart';
 import 'package:payme/presentation/widgets/require_permission.dart';
 import 'package:payme/presentation/widgets/error_view.dart';
 import 'package:payme/presentation/utils/sync_refresh_helper.dart';
+import '../../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../../presentation/widgets/sync_refresh_button.dart';
 import '../controllers/role_list_controller.dart';
 import '../widgets/role_list_tile.dart';
 
@@ -24,10 +26,7 @@ class RoleListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.rolesListTitle),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => SyncRefreshHelper.refresh(ref),
-          ),
+          const SyncRefreshButton(),
         ],
       ),
       body: _buildBody(context, ref, state, l10n),

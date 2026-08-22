@@ -721,6 +721,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get businessInformation => 'Business Information';
 
   @override
+  String get clientActivity => 'Activity / Sector';
+
+  @override
+  String get clientNameRequired => 'Client name is required';
+
+  @override
   String get businessNameRequired => 'Business Name is required';
 
   @override
@@ -1178,4 +1184,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roleRequired => 'Role is required';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get deselectAll => 'Deselect All';
+
+  @override
+  String get loggedInAs => 'Logged in as:';
+
+  @override
+  String get refresh => 'Refresh';
 }

@@ -35,6 +35,7 @@ class ClientForm extends ConsumerStatefulWidget {
 class _ClientFormState extends ConsumerState<ClientForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
+  late TextEditingController _activityController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _addressController;
@@ -48,6 +49,7 @@ class _ClientFormState extends ConsumerState<ClientForm> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialClient?.name);
+    _activityController = TextEditingController(text: widget.initialClient?.activity);
     _phoneController = TextEditingController(text: widget.initialClient?.phone);
     _emailController = TextEditingController(text: widget.initialClient?.email);
     _addressController = TextEditingController(text: widget.initialClient?.address);
@@ -61,6 +63,7 @@ class _ClientFormState extends ConsumerState<ClientForm> {
   @override
   void dispose() {
     _nameController.dispose();
+    _activityController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _addressController.dispose();
@@ -76,6 +79,7 @@ class _ClientFormState extends ConsumerState<ClientForm> {
     if (_formKey.currentState!.validate()) {
       final client = widget.initialClient?.copyWith(
             name: _nameController.text.trim(),
+            activity: _activityController.text.trim().isEmpty ? null : _activityController.text.trim(),
             phone: _phoneController.text.trim(),
             email: _emailController.text.trim(),
             address: _addressController.text.trim(),
@@ -88,6 +92,7 @@ class _ClientFormState extends ConsumerState<ClientForm> {
           Client(
             id: '',
             name: _nameController.text.trim(),
+            activity: _activityController.text.trim().isEmpty ? null : _activityController.text.trim(),
             phone: _phoneController.text.trim(),
             email: _emailController.text.trim(),
             address: _addressController.text.trim(),
@@ -152,6 +157,15 @@ class _ClientFormState extends ConsumerState<ClientForm> {
             },
             textInputAction: TextInputAction.next,
             autofocus: widget.initialClient == null,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _activityController,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.clientActivity,
+              border: const OutlineInputBorder(),
+            ),
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           

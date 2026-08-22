@@ -15,11 +15,6 @@ async function getTestEnv() {
         host: '127.0.0.1',
         port: 8080,
       },
-      storage: {
-        rules: fs.readFileSync('../storage.rules', 'utf8'),
-        host: '127.0.0.1',
-        port: 9199,
-      },
     });
   }
   return testEnv;

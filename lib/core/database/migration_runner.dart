@@ -142,6 +142,12 @@ class MigrationRunner {
         await applyMigration(db, scriptContent, 16);
         currentVersion = 16;
       }
+      if (currentVersion == 16) {
+        _logger.info('Running migration: v17_client_activity.sql');
+        final scriptContent = await loadMigrationScript('v17_client_activity.sql');
+        await applyMigration(db, scriptContent, 17);
+        currentVersion = 17;
+      }
     }
 
     await db.update('app_meta', {'schema_version': currentVersion});

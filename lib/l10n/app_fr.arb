@@ -112,6 +112,7 @@
   "editClient": "Modifier le client",
   "newClient": "Nouveau client",
   "clientNameLabel": "Nom du client *",
+  "clientActivity": "Activité / Secteur",
   "errorEnterName": "Veuillez entrer un nom",
   "phoneOptional": "Téléphone (Optionnel)",
   "emailOptional": "E-mail (Optionnel)",
@@ -395,5 +396,9 @@
   "displayNameRequired": "Le nom d'affichage est requis",
   "initialPassword": "Mot de passe initial",
   "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères",
-  "roleRequired": "Le rôle est requis"
+  "roleRequired": "Le rôle est requis",
+  "selectAll": "Tout sélectionner",
+  "deselectAll": "Tout désélectionner",
+  "loggedInAs": "Connecté en tant que :",
+  "refresh": "Rafraîchir"
 }

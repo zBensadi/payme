@@ -6,6 +6,7 @@ import '../controllers/accounting_year_controller.dart';
 import '../widgets/year_list_tile.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/widgets/sync_refresh_button.dart';
 
 class AccountingYearsScreen extends ConsumerWidget {
   const AccountingYearsScreen({super.key});
@@ -58,6 +59,9 @@ class AccountingYearsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.accountingYears),
+        actions: [
+          const SyncRefreshButton(),
+        ],
       ),
       body: Center(
         child: ConstrainedBox(

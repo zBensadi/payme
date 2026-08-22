@@ -716,6 +716,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get businessInformation => 'معلومات الشركة';
 
   @override
+  String get clientActivity => 'النشاط / القطاع';
+
+  @override
+  String get clientNameRequired => 'Client name is required';
+
+  @override
   String get businessNameRequired => 'اسم الشركة مطلوب';
 
   @override
@@ -1172,4 +1178,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get roleRequired => 'الدور مطلوب';
+
+  @override
+  String get selectAll => 'تحديد الكل';
+
+  @override
+  String get deselectAll => 'إلغاء تحديد الكل';
+
+  @override
+  String get loggedInAs => 'تم تسجيل الدخول باسم:';
+
+  @override
+  String get refresh => 'تحديث';
 }

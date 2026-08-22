@@ -16,6 +16,8 @@ import '../../invoices/utils/pdf_preview_helper.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/utils/plus_action.dart';
+import '../../../../app.dart';
 
 class ClientLedgerScreen extends ConsumerWidget {
   final String clientId;
@@ -28,7 +30,11 @@ class ClientLedgerScreen extends ConsumerWidget {
     final settingsState = ref.watch(settingsControllerProvider);
     final currency = settingsState.value?.currencyCode ?? '\$';
 
-    return ledgerState.when(
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        PlusIntent: PlusAction(() => context.push('/clients/$clientId/invoices/new')),
+      },
+      child: ledgerState.when(
       data: (state) {
         final clientName = state.client.name;
         final invoices = state.items;
@@ -133,6 +139,6 @@ class ClientLedgerScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(clientLedgerControllerProvider(clientId)),
         ),
       ),
-    );
+    ));
   }
 }

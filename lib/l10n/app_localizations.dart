@@ -1402,6 +1402,18 @@ abstract class AppLocalizations {
   /// **'Business Information'**
   String get businessInformation;
 
+  /// No description provided for @clientActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity / Sector'**
+  String get clientActivity;
+
+  /// No description provided for @clientNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Client name is required'**
+  String get clientNameRequired;
+
   /// No description provided for @businessNameRequired.
   ///
   /// In en, this message translates to:
@@ -2253,6 +2265,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role is required'**
   String get roleRequired;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @deselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAll;
+
+  /// No description provided for @loggedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged in as:'**
+  String get loggedInAs;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
 }
 
 class _AppLocalizationsDelegate

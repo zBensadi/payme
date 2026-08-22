@@ -6,6 +6,7 @@ import '../../../../domain/services/invoice_number_generator.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/active_year_provider.dart';
 import 'invoice_list_controller.dart';
+import 'global_invoice_list_controller.dart';
 
 final invoiceFormControllerProvider = AsyncNotifierProvider<InvoiceFormController, void>(InvoiceFormController.new);
 
@@ -59,8 +60,9 @@ class InvoiceFormController extends AsyncNotifier<void> {
 
     if (result is Success<Invoice>) {
       state = const AsyncData(null);
-      // Invalidate the list for this client
+      // Invalidate the list for this client and the global list
       ref.invalidate(clientInvoiceListProvider(clientId));
+      ref.invalidate(globalInvoiceListControllerProvider);
       return true;
     } else {
       state = AsyncError(Exception((result as Failure).failure.message), StackTrace.current);

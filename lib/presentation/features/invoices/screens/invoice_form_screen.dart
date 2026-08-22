@@ -8,6 +8,7 @@ import '../../../../core/error/result.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../providers/repository_providers.dart';
 import '../../settings/controllers/settings_controller.dart';
+import '../../clients/controllers/client_list_controller.dart';
 import '../controllers/invoice_form_controller.dart';
 import '../widgets/invoice_pdf_preview_button.dart';
 import '../../../widgets/loading_view.dart';
@@ -15,12 +16,12 @@ import '../../../widgets/error_view.dart';
 import 'package:payme/l10n/app_localizations.dart';
 
 class InvoiceFormScreen extends ConsumerStatefulWidget {
-  final String clientId;
+  final String? clientId;
   final String? invoiceId;
 
   const InvoiceFormScreen({
     super.key,
-    required this.clientId,
+    this.clientId,
     this.invoiceId,
   });
 
@@ -41,10 +42,12 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
   bool _isInitialized = false;
   bool _isLoading = false;
   String? _error;
+  String? _selectedClientId;
 
   @override
   void initState() {
     super.initState();
+    _selectedClientId = widget.clientId;
     _loadExisting();
   }
 
@@ -104,6 +107,13 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedClientId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorRequired), backgroundColor: Colors.red),
+        );
+        return;
+      }
+      
       final amount = double.tryParse(_amountController.text) ?? 0.0;
       
       final invoice = _existingInvoice?.copyWith(
@@ -112,11 +122,12 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
             amount: amount,
             dueDate: _dueDate,
             notes: _notesController.text.isEmpty ? null : _notesController.text,
+            clientId: _selectedClientId!,
           ) ??
           Invoice(
             id: '',
             accountingYearId: '', // Set by controller
-            clientId: widget.clientId,
+            clientId: _selectedClientId!,
             invoiceNumber: 0, // Set by controller
             date: _date,
             description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
@@ -128,7 +139,7 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
             isDirty: true,
           );
 
-      final success = await ref.read(invoiceFormControllerProvider.notifier).save(invoice, widget.clientId);
+      final success = await ref.read(invoiceFormControllerProvider.notifier).save(invoice, _selectedClientId!);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.invoiceSaved), backgroundColor: Colors.green),
@@ -179,6 +190,26 @@ class _InvoiceFormScreenState extends ConsumerState<InvoiceFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (widget.clientId == null) ...[
+              ref.watch(clientListControllerProvider).when(
+                data: (clients) => DropdownButtonFormField<String>(
+                  value: _selectedClientId,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.clients,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: clients.map((client) => DropdownMenuItem(
+                    value: client.id,
+                    child: Text(client.name),
+                  )).toList(),
+                  onChanged: (value) => setState(() => _selectedClientId = value),
+                  validator: (value) => value == null ? AppLocalizations.of(context)!.errorRequired : null,
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text(e.toString()),
+              ),
+              const SizedBox(height: 16),
+            ],
             TextFormField(
               controller: _amountController,
               decoration: InputDecoration(

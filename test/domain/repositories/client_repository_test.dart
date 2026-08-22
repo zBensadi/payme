@@ -50,6 +50,7 @@ void main() {
                     phone TEXT,
                     email TEXT,
                     address TEXT,
+                    activity TEXT,
                     notes TEXT,
                     rc TEXT,
                     nif TEXT,

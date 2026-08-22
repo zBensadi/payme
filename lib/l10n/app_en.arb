@@ -370,6 +370,8 @@
   "backupAndRestore": "Backup & Restore",
   "changePasswordTitle": "Change Password",
   "businessInformation": "Business Information",
+  "clientActivity": "Activity / Sector",
+  "clientNameRequired": "Client name is required",
   "businessNameRequired": "Business Name is required",
   "phoneNumber": "Phone Number",
   "preferences": "Preferences",
@@ -549,5 +551,9 @@
   "displayNameRequired": "Display Name is required",
   "initialPassword": "Initial Password",
   "passwordTooShort": "Password must be at least 6 characters",
-  "roleRequired": "Role is required"
+  "roleRequired": "Role is required",
+  "selectAll": "Select All",
+  "deselectAll": "Deselect All",
+  "loggedInAs": "Logged in as:",
+  "refresh": "Refresh"
 }

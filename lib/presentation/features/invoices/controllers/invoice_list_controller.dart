@@ -5,6 +5,7 @@ import '../../../../domain/services/invoice_status_calculator.dart';
 import '../../../providers/repository_providers.dart';
 import '../../../providers/active_year_provider.dart';
 import '../models/invoice_list_item.dart';
+import 'global_invoice_list_controller.dart';
 
 // Provides the invoices for a specific client in the active year
 final clientInvoiceListProvider = FutureProvider.family<List<InvoiceListItem>, String>((ref, clientId) async {
@@ -57,6 +58,7 @@ class InvoiceDeleter {
 
     if (result is Success) {
       ref.invalidate(clientInvoiceListProvider(clientId));
+      ref.invalidate(globalInvoiceListControllerProvider);
     } else {
       throw Exception((result as Failure).failure.message);
     }

@@ -279,6 +279,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/invoices',
         builder: (context, state) => const GlobalInvoiceListScreen(),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const InvoiceFormScreen(
+              clientId: null,
+              invoiceId: 'new',
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/clients',

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/routing/app_router.dart';
 import 'presentation/providers/locale_controller.dart';
 import 'core/constants/supported_locales.dart';
+import 'presentation/utils/sync_refresh_helper.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/database/database_provider.dart';
@@ -79,6 +81,10 @@ class _PayMeRootState extends State<PayMeRoot> {
   }
 }
 
+class PlusIntent extends Intent {
+  const PlusIntent();
+}
+
 class PayMeApp extends ConsumerWidget {
   const PayMeApp({super.key});
 
@@ -87,21 +93,48 @@ class PayMeApp extends ConsumerWidget {
     final goRouter = ref.watch(appRouterProvider);
     final locale = ref.watch(localeControllerProvider);
 
-    return MaterialApp.router(
-      title: 'PayMe',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: goRouter,
-      debugShowCheckedModeBanner: false,
-      locale: locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: SupportedLocales.all,
-    );
+    return Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.add): const PlusIntent(),
+        const SingleActivator(LogicalKeyboardKey.numpadAdd): const PlusIntent(),
+        const CharacterActivator('+'): const PlusIntent(),
+      },
+      child: Focus(
+        autofocus: true,
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.f5) {
+                SyncRefreshHelper.refresh(ref);
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.backspace) {
+                final primaryFocus = FocusManager.instance.primaryFocus;
+                if (primaryFocus?.context?.widget is EditableText) {
+                  return KeyEventResult.ignored;
+                }
+                if (goRouter.canPop()) {
+                  goRouter.pop();
+                  return KeyEventResult.handled;
+                }
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: MaterialApp.router(
+        title: 'PayMe',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        routerConfig: goRouter,
+        debugShowCheckedModeBanner: false,
+        locale: locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: SupportedLocales.all,
+      ),
+    ));
   }
 }
