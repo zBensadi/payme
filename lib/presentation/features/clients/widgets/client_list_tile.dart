@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../domain/entities/client.dart';
 import 'package:payme/l10n/app_localizations.dart';
 
@@ -27,9 +27,25 @@ class ClientListTile extends StatelessWidget {
         child: Text(client.name.isNotEmpty ? client.name.substring(0, 1).toUpperCase() : '?'),
       ),
       title: Text(client.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: client.phone != null && client.phone!.isNotEmpty
-          ? Text(client.phone!)
-          : (client.email != null && client.email!.isNotEmpty ? Text(client.email!) : null),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (client.activity != null && client.activity!.isNotEmpty)
+            Text(
+              client.activity!,
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                color: Colors.grey.shade600,
+                fontSize: 12,
+              ),
+            ),
+          if (client.phone != null && client.phone!.isNotEmpty)
+            Text(client.phone!)
+          else if (client.email != null && client.email!.isNotEmpty)
+            Text(client.email!),
+        ],
+      ),
       onTap: onTap,
       trailing: PopupMenuButton<String>(
         onSelected: (value) {

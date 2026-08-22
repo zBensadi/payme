@@ -2,7 +2,7 @@ abstract class PdfLocalizations {
   String get billTo;
   String get description;
   String get notes;
-  String get generatedBy;
+  String generatedBy(String name);
   String get page;
   String get of;
   String get totalInvoiced;

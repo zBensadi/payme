@@ -53,7 +53,7 @@ class SettingsController extends AsyncNotifier<BusinessSettings> {
       }
     }
 
-    state = const AsyncLoading();
+    state = const AsyncLoading<BusinessSettings>().copyWithPrevious(state);
     
     final currentSettings = await _fetchSettings();
     final updated = currentSettings.copyWith(

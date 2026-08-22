@@ -34,6 +34,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _languageCode = 'en';
   String _documentLayout = 'standard';
   String? _newLogoPath;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -82,6 +83,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isSaving = true);
       try {
         await ref.read(settingsControllerProvider.notifier).updateSettings(
           businessName: _businessNameController.text,
@@ -108,6 +110,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
           );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSaving = false);
         }
       }
     }
@@ -279,8 +285,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _saveSettings,
-                    child: Text(context.l10n.saveSettings, style: const TextStyle(fontSize: 16)),
+                    onPressed: _isSaving ? null : _saveSettings,
+                    child: _isSaving
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Text(context.l10n.saveSettings, style: const TextStyle(fontSize: 16)),
                   ),
                 ),
                 const SizedBox(height: 32),

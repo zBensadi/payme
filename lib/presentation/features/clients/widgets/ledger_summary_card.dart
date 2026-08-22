@@ -65,6 +65,23 @@ class LedgerSummaryCard extends ConsumerWidget {
                 ),
               ],
             ),
+            if (client.activity?.isNotEmpty == true) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.business_center, size: 16, color: Colors.grey.shade600),
+                  const SizedBox(width: 8),
+                  Text(
+                    client.activity!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             if (client.rc?.isNotEmpty == true || client.nif?.isNotEmpty == true || client.nis?.isNotEmpty == true || client.art?.isNotEmpty == true) ...[
               const SizedBox(height: 12),
               Container(

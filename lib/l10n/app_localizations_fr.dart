@@ -728,6 +728,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get businessInformation => 'Informations sur l\'entreprise';
 
   @override
+  String get clientActivity => 'Activité / Secteur';
+
+  @override
+  String get clientNameRequired => 'Client name is required';
+
+  @override
   String get businessNameRequired => 'Le nom de l\'entreprise est requis';
 
   @override
@@ -844,7 +850,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get billTo => 'FACTURER À';
 
   @override
-  String get generatedBy => 'Généré par PayMe';
+  String generatedBy(String name) {
+    return 'Généré par : $name';
+  }
 
   @override
   String get page => 'Page';
@@ -1190,4 +1198,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get roleRequired => 'Le rôle est requis';
+
+  @override
+  String get selectAll => 'Tout sélectionner';
+
+  @override
+  String get deselectAll => 'Tout désélectionner';
+
+  @override
+  String get loggedInAs => 'Connecté en tant que :';
+
+  @override
+  String get refresh => 'Rafraîchir';
 }

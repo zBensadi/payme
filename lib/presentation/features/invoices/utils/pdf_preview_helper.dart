@@ -67,6 +67,9 @@ class PdfPreviewHelper {
         }
       }
 
+      final currentUser = ref.read(currentUserProvider).value;
+      final generatedByName = currentUser?.user.displayName ?? currentUser?.user.email ?? 'Unknown User';
+
       final service = ref.read(pdfGenerationServiceProvider);
       final pdfBytes = await service.generateInvoicePdf(
         invoice: invoice,
@@ -74,6 +77,7 @@ class PdfPreviewHelper {
         settings: settings,
         payments: payments,
         logoBytes: logoBytes,
+        generatedByName: generatedByName,
       );
 
       if (context.mounted) {

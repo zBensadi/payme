@@ -9,6 +9,8 @@ import '../../../widgets/error_view.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../accounting_years/controllers/accounting_year_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
+import '../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../presentation/widgets/sync_refresh_button.dart';
 import '../../auth/controllers/firebase_auth_controller.dart';
 import '../models/dashboard_state.dart';
 import '../widgets/summary_tile.dart';
@@ -20,6 +22,7 @@ import '../../../providers/sync_providers.dart';
 import '../../../../domain/entities/permissions.dart';
 import '../../../widgets/require_permission.dart';
 import '../../../utils/sync_refresh_helper.dart';
+import '../../auth/controllers/current_user_controller.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -115,6 +118,7 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.controlCenter),
         actions: [
+          const SyncRefreshButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
@@ -394,6 +398,22 @@ LayoutBuilder(
                     )),
                   ],
                 ),
+                const SizedBox(height: 32),
+                ref.watch(currentUserProvider).when(
+                  data: (user) {
+                    if (user == null) return const SizedBox.shrink();
+                    final displayName = user.user.displayName ?? user.user.email ?? 'Unknown User';
+                    return Center(
+                      child: Text(
+                        '${AppLocalizations.of(context)!.loggedInAs} $displayName',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           );

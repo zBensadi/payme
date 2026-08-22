@@ -68,6 +68,29 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
     }
   }
 
+  void _selectAll() {
+    setState(() {
+      _selectedPermissions.addAll([
+        Permissions.clientsView, Permissions.clientsCreate, Permissions.clientsEdit, Permissions.clientsDelete,
+        Permissions.invoicesView, Permissions.invoicesCreate, Permissions.invoicesEdit, Permissions.invoicesDelete,
+        Permissions.paymentsView, Permissions.paymentsCreate, Permissions.paymentsEdit, Permissions.paymentsDelete,
+        Permissions.accountingYearsView, Permissions.accountingYearsManage,
+        Permissions.reportsView, Permissions.exportPdf, Permissions.exportCsv, Permissions.activityView,
+        Permissions.dashboardView, Permissions.settingsView, Permissions.settingsEdit, Permissions.backupManage,
+        Permissions.usersView, Permissions.usersCreate, Permissions.usersEdit, Permissions.usersDelete,
+        Permissions.rolesView, Permissions.rolesManage,
+      ]);
+    });
+  }
+
+  void _deselectAll() {
+    setState(() {
+      // In the future, if there are specific non-removable permissions for regular roles, handle them here.
+      // Currently, owner_role is fully protected by disabled checkboxes, so clearing here is safe for others.
+      _selectedPermissions.clear();
+    });
+  }
+
   Future<void> _confirmDelete() async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
@@ -268,7 +291,25 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
             ),
             
             const SizedBox(height: 32),
-            Text(l10n.permissionsGroup, style: Theme.of(context).textTheme.titleLarge),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.permissionsGroup, style: Theme.of(context).textTheme.titleLarge),
+                if (state.canManage && isEditable && widget.roleId != 'owner_role' && widget.roleId != 'role-owner')
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: _selectAll,
+                        child: Text(l10n.selectAll),
+                      ),
+                      TextButton(
+                        onPressed: _deselectAll,
+                        child: Text(l10n.deselectAll),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
             const SizedBox(height: 16),
             
             _buildPermissionGroup(l10n.permissions_clients, [

@@ -6,6 +6,8 @@ import '../../../../utils/failure_localizer.dart';
 
 import '../controllers/user_list_controller.dart';
 import '../widgets/user_list_tile.dart';
+import '../../../../../presentation/utils/sync_refresh_helper.dart';
+import '../../../../../presentation/widgets/sync_refresh_button.dart';
 import '../../../../widgets/loading_view.dart';
 import '../../../../widgets/error_view.dart';
 import '../../../../utils/sync_refresh_helper.dart';
@@ -23,6 +25,7 @@ class UserListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.users),
         actions: [
+          const SyncRefreshButton(),
           IconButton(
             icon: Icon(state.showInactive ? Icons.visibility : Icons.visibility_off),
             tooltip: state.showInactive ? l10n.hideInactiveUsers : l10n.showInactiveUsers,

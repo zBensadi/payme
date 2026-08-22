@@ -112,6 +112,7 @@
   "editClient": "تعديل العميل",
   "newClient": "عميل جديد",
   "clientNameLabel": "اسم العميل *",
+  "clientActivity": "النشاط / القطاع",
   "errorEnterName": "الرجاء إدخال اسم",
   "phoneOptional": "الهاتف (اختياري)",
   "emailOptional": "البريد الإلكتروني (اختياري)",
@@ -259,7 +260,14 @@
   "businessLogo": "شعار الشركة",
   "selectLogo": "اختيار شعار",
   "billTo": "فاتورة إلى",
-  "generatedBy": "تم الإنشاء بواسطة PayMe",
+  "generatedBy": "تم الإنشاء بواسطة: {name}",
+  "@generatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "page": "صفحة",
   "ofWord": "من",
   "documentTitle": "عنوان المستند",
@@ -388,5 +396,9 @@
   "displayNameRequired": "اسم العرض مطلوب",
   "initialPassword": "كلمة المرور الأولية",
   "passwordTooShort": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
-  "roleRequired": "الدور مطلوب"
+  "roleRequired": "الدور مطلوب",
+  "selectAll": "تحديد الكل",
+  "deselectAll": "إلغاء تحديد الكل",
+  "loggedInAs": "تم تسجيل الدخول باسم:",
+  "refresh": "تحديث"
 }
