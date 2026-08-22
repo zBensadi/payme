@@ -18,8 +18,7 @@ import '../../../../services/csv_export_service.dart';
 import 'package:intl/intl.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../presentation/widgets/sync_refresh_button.dart';
-import '../../../../presentation/utils/plus_action.dart';
-import '../../../../app.dart';
+import '../../../../presentation/utils/plus_action_registry.dart';
 
 class ClientListScreen extends ConsumerStatefulWidget {
   const ClientListScreen({super.key});
@@ -30,11 +29,30 @@ class ClientListScreen extends ConsumerStatefulWidget {
 
 class _ClientListScreenState extends ConsumerState<ClientListScreen> {
   final _searchController = TextEditingController();
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    // Register the creation callback so keyboard + and the FAB share the same action.
+    // initState cannot call ref.read directly; use addPostFrameCallback to read once mounted.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref.read(plusActionRegistryProvider).push('ClientList', _createClient);
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _plusReg?.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Single source of truth for the "create client" action.
+  void _createClient() {
+    if (mounted) context.push('/clients/new');
   }
 
   void _onSearchChanged(String query) {
@@ -123,11 +141,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(clientListControllerProvider);
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        PlusIntent: PlusAction(() => context.push('/clients/new')),
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.clients),
         actions: [
@@ -200,7 +214,7 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
                   message: AppLocalizations.of(context)!.clientListEmpty,
                   actionLabel: AppLocalizations.of(context)!.addClient,
                   icon: Icons.people_outline,
-                  onAction: () => context.push('/clients/new'),
+                  onAction: _createClient,
                 );
               }
 
@@ -228,9 +242,9 @@ class _ClientListScreenState extends ConsumerState<ClientListScreen> {
             ),
         ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/clients/new'),
+        onPressed: _createClient,
         child: const Icon(Icons.add),
       ),
-    ));
+    );
   }
 }

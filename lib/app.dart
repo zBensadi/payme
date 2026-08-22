@@ -8,6 +8,8 @@ import 'presentation/routing/app_router.dart';
 import 'presentation/providers/locale_controller.dart';
 import 'core/constants/supported_locales.dart';
 import 'presentation/utils/sync_refresh_helper.dart';
+import 'presentation/utils/plus_action.dart';
+import 'presentation/utils/plus_action_registry.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/database/database_provider.dart';
@@ -85,30 +87,86 @@ class PlusIntent extends Intent {
   const PlusIntent();
 }
 
-class PayMeApp extends ConsumerWidget {
+// [PLUS-KEY-DIAGNOSTIC] named handler function so we can remove it in dispose
+bool _plusDiagnosticHandler(KeyEvent event) {
+  if (event is KeyDownEvent) {
+    final lk = event.logicalKey;
+    if (lk == LogicalKeyboardKey.equal ||
+        lk == LogicalKeyboardKey.add ||
+        lk == LogicalKeyboardKey.numpadAdd ||
+        (event.character != null && event.character == '+')) {
+      debugPrint(
+        '[PLUS-KEY-DIAGNOSTIC][HWKeyboard] '
+        'logicalKey=${event.logicalKey.keyLabel}(${event.logicalKey.keyId}) '
+        'physicalKey=${event.physicalKey.usbHidUsage} '
+        'character=${event.character?.isEmpty == true ? "<empty>" : event.character} '
+        'synthesized=${event.synthesized} '
+        'modifiers=${HardwareKeyboard.instance.logicalKeysPressed}',
+      );
+    }
+  }
+  return false; // never consume — diagnostic only
+}
+
+class PayMeApp extends ConsumerStatefulWidget {
   const PayMeApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PayMeApp> createState() => _PayMeAppState();
+}
+
+class _PayMeAppState extends ConsumerState<PayMeApp> {
+  @override
+  void initState() {
+    super.initState();
+    // [PLUS-KEY-DIAGNOSTIC] Step 0 — registered once, removed in dispose
+    HardwareKeyboard.instance.addHandler(_plusDiagnosticHandler);
+    debugPrint('[PLUS-KEY-DIAGNOSTIC][initState] HardwareKeyboard handler registered');
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_plusDiagnosticHandler);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final goRouter = ref.watch(appRouterProvider);
     final locale = ref.watch(localeControllerProvider);
+    final plusRegistry = ref.watch(plusActionRegistryProvider);
 
-    return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.add): const PlusIntent(),
-        const SingleActivator(LogicalKeyboardKey.numpadAdd): const PlusIntent(),
-        const CharacterActivator('+'): const PlusIntent(),
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        PlusIntent: PlusAction(plusRegistry),
       },
-      child: Focus(
-        autofocus: true,
+      child: Shortcuts(
+        shortcuts: <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.equal, shift: true): const PlusIntent(),
+          const SingleActivator(LogicalKeyboardKey.add): const PlusIntent(),
+          const SingleActivator(LogicalKeyboardKey.numpadAdd): const PlusIntent(),
+          const CharacterActivator('+'): const PlusIntent(),
+        },
+        child: Focus(
+          autofocus: true,
           onKeyEvent: (node, event) {
             if (event is KeyDownEvent) {
+              // [PLUS-KEY-DIAGNOSTIC] Step 1 — root Focus.onKeyEvent sees this event
+              debugPrint(
+                '[PLUS-KEY-DIAGNOSTIC][Focus.onKeyEvent] '
+                'logicalKey=\${event.logicalKey.keyLabel}(\${event.logicalKey.keyId}) '
+                'physicalKey=\${event.physicalKey.usbHidUsage} '
+                'character="\${event.character}" '
+                'synthesized=\${event.synthesized} '
+                'modifiers=\${HardwareKeyboard.instance.logicalKeysPressed}',
+              );
+
               if (event.logicalKey == LogicalKeyboardKey.f5) {
                 SyncRefreshHelper.refresh(ref);
                 return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.backspace) {
+              } else if (event.logicalKey == LogicalKeyboardKey.backspace || event.logicalKey == LogicalKeyboardKey.escape) {
                 final primaryFocus = FocusManager.instance.primaryFocus;
-                if (primaryFocus?.context?.widget is EditableText) {
+                if (primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>() != null) {
                   return KeyEventResult.ignored;
                 }
                 if (goRouter.canPop()) {
@@ -120,21 +178,23 @@ class PayMeApp extends ConsumerWidget {
             return KeyEventResult.ignored;
           },
           child: MaterialApp.router(
-        title: 'PayMe',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: goRouter,
-        debugShowCheckedModeBanner: false,
-        locale: locale,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: SupportedLocales.all,
+            title: 'PayMe',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.system,
+            routerConfig: goRouter,
+            debugShowCheckedModeBanner: false,
+            locale: locale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: SupportedLocales.all,
+          ),
+        ),
       ),
-    ));
+    );
   }
 }

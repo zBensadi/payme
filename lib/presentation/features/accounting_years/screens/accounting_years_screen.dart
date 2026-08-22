@@ -7,11 +7,46 @@ import '../widgets/year_list_tile.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../presentation/widgets/sync_refresh_button.dart';
+import '../../../../presentation/utils/plus_action_registry.dart';
+import '../../auth/controllers/current_user_controller.dart';
+import '../../../providers/permission_service_provider.dart';
 
-class AccountingYearsScreen extends ConsumerWidget {
+class AccountingYearsScreen extends ConsumerStatefulWidget {
   const AccountingYearsScreen({super.key});
 
-  Future<void> _handleCreate(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<AccountingYearsScreen> createState() => _AccountingYearsScreenState();
+}
+
+class _AccountingYearsScreenState extends ConsumerState<AccountingYearsScreen> {
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref.read(plusActionRegistryProvider).push('AccountingYears', _createYear);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _plusReg?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createYear() async {
+    if (!mounted) return;
+    
+    // Safety: Ensure user has permission, since keyboard bypasses the FAB RequirePermission wrapper
+    final currentUser = ref.read(currentUserProvider).value;
+    final permissionService = ref.read(permissionServiceProvider);
+    if (!permissionService.hasPermission(currentUser, Permissions.accountingYearsManage)) {
+      return;
+    }
+
     final controller = TextEditingController();
     final newName = await showDialog<String>(
       context: context,
@@ -53,7 +88,7 @@ class AccountingYearsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(accountingYearControllerProvider);
 
     return Scaffold(
@@ -99,7 +134,7 @@ class AccountingYearsScreen extends ConsumerWidget {
       floatingActionButton: RequirePermission(
         permission: Permissions.accountingYearsManage,
         child: FloatingActionButton(
-          onPressed: () => _handleCreate(context, ref),
+          onPressed: _createYear,
           tooltip: AppLocalizations.of(context)!.createNewYear,
           child: const Icon(Icons.add),
         ),

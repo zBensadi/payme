@@ -16,25 +16,51 @@ import '../../invoices/utils/pdf_preview_helper.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
-import '../../../../presentation/utils/plus_action.dart';
-import '../../../../app.dart';
+import '../../../../presentation/utils/plus_action_registry.dart';
 
-class ClientLedgerScreen extends ConsumerWidget {
+class ClientLedgerScreen extends ConsumerStatefulWidget {
   final String clientId;
 
   const ClientLedgerScreen({super.key, required this.clientId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ClientLedgerScreen> createState() => _ClientLedgerScreenState();
+}
+
+class _ClientLedgerScreenState extends ConsumerState<ClientLedgerScreen> {
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref
+            .read(plusActionRegistryProvider)
+            .push('ClientLedger(${widget.clientId})', _createInvoice);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _plusReg?.dispose();
+    super.dispose();
+  }
+
+  /// Single source of truth for the "create invoice for this client" action.
+  void _createInvoice() {
+    if (mounted) context.push('/clients/${widget.clientId}/invoices/new');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clientId = widget.clientId;
     final ledgerState = ref.watch(clientLedgerControllerProvider(clientId));
     final settingsState = ref.watch(settingsControllerProvider);
     final currency = settingsState.value?.currencyCode ?? '\$';
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        PlusIntent: PlusAction(() => context.push('/clients/$clientId/invoices/new')),
-      },
-      child: ledgerState.when(
+    return ledgerState.when(
       data: (state) {
         final clientName = state.client.name;
         final invoices = state.items;
@@ -52,7 +78,7 @@ class ClientLedgerScreen extends ConsumerWidget {
                         message: AppLocalizations.of(context)!.noInvoicesFound,
                         icon: Icons.receipt_long,
                         actionLabel: AppLocalizations.of(context)!.createInvoice,
-                        onAction: () => context.push('/clients/$clientId/invoices/new'),
+                        onAction: _createInvoice,
                       )
                     : RefreshIndicator(
                         onRefresh: () => SyncRefreshHelper.refresh(ref),
@@ -123,14 +149,14 @@ class ClientLedgerScreen extends ConsumerWidget {
                           },
                         ),
                       ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => context.push('/clients/$clientId/invoices/new'),
-          child: const Icon(Icons.add),
-        ),
-      );
+              ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _createInvoice,
+            child: const Icon(Icons.add),
+          ),
+        );
       },
       loading: () => Scaffold(body: LoadingView(message: AppLocalizations.of(context)!.loadingLedger)),
       error: (error, _) => Scaffold(
@@ -139,6 +165,6 @@ class ClientLedgerScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(clientLedgerControllerProvider(clientId)),
         ),
       ),
-    ));
+    );
   }
 }

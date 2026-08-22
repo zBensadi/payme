@@ -173,4 +173,86 @@ void main() {
 
     expect(pdfBytes, isNotEmpty);
   });
+
+  test('generateInvoicePdf layout handles duplicate layout correctly (pw.Page + Expands)', () async {
+    final client = Client(
+      id: 'c1',
+      name: 'Acme Corp',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final invoice = Invoice(
+      id: 'inv1',
+      accountingYearId: 'y1',
+      clientId: 'c1',
+      invoiceNumber: 101,
+      date: DateTime.now(),
+      amount: 1500.0,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isDirty: false,
+    );
+
+    final settings = BusinessSettings(
+      id: 1,
+      currencyCode: 'USD',
+      businessName: 'My Awesome Business',
+      defaultDocumentLayout: 'duplicate',
+    );
+
+    // Should successfully generate the duplicate layout containing two copies
+    // each with its own inline footer using pw.Page and pw.Expanded.
+    final pdfBytes = await service.generateInvoicePdf(
+      invoice: invoice,
+      client: client,
+      settings: settings,
+      payments: [],
+      generatedByName: 'Test User',
+    );
+
+    expect(pdfBytes, isNotEmpty);
+    expect(pdfBytes.sublist(0, 5), equals([37, 80, 68, 70, 45]));
+  });
+
+  test('generateInvoicePdf gracefully falls back to single layout if content is too dense', () async {
+    final client = Client(
+      id: 'c1',
+      name: 'Acme Corp',
+      address: 'Very long address ' * 10, // Exceeds 100 chars
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final invoice = Invoice(
+      id: 'inv1',
+      accountingYearId: 'y1',
+      clientId: 'c1',
+      invoiceNumber: 101,
+      date: DateTime.now(),
+      amount: 1500.0,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isDirty: false,
+    );
+
+    final settings = BusinessSettings(
+      id: 1,
+      currencyCode: 'USD',
+      businessName: 'My Awesome Business',
+      defaultDocumentLayout: 'duplicate',
+    );
+
+    // This should trigger the fallback to single layout because the client address is too long
+    final pdfBytes = await service.generateInvoicePdf(
+      invoice: invoice,
+      client: client,
+      settings: settings,
+      payments: [],
+      generatedByName: 'Test User',
+    );
+
+    expect(pdfBytes, isNotEmpty);
+    expect(pdfBytes.sublist(0, 5), equals([37, 80, 68, 70, 45]));
+  });
 }

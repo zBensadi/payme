@@ -15,10 +15,9 @@ import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../presentation/widgets/sync_refresh_button.dart';
 import '../../../providers/user_lookup_provider.dart';
-import '../../../../presentation/utils/plus_action.dart';
-import '../../../../app.dart';
+import '../../../../presentation/utils/plus_action_registry.dart';
 
-class PaymentListScreen extends ConsumerWidget {
+class PaymentListScreen extends ConsumerStatefulWidget {
   final String clientId;
   final String invoiceId;
 
@@ -29,7 +28,41 @@ class PaymentListScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaymentListScreen> createState() => _PaymentListScreenState();
+}
+
+class _PaymentListScreenState extends ConsumerState<PaymentListScreen> {
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref
+            .read(plusActionRegistryProvider)
+            .push('PaymentList(${widget.invoiceId})', _createPayment);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _plusReg?.dispose();
+    super.dispose();
+  }
+
+  /// Single source of truth for the "record payment" action.
+  void _createPayment() {
+    if (mounted) {
+      context.push('/clients/${widget.clientId}/invoices/${widget.invoiceId}/payments/new');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clientId = widget.clientId;
+    final invoiceId = widget.invoiceId;
     final invoiceFuture = ref.read(invoiceRepositoryProvider).getById(invoiceId);
     final paymentState = ref.watch(paymentListProvider(invoiceId));
 
@@ -39,11 +72,7 @@ class PaymentListScreen extends ConsumerWidget {
         final invoiceResult = snapshot.data;
         final invoiceNumber = ((invoiceResult is Success) ? (invoiceResult as Success).value?.invoiceNumber.toString() : null) ?? '...';
 
-        return Actions(
-          actions: <Type, Action<Intent>>{
-            PlusIntent: PlusAction(() => context.push('/clients/$clientId/invoices/$invoiceId/payments/new')),
-          },
-          child: Scaffold(
+        return Scaffold(
           appBar: AppBar(
             title: Text(AppLocalizations.of(context)!.paymentsInvoiceTitle(invoiceNumber)),
             actions: [
@@ -52,13 +81,13 @@ class PaymentListScreen extends ConsumerWidget {
           ),
           body: paymentState.when(
             data: (payments) {
-              final content = payments.isEmpty 
+              final content = payments.isEmpty
                   ? Expanded(
                       child: EmptyStateView(
                         message: AppLocalizations.of(context)!.noPaymentsRecorded,
                         icon: Icons.payments_outlined,
                         actionLabel: AppLocalizations.of(context)!.recordPayment,
-                        onAction: () => context.push('/clients/$clientId/invoices/$invoiceId/payments/new'),
+                        onAction: _createPayment,
                       ),
                     )
                   : Expanded(
@@ -153,10 +182,10 @@ class PaymentListScreen extends ConsumerWidget {
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => context.push('/clients/$clientId/invoices/$invoiceId/payments/new'),
+            onPressed: _createPayment,
             child: const Icon(Icons.add),
           ),
-        ));
+        );
       }
     );
   }

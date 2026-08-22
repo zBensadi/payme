@@ -1729,7 +1729,7 @@ abstract class AppLocalizations {
   /// No description provided for @rc.
   ///
   /// In en, this message translates to:
-  /// **'RC'**
+  /// **'RC/Agreement/Artisan No.'**
   String get rc;
 
   /// No description provided for @nif.

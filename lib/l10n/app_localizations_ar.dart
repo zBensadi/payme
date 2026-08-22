@@ -891,7 +891,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get legalInformation => 'المعلومات القانونية';
 
   @override
-  String get rc => 'السجل التجاري (RC)';
+  String get rc => 'السجل التجاري / الاعتماد / رقم الحرفي';
 
   @override
   String get nif => 'رقم التعريف الجبائي (NIF)';

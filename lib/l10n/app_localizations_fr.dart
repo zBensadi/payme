@@ -904,7 +904,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get legalInformation => 'Informations Légales';
 
   @override
-  String get rc => 'RC';
+  String get rc => 'RC/Agréement/N° Artisan';
 
   @override
   String get nif => 'NIF';

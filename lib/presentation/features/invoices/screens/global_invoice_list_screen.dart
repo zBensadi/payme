@@ -16,8 +16,7 @@ import 'package:payme/l10n/app_localizations.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../presentation/widgets/sync_refresh_button.dart';
-import '../../../../presentation/utils/plus_action.dart';
-import '../../../../app.dart';
+import '../../../../presentation/utils/plus_action_registry.dart';
 
 class GlobalInvoiceListScreen extends ConsumerStatefulWidget {
   const GlobalInvoiceListScreen({super.key});
@@ -28,11 +27,28 @@ class GlobalInvoiceListScreen extends ConsumerStatefulWidget {
 
 class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScreen> {
   final _searchController = TextEditingController();
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref.read(plusActionRegistryProvider).push('GlobalInvoiceList', _createInvoice);
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _plusReg?.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Single source of truth for the "create invoice" action.
+  void _createInvoice() {
+    if (mounted) context.push('/invoices/new');
   }
 
   void _onSearchChanged(String query) {
@@ -53,11 +69,7 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
     final filter = ref.watch(globalInvoiceFilterProvider);
     final currency = ref.watch(settingsControllerProvider).maybeWhen(data: (d) => d.currencyCode, orElse: () => '\$');
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        PlusIntent: PlusAction(() => context.push('/invoices/new')),
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.allInvoices),
         actions: [
@@ -169,9 +181,9 @@ class _GlobalInvoiceListScreenState extends ConsumerState<GlobalInvoiceListScree
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/invoices/new'),
+        onPressed: _createInvoice,
         child: const Icon(Icons.add),
       ),
-    ));
+    );
   }
 }

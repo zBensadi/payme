@@ -11,12 +11,40 @@ import '../../../../../presentation/widgets/sync_refresh_button.dart';
 import '../../../../widgets/loading_view.dart';
 import '../../../../widgets/error_view.dart';
 import '../../../../utils/sync_refresh_helper.dart';
+import '../../../../utils/plus_action_registry.dart';
 
-class UserListScreen extends ConsumerWidget {
+class UserListScreen extends ConsumerStatefulWidget {
   const UserListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<UserListScreen> createState() => _UserListScreenState();
+}
+
+class _UserListScreenState extends ConsumerState<UserListScreen> {
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref.read(plusActionRegistryProvider).push('UserList', _createUser);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _plusReg?.dispose();
+    super.dispose();
+  }
+
+  void _createUser() {
+    if (mounted) context.push('/users/new');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(userListControllerProvider);
     final notifier = ref.read(userListControllerProvider.notifier);
     final l10n = AppLocalizations.of(context)!;
@@ -88,9 +116,7 @@ class UserListScreen extends ConsumerWidget {
                         ),
                 ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/users/new');
-        },
+        onPressed: _createUser,
         child: const Icon(Icons.add),
       ),
     );

@@ -2,38 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/sync_refresh_helper.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import '../providers/sync_refresh_provider.dart';
 
-class SyncRefreshButton extends ConsumerStatefulWidget {
+class SyncRefreshButton extends ConsumerWidget {
   const SyncRefreshButton({super.key});
 
-  @override
-  ConsumerState<SyncRefreshButton> createState() => _SyncRefreshButtonState();
-}
-
-class _SyncRefreshButtonState extends ConsumerState<SyncRefreshButton> {
-  bool _isRefreshing = false;
-
-  Future<void> _handleRefresh() async {
-    if (_isRefreshing) return;
-    
-    setState(() {
-      _isRefreshing = true;
-    });
-
-    try {
-      await SyncRefreshHelper.refresh(ref);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isRefreshing = false;
-        });
-      }
-    }
+  Future<void> _handleRefresh(WidgetRef ref) async {
+    await SyncRefreshHelper.refresh(ref);
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_isRefreshing) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isRefreshing = ref.watch(syncRefreshStateProvider);
+
+    if (isRefreshing) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: Center(
@@ -49,7 +31,7 @@ class _SyncRefreshButtonState extends ConsumerState<SyncRefreshButton> {
     return IconButton(
       icon: const Icon(Icons.refresh),
       tooltip: AppLocalizations.of(context)!.refresh,
-      onPressed: _handleRefresh,
+      onPressed: () => _handleRefresh(ref),
     );
   }
 }

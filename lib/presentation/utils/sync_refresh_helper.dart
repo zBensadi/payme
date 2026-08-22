@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/sync_providers.dart';
 import '../providers/sync_trigger_provider.dart';
 import '../../core/sync/sync_status.dart';
+import '../providers/sync_refresh_provider.dart';
 
 class SyncRefreshHelper {
   /// Triggers a full synchronization and waits for it to complete.
@@ -10,6 +11,12 @@ class SyncRefreshHelper {
   /// Resolves when the triggered sync completes successfully, fails, or is determined to be offline.
   /// It is immune to race conditions where the sync status might initially be idle before transitioning.
   static Future<void> refresh(WidgetRef ref) async {
+    // Prevent concurrent refreshes
+    if (ref.read(syncRefreshStateProvider)) return;
+    
+    final notifier = ref.read(syncRefreshStateProvider.notifier);
+    notifier.setRefreshing(true);
+    
     final syncTrigger = ref.read(syncTriggerProvider);
     final syncService = ref.read(syncServiceProvider);
 
@@ -22,6 +29,7 @@ class SyncRefreshHelper {
 
     if (isInitiallyOffline) {
        // If currently offline, the SyncService will abort immediately.
+       notifier.setRefreshing(false);
        return;
     }
 
@@ -53,6 +61,11 @@ class SyncRefreshHelper {
       // Timeout reached. Resolve gracefully so the UI doesn't hang indefinitely.
     } finally {
       await sub.cancel();
+      try {
+        notifier.setRefreshing(false);
+      } catch (_) {
+        // Ignore if provider was disposed during the sync
+      }
     }
   }
 }

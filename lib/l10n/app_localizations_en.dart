@@ -894,7 +894,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legalInformation => 'Legal Information';
 
   @override
-  String get rc => 'RC';
+  String get rc => 'RC/Agreement/Artisan No.';
 
   @override
   String get nif => 'NIF';

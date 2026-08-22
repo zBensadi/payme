@@ -45,22 +45,32 @@ class PdfGenerationService {
     final isRtl = settings.languageCode == 'ar';
     final textDirection = isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr;
 
-    if (settings.defaultDocumentLayout == 'duplicate') {
+    bool useDuplicate = settings.defaultDocumentLayout == 'duplicate';
+    if (useDuplicate && !_canFitCompactDuplicate(invoice, settings, client)) {
+      useDuplicate = false; // Fallback to standard layout for overly dense content
+    }
+
+    if (useDuplicate) {
       pdf.addPage(
-        pw.MultiPage(
+        pw.Page(
           pageFormat: PdfPageFormat.a4,
           textDirection: textDirection,
           margin: const pw.EdgeInsets.only(left: 32, top: 24, right: 32, bottom: 16),
-          footer: (context) => _buildFooter(context, generatedByName),
           build: (context) {
-            return [
-              ..._buildCompactInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes),
-              pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(vertical: 12),
-                child: pw.Divider(color: PdfColors.grey400, borderStyle: pw.BorderStyle.dashed),
-              ),
-              ..._buildCompactInvoiceWidgets(invoice, client, settings, totalPaid, remainingBalance, logoBytes),
-            ];
+            return pw.Column(
+              children: [
+                pw.Expanded(
+                  child: _buildCompactInvoiceColumn(invoice, client, settings, totalPaid, remainingBalance, logoBytes, generatedByName),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 12),
+                  child: pw.Divider(color: PdfColors.grey400, borderStyle: pw.BorderStyle.dashed),
+                ),
+                pw.Expanded(
+                  child: _buildCompactInvoiceColumn(invoice, client, settings, totalPaid, remainingBalance, logoBytes, generatedByName),
+                ),
+              ],
+            );
           },
         ),
       );
@@ -81,28 +91,63 @@ class PdfGenerationService {
     return pdf.save();
   }
 
-  List<pw.Widget> _buildCompactInvoiceWidgets(
+  bool _canFitCompactDuplicate(Invoice invoice, BusinessSettings settings, Client client) {
+    if (invoice.notes != null && invoice.notes!.length > 150) return false;
+    if (client.address != null && client.address!.length > 100) return false;
+    if (settings.address != null && settings.address!.length > 100) return false;
+    if (invoice.description != null && invoice.description!.length > 300) return false;
+    return true;
+  }
+
+  pw.Widget _buildCompactInvoiceColumn(
     Invoice invoice,
     Client client,
     BusinessSettings settings,
     double totalPaid,
     double remainingBalance,
     Uint8List? logoBytes,
+    String generatedByName,
   ) {
-    return [
-      pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Expanded(child: _buildCompactHeader(invoice, settings, logoBytes)),
+            pw.SizedBox(width: 16),
+            pw.Expanded(child: _buildCompactClientSection(invoice, client)),
+          ],
+        ),
+        pw.SizedBox(height: 8),
+        _buildCompactInvoiceSection(invoice),
+        pw.SizedBox(height: 8),
+        _buildTotals(invoice, totalPaid, remainingBalance, settings.currencyCode, settings.languageCode),
+        pw.Spacer(),
+        _buildCompactFooter(generatedByName),
+      ],
+    );
+  }
+
+  pw.Widget _buildCompactFooter(String generatedByName) {
+    final now = DateTime.now();
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(top: 8),
+      child: pw.Column(
         children: [
-          pw.Expanded(child: _buildCompactHeader(invoice, settings, logoBytes)),
-          pw.SizedBox(width: 16),
-          pw.Expanded(child: _buildCompactClientSection(invoice, client)),
+          pw.Divider(color: PdfColors.grey300, height: 1),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              _buildText(_localizations.generatedBy(generatedByName)),
+              _buildText(_formatDate(now)),
+              _buildText('${_localizations.page} 1 ${_localizations.of} 1'),
+            ],
+          ),
         ],
       ),
-      pw.SizedBox(height: 8),
-      _buildCompactInvoiceSection(invoice),
-      pw.SizedBox(height: 8),
-      _buildTotals(invoice, totalPaid, remainingBalance, settings.currencyCode, settings.languageCode),
-    ];
+    );
   }
 
   pw.Widget _buildCompactHeader(Invoice invoice, BusinessSettings settings, Uint8List? logoBytes) {

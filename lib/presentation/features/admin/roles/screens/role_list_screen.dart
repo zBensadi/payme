@@ -13,12 +13,51 @@ import '../../../../../presentation/utils/sync_refresh_helper.dart';
 import '../../../../../presentation/widgets/sync_refresh_button.dart';
 import '../controllers/role_list_controller.dart';
 import '../widgets/role_list_tile.dart';
+import '../../../../utils/plus_action_registry.dart';
+import '../../../auth/controllers/current_user_controller.dart';
+import '../../../../providers/permission_service_provider.dart';
 
-class RoleListScreen extends ConsumerWidget {
+class RoleListScreen extends ConsumerStatefulWidget {
   const RoleListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RoleListScreen> createState() => _RoleListScreenState();
+}
+
+class _RoleListScreenState extends ConsumerState<RoleListScreen> {
+  PlusActionRegistration? _plusReg;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _plusReg = ref.read(plusActionRegistryProvider).push('RoleList', _createRole);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _plusReg?.dispose();
+    super.dispose();
+  }
+
+  void _createRole() {
+    if (!mounted) return;
+    
+    // The FAB is hidden by RequirePermission if unauthorized.
+    // The keyboard shortcut could bypass the UI hiding, so we must check here too.
+    final currentUser = ref.read(currentUserProvider).value;
+    final permissionService = ref.read(permissionServiceProvider);
+    
+    if (permissionService.hasPermission(currentUser, Permissions.rolesManage)) {
+      context.push('/roles/new');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(roleListControllerProvider);
     final l10n = AppLocalizations.of(context)!;
 
@@ -29,20 +68,18 @@ class RoleListScreen extends ConsumerWidget {
           const SyncRefreshButton(),
         ],
       ),
-      body: _buildBody(context, ref, state, l10n),
+      body: _buildBody(context, state, l10n),
       floatingActionButton: RequirePermission(
         permission: Permissions.rolesManage,
         child: FloatingActionButton(
-          onPressed: () {
-            context.push('/roles/new');
-          },
+          onPressed: _createRole,
           child: const Icon(Icons.add),
         ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, RoleListState state, AppLocalizations l10n) {
+  Widget _buildBody(BuildContext context, RoleListState state, AppLocalizations l10n) {
     if (state.isLoading && state.roles.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }

@@ -6,6 +6,7 @@ import 'package:payme/app.dart';
 import 'package:payme/presentation/routing/app_router.dart';
 import 'package:payme/presentation/providers/locale_controller.dart';
 import 'package:payme/l10n/app_localizations.dart';
+import 'package:payme/presentation/utils/plus_action_registry.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:payme/core/constants/supported_locales.dart';
@@ -118,6 +119,23 @@ void main() {
             ),
           ),
         ),
+        GoRoute(
+          path: '/clients',
+          builder: (context, state) => Scaffold(
+            body: Center(
+              child: Focus(
+                autofocus: true,
+                child: const Text('Clients'),
+              ),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/clients/new',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text('New Client')),
+          ),
+        ),
       ],
     );
 
@@ -183,5 +201,42 @@ void main() {
 
     // Should pop back to Home
     expect(find.text('Home'), findsOneWidget);
+
+    // D. Plus shortcut — no registration → isEnabled=false → no navigation.
+    mockRouter.go('/');
+    await tester.pumpAndSettle();
+    final providerContainer = ProviderScope.containerOf(
+      tester.element(find.byType(PayMeApp)),
+    );
+    final registry = providerContainer.read(plusActionRegistryProvider);
+
+    final materialAppContext = tester.element(find.byType(MaterialApp));
+
+    // With no registration, Actions.invoke should be a no-op.
+    Actions.invoke(materialAppContext, const PlusIntent());
+    await tester.pumpAndSettle();
+    expect(find.text('Home'), findsOneWidget); // still on Home
+
+    // E. Push a registration → keyboard + navigates.
+    mockRouter.go('/clients');
+    await tester.pumpAndSettle();
+    FocusScope.of(tester.element(find.byType(PayMeApp))).unfocus();
+    await tester.pumpAndSettle();
+
+    // Simulate what ClientListScreen.initState does.
+    final reg = registry.push('ClientList', () => mockRouter.go('/clients/new'));
+    await tester.pumpAndSettle();
+
+    Actions.invoke(materialAppContext, const PlusIntent());
+    await tester.pumpAndSettle();
+    expect(find.text('New Client'), findsOneWidget);
+
+    // F. Dispose registration → keyboard + is no-op again (stale callback must not fire).
+    reg.dispose();
+    mockRouter.go('/clients');
+    await tester.pumpAndSettle();
+    Actions.invoke(materialAppContext, const PlusIntent());
+    await tester.pumpAndSettle();
+    expect(find.text('Clients'), findsOneWidget); // stayed on /clients
   });
 }
