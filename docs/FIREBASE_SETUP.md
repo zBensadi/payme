@@ -94,7 +94,7 @@ Follow the prompts:
 
 ## Step 6 — Deploy Firebase Resources (Rules & Functions)
 
-PayMe Alpha 17 relies on Cloud Functions for secure business bootstrapping and user provisioning, and Firebase Storage for business logos.
+PayMe relies on Cloud Functions for secure business bootstrapping and user provisioning, and Firebase Storage for business logos.
 
 Deploy the security rules and cloud functions to your project:
 

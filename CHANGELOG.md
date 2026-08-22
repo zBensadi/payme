@@ -4,6 +4,26 @@ All notable changes to PayMe are documented in this file.
 
 ---
 
+## [2.0.0-alpha.18] - Unreleased
+
+### Summary
+Alpha 18 focuses on UI/UX polish, desktop navigation enhancements, and a complete redesign of the PDF layout system.
+
+### Features & Polish
+- **PDF Redesign**: Redesigned the invoice/payment receipt layout to be more compact, supporting two identical receipts side-by-side on a single A4 page to save paper, while ensuring no clipping for long addresses.
+- **Amount in Words**: Added numeric-to-words formatting (EN, FR, AR) for invoice totals.
+- **Client Activity Logging**: Added `activity` note taking on the client model (Schema Version 17).
+- **Navigation & Shortcuts**: 
+  - Restructured the `+` shortcut (`PlusAction`) to be screen-specific (creating invoices, clients, etc.) and safely ignored when text fields are focused.
+  - Enabled standard `F5` and `Backspace` hardware shortcuts for desktop navigation.
+- **UI Responsiveness**: 
+  - Introduced `SyncRefreshButton` for consistent manual sync interactions.
+  - Implemented 'Select All / Deselect All' toggles in the Role Editor.
+  - Added a visual logged-in indicator in the app layout.
+  - Fixed reactivity issues in the global invoice list.
+
+---
+
 ## [v2.0.0-alpha.17] — 2026-08-21
 
 ### Summary

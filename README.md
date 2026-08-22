@@ -2,7 +2,7 @@
 
 A cross-platform (Windows + Android) offline-first client receivables management application built with Flutter and Firebase.
 
-> **Status:** v2.0.0-alpha.17 — Alpha/Testing release. Not production-ready.
+> **Status:** v2.0.0-alpha.18 — Alpha/Testing release candidate. Not production-ready.
 
 ---
 

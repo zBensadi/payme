@@ -26,8 +26,8 @@ void main() {
   });
 
 
-  test('AppConstants.schemaVersion equals 16', () {
-    expect(AppConstants.schemaVersion, 16);
+  test('AppConstants.schemaVersion equals 17', () {
+    expect(AppConstants.schemaVersion, 17);
   });
 
   test('V15 upgrades to V16 and adds logo_sha256 to business_settings', () async {
